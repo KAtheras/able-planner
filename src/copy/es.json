@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "language": "es",
+    "direction": "ltr"
+  },
+  "app": {
+    "title": "Planificador ABLE (andamiaje)",
+    "tagline": "Primero móvil • Accesible • Bilingüe"
+  },
+  "home": {
+    "heading": "Bienvenido",
+    "intro":
+      "Esta es la base limpia para el Planificador ABLE. La interfaz, el texto y la lógica se incorporarán gradualmente.",
+    "languageLoaded": "Idioma cargado: {{lang}}"
+  },
+  "labels": {},
+  "messages": {},
+  "buttons": {},
+  "disclosures": {}
+}

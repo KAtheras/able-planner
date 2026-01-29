@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "language": "en",
+    "direction": "ltr"
+  },
+  "app": {
+    "title": "ABLE Planner (Scaffold)",
+    "tagline": "Mobile-first • Accessible • Bilingual"
+  },
+  "home": {
+    "heading": "Welcome",
+    "intro":
+      "This is the clean foundation for the ABLE Planner. UI, copy, and logic will be layered in gradually.",
+    "languageLoaded": "Language loaded: {{lang}}"
+  },
+  "labels": {},
+  "messages": {},
+  "buttons": {},
+  "disclosures": {}
+}
