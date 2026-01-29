@@ -1,0 +1,1277 @@
+{
+  "AK": {
+    "name": "Alaska",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "AL": {
+    "name": "Alabama",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "AR": {
+    "name": "Arkansas",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "AZ": {
+    "name": "Arizona",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 2000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 4000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 2000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 2000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "CA": {
+    "name": "California",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "CO": {
+    "name": "Colorado",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "CT": {
+    "name": "Connecticut",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "DC": {
+    "name": "District of Columbia",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "DE": {
+    "name": "Delaware",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "FL": {
+    "name": "Florida",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "GA": {
+    "name": "Georgia",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "HI": {
+    "name": "Hawaii",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "IA": {
+    "name": "Iowa",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 6100,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 6100,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 6100,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 6100,
+        "creditPercent": 0
+      }
+    }
+  },
+  "ID": {
+    "name": "Idaho",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "IL": {
+    "name": "Illinois",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "IN": {
+    "name": "Indiana",
+    "benefits": {
+      "single": {
+        "type": "credit",
+        "amount": 500,
+        "creditPercent": 0.2
+      },
+      "married_joint": {
+        "type": "credit",
+        "amount": 500,
+        "creditPercent": 0.2
+      },
+      "married_separate": {
+        "type": "credit",
+        "amount": 500,
+        "creditPercent": 0.2
+      },
+      "head_of_household": {
+        "type": "credit",
+        "amount": 500,
+        "creditPercent": 0.2
+      }
+    }
+  },
+  "KS": {
+    "name": "Kansas",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 3000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 6000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 3000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 3000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "KY": {
+    "name": "Kentucky",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "LA": {
+    "name": "Louisiana",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "MA": {
+    "name": "Massachusetts",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "MD": {
+    "name": "Maryland",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 2500,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 2500,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 2500,
+        "creditPercent": 0
+      }
+    }
+  },
+  "ME": {
+    "name": "Maine",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "MI": {
+    "name": "Michigan",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "MN": {
+    "name": "Minnesota",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "MO": {
+    "name": "Missouri",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 8000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 16000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 8000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 8000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "MS": {
+    "name": "Mississippi",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 1
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 1
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 1
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 1
+      }
+    }
+  },
+  "MT": {
+    "name": "Montana",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 3000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 3000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 3000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 3000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "NC": {
+    "name": "North Carolina",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "ND": {
+    "name": "North Dakota",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "NE": {
+    "name": "Nebraska",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 5000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "NH": {
+    "name": "New Hampshire",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "NJ": {
+    "name": "New Jersey",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "NM": {
+    "name": "New Mexico",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "NV": {
+    "name": "Nevada",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "NY": {
+    "name": "New York",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "OH": {
+    "name": "Ohio",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 4000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 4000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 4000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 4000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "OK": {
+    "name": "Oklahoma",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 10000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "OR": {
+    "name": "Oregon",
+    "benefits": {
+      "single": {
+        "type": "credit",
+        "amount": 180,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "credit",
+        "amount": 360,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "credit",
+        "amount": 180,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "credit",
+        "amount": 180,
+        "creditPercent": 0
+      }
+    }
+  },
+  "PA": {
+    "name": "Pennsylvania",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 19000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 19000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 19000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 19000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "RI": {
+    "name": "Rhode Island",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "SC": {
+    "name": "South Carolina",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 1
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 1
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 1
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 1
+      }
+    }
+  },
+  "SD": {
+    "name": "South Dakota",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "TN": {
+    "name": "Tennessee",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "TX": {
+    "name": "Texas",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "UT": {
+    "name": "Utah",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0.0455
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0.0455
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0.0455
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0.0455
+      }
+    }
+  },
+  "VA": {
+    "name": "Virginia",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 2000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 2000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 2000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 2000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "VT": {
+    "name": "Vermont",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "WA": {
+    "name": "Washington",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  },
+  "WI": {
+    "name": "Wisconsin",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 19000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 19000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 19000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 19000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "WV": {
+    "name": "West Virginia",
+    "benefits": {
+      "single": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "deduction",
+        "amount": 20000,
+        "creditPercent": 0
+      }
+    }
+  },
+  "WY": {
+    "name": "Wyoming",
+    "benefits": {
+      "single": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_joint": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "married_separate": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      },
+      "head_of_household": {
+        "type": "none",
+        "amount": 0,
+        "creditPercent": 0
+      }
+    }
+  }
+}

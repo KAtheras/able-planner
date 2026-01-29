@@ -1,0 +1,110 @@
+[
+  {
+    "creditRate": 0.5,
+    "brackets": {
+      "single": {
+        "type": "max",
+        "value": 23750,
+        "label": "AGI ≤ $23,750"
+      },
+      "married_separate": {
+        "type": "max",
+        "value": 23750,
+        "label": "AGI ≤ $23,750"
+      },
+      "married_joint": {
+        "type": "max",
+        "value": 47500,
+        "label": "AGI ≤ $47,500"
+      },
+      "head_of_household": {
+        "type": "max",
+        "value": 35625,
+        "label": "AGI ≤ $35,625"
+      }
+    }
+  },
+  {
+    "creditRate": 0.2,
+    "brackets": {
+      "single": {
+        "type": "range",
+        "min": 23751,
+        "max": 25500,
+        "label": "$23,751 – $25,500"
+      },
+      "married_separate": {
+        "type": "range",
+        "min": 23751,
+        "max": 25500,
+        "label": "$23,751 – $25,500"
+      },
+      "married_joint": {
+        "type": "range",
+        "min": 47501,
+        "max": 51000,
+        "label": "$47,501 – $51,000"
+      },
+      "head_of_household": {
+        "type": "range",
+        "min": 35626,
+        "max": 38250,
+        "label": "$35,626 – $38,250"
+      }
+    }
+  },
+  {
+    "creditRate": 0.1,
+    "brackets": {
+      "single": {
+        "type": "range",
+        "min": 25501,
+        "max": 39500,
+        "label": "$25,501 – $39,500"
+      },
+      "married_separate": {
+        "type": "range",
+        "min": 25501,
+        "max": 39500,
+        "label": "$25,501 – $39,500"
+      },
+      "married_joint": {
+        "type": "range",
+        "min": 51001,
+        "max": 79000,
+        "label": "$51,001 – $79,000"
+      },
+      "head_of_household": {
+        "type": "range",
+        "min": 38251,
+        "max": 59250,
+        "label": "$38,251 – $59,250"
+      }
+    }
+  },
+  {
+    "creditRate": 0,
+    "brackets": {
+      "single": {
+        "type": "min",
+        "value": 39500,
+        "label": "AGI > $39,500"
+      },
+      "married_separate": {
+        "type": "min",
+        "value": 39500,
+        "label": "AGI > $39,500"
+      },
+      "married_joint": {
+        "type": "min",
+        "value": 79000,
+        "label": "AGI > $79,000"
+      },
+      "head_of_household": {
+        "type": "min",
+        "value": 59250,
+        "label": "AGI > $59,250"
+      }
+    }
+  }
+]

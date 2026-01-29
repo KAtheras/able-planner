@@ -1,0 +1,359 @@
+{
+  "AL": {
+    "name": "Alabama",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 475000
+  },
+  "AK": {
+    "name": "Alaska",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 400000
+  },
+  "AZ": {
+    "name": "Arizona",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 570000
+  },
+  "AR": {
+    "name": "Arkansas",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 366000
+  },
+  "CA": {
+    "name": "California",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 529000
+  },
+  "CO": {
+    "name": "Colorado",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "CT": {
+    "name": "Connecticut",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 550000
+  },
+  "DE": {
+    "name": "Delaware",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "FL": {
+    "name": "Florida",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 418000
+  },
+  "GA": {
+    "name": "Georgia",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 235000
+  },
+  "HI": {
+    "name": "Hawaii",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 350000
+  },
+  "ID": {
+    "name": "Idaho",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "IL": {
+    "name": "Illinois",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 550000
+  },
+  "IN": {
+    "name": "Indiana",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 450000
+  },
+  "IA": {
+    "name": "Iowa",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 505000
+  },
+  "KS": {
+    "name": "Kansas",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 447000
+  },
+  "KY": {
+    "name": "Kentucky",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "LA": {
+    "name": "Louisiana",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "ME": {
+    "name": "Maine",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 425000
+  },
+  "MD": {
+    "name": "Maryland",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "MA": {
+    "name": "Massachusetts",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "MI": {
+    "name": "Michigan",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "MN": {
+    "name": "Minnesota",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 425000
+  },
+  "MS": {
+    "name": "Mississippi",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 235000
+  },
+  "MO": {
+    "name": "Missouri",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 325000
+  },
+  "MT": {
+    "name": "Montana",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 392000
+  },
+  "NE": {
+    "name": "Nebraska",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "NV": {
+    "name": "Nevada",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "NH": {
+    "name": "New Hampshire",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 621411
+  },
+  "NJ": {
+    "name": "New Jersey",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 550000
+  },
+  "NM": {
+    "name": "New Mexico",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "NY": {
+    "name": "New York",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 520000
+  },
+  "NC": {
+    "name": "North Carolina",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 540000
+  },
+  "ND": {
+    "name": "North Dakota",
+    "hasPlan": false,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": null
+  },
+  "OH": {
+    "name": "Ohio",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 550000
+  },
+  "OK": {
+    "name": "Oklahoma",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 300000
+  },
+  "OR": {
+    "name": "Oregon",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "PA": {
+    "name": "Pennsylvania",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 511758
+  },
+  "RI": {
+    "name": "Rhode Island",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 520000
+  },
+  "SC": {
+    "name": "South Carolina",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 575000
+  },
+  "SD": {
+    "name": "South Dakota",
+    "hasPlan": false,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": null
+  },
+  "TN": {
+    "name": "Tennessee",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "TX": {
+    "name": "Texas",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "UT": {
+    "name": "Utah",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 574000
+  },
+  "VT": {
+    "name": "Vermont",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 550000
+  },
+  "VA": {
+    "name": "Virginia",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 575000
+  },
+  "WA": {
+    "name": "Washington",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "DC": {
+    "name": "Washington D.C.",
+    "hasPlan": true,
+    "residencyRequired": false,
+    "parity": false,
+    "maxAccountBalance": 500000
+  },
+  "WV": {
+    "name": "West Virginia",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 550000
+  },
+  "WI": {
+    "name": "Wisconsin",
+    "hasPlan": false,
+    "residencyRequired": false,
+    "parity": true,
+    "maxAccountBalance": null
+  },
+  "WY": {
+    "name": "Wyoming",
+    "hasPlan": true,
+    "residencyRequired": true,
+    "parity": false,
+    "maxAccountBalance": 235000
+  }
+}

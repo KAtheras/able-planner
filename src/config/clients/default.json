@@ -1,0 +1,7 @@
+{
+  "clientId": "default",
+  "defaults": {
+    "annualReturn": 0.05,
+    "timeHorizonYears": 40
+  }
+}
