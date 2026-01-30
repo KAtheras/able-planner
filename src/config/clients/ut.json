@@ -3,5 +3,11 @@
   "defaults": {
     "annualReturn": 0.045,
     "timeHorizonYears": 40
+  },
+  "brand": {
+    "primary": "#009AA7",
+    "primaryHover": "#007F8C",
+    "onPrimary": "#FFFFFF",
+    "ring": "rgba(0, 154, 167, 0.35)"
   }
 }
