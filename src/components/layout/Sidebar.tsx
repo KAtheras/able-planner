@@ -15,7 +15,7 @@ function IconGrid() {
     <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">
       <path
         fill="currentColor"
-        d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"
+        d="M4 5h16v3H4zM4 10h16v3H4zM4 15h10v3H4z"
       />
     </svg>
   );
@@ -26,7 +26,7 @@ function IconChat() {
     <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">
       <path
         fill="currentColor"
-        d="M4 4h16v11H7.8L4 18.5V4Zm2 2v8.3L7.1 13H18V6H6Z"
+        d="M3 5h18v14H3zM5 7v4h6V7H5zm0 6v4h6v-4H5zm8-6v4h6V7h-6zm0 6v4h6v-4h-6z"
       />
     </svg>
   );
@@ -84,9 +84,9 @@ export default function Sidebar({ active, onChange }: SidebarProps) {
               aria-current={isActive ? "page" : undefined}
               className={[
                 "group flex w-full flex-col items-center justify-center gap-2 rounded-3xl px-2 py-3 text-xs font-semibold",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
                 isActive
-                  ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-black"
+                  ? "bg-[var(--brand-primary)] text-[var(--brand-on-primary)]"
                   : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
               ].join(" ")}
             >
@@ -118,13 +118,13 @@ export default function Sidebar({ active, onChange }: SidebarProps) {
                 type="button"
                 onClick={() => onChange(item.key)}
                 aria-current={isActive ? "page" : undefined}
-                className={[
-                  "flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600",
-                  isActive
-                    ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-black"
-                    : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
-                ].join(" ")}
+              className={[
+                "flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
+                isActive
+                  ? "bg-[var(--brand-primary)] text-[var(--brand-on-primary)]"
+                  : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
+              ].join(" ")}
               >
                 <span className="grid place-items-center">{item.icon}</span>
                 <span className="tracking-wide">{item.label}</span>

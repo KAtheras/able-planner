@@ -4,6 +4,12 @@
     "annualReturn": 0.045,
     "timeHorizonYears": 40
   },
+  "constraints": {
+    "annualReturnWarningMax": 0.08,
+    "annualReturnHardMax": 0.20,
+    "timeHorizonYearsHardMin": 1,
+    "timeHorizonYearsHardMax": 75
+  },
   "brand": {
     "primary": "#009AA7",
     "primaryHover": "#007F8C",

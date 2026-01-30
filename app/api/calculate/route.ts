@@ -6,10 +6,7 @@ import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrack
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
 import stateTaxRates from "@/config/rules/stateTaxRates.json";
-import clientDefault from "@/config/clients/default.json";
-import clientIL from "@/config/clients/il.json";
-import clientTX from "@/config/clients/tx.json";
-import clientUT from "@/config/clients/ut.json";
+import { getClientConfig, normalizeClientId } from "@/config/clients";
 
 type FscCriteria = {
   hasTaxLiability?: boolean;
@@ -59,17 +56,8 @@ type ClientConfig = {
   };
 };
 
-const CLIENT_MAP: Record<string, ClientConfig> = {
-  default: clientDefault,
-  ut: clientUT,
-  il: clientIL,
-  tx: clientTX,
-};
-const STATE_TO_CLIENT: Record<string, string> = {
-  UT: "ut",
-  IL: "il",
-  TX: "tx",
-};
+
+
 
 const MIN_HORIZON_YEARS = 1;
 const MAX_HORIZON_YEARS = 75;
@@ -183,10 +171,9 @@ export async function POST(request: Request) {
         residencyRequired: null,
       };
 
-  const resolvedClientId =
-    (parsed.clientId?.toLowerCase() as keyof typeof CLIENT_MAP | undefined) ??
-    STATE_TO_CLIENT[normalizedState] ??
-    "default";
+  const resolvedClientId = normalizeClientId(
+  normalizeClientId(parsed.clientId),
+);
   const beneficiaryStateCodeNormalized =
     parsed.beneficiaryStateCode?.toUpperCase() ?? null;
   const projectionInput = parsed.projection ?? {};
@@ -249,7 +236,7 @@ export async function POST(request: Request) {
     projection: projectionEcho,
     projectionNotes,
   };
-  const requestedConfig = CLIENT_MAP[resolvedClientId];
+  const requestedConfig = getClientConfig(resolvedClientId);
   const overrideValue =
     typeof parsed.annualReturnOverride === "number" &&
     Number.isFinite(parsed.annualReturnOverride)
@@ -265,10 +252,13 @@ export async function POST(request: Request) {
     overrideRawTimeHorizon !== null ? clampHorizonValue(overrideRawTimeHorizon) : null;
 
   const clientAnnualReturn = getDefaultValue(requestedConfig, "annualReturn");
-  const fallbackAnnualReturn = getDefaultValue(CLIENT_MAP["default"], "annualReturn");
+  const fallbackAnnualReturn = getDefaultValue(
+  getClientConfig("default"),
+  "annualReturn",
+);
   const clientTimeHorizon = getDefaultValue(requestedConfig, "timeHorizonYears");
   const fallbackTimeHorizon = getDefaultValue(
-    CLIENT_MAP["default"],
+    getClientConfig("default"),
     "timeHorizonYears",
   );
 
