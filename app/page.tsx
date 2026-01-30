@@ -5,19 +5,10 @@ import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import SettingsMenu from "@/components/layout/SettingsMenu";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
-import defaultClient from "@/config/clients/default.json";
-import utClient from "@/config/clients/ut.json";
-import ilClient from "@/config/clients/il.json";
-import txClient from "@/config/clients/tx.json";
+import { getClientConfig } from "@/config/clients";
 
 const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
-type PlannerState = "default" | "UT" | "IL" | "TX";
-const CLIENTS: Record<PlannerState, { brand?: Record<string, string> }> = {
-  default: defaultClient,
-  UT: utClient,
-  IL: ilClient,
-  TX: txClient,
-};
+
 
 export default function Home() {
   const [language, setLanguage] = useState<SupportedLanguage>("en");
@@ -49,16 +40,16 @@ export default function Home() {
   }, [language]);
 
   useEffect(() => {
-    const client = CLIENTS[plannerStateCode] ?? defaultClient;
-    const brand = client.brand;
-    if (!brand) return;
+  const client = getClientConfig(plannerStateCode);
+  const brand = client.brand;
+  if (!brand) return;
 
-    const root = document.documentElement.style;
-    root.setProperty("--brand-primary", brand.primary);
-    root.setProperty("--brand-primary-hover", brand.primaryHover);
-    root.setProperty("--brand-on-primary", brand.onPrimary);
-    root.setProperty("--brand-ring", brand.ring);
-  }, [plannerStateCode]);
+  const root = document.documentElement.style;
+  root.setProperty("--brand-primary", brand.primary);
+  root.setProperty("--brand-primary-hover", brand.primaryHover);
+  root.setProperty("--brand-on-primary", brand.onPrimary);
+  root.setProperty("--brand-ring", brand.ring);
+}, [plannerStateCode]);
 
   const handleWelcomeContinue = () => {
     sessionStorage.setItem(WELCOME_KEY, "true");

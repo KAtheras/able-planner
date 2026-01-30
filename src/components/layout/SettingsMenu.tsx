@@ -3,13 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { type SupportedLanguage } from "@/copy";
 
-export type ThemeKey = "default" | "ut" | "il" | "tx";
-
 export type SettingsMenuProps = {
   language: SupportedLanguage;
   setLanguage: (value: SupportedLanguage) => void;
-  theme: ThemeKey;
-  setTheme: (value: ThemeKey) => void;
 };
 
 const LANGUAGE_OPTIONS: { value: SupportedLanguage; label: string }[] = [
@@ -17,13 +13,9 @@ const LANGUAGE_OPTIONS: { value: SupportedLanguage; label: string }[] = [
   { value: "es", label: "ES" },
 ];
 
-export const THEME_OPTIONS: ThemeKey[] = ["default", "ut", "il", "tx"];
-
 export default function SettingsMenu({
   language,
   setLanguage,
-  theme,
-  setTheme,
 }: SettingsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -103,30 +95,6 @@ export default function SettingsMenu({
                     onClick={() => setLanguage(option.value)}
                   >
                     {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                Theme
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {THEME_OPTIONS.map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      "rounded-full border px-2 py-1 text-xs font-semibold transition",
-                      value === theme
-                        ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-50 dark:bg-zinc-50 dark:text-black"
-                        : "border-zinc-200 text-zinc-700 hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-900/60",
-                    ].join(" ")}
-                    aria-pressed={value === theme}
-                    onClick={() => setTheme(value)}
-                  >
-                    {value.toUpperCase()}
                   </button>
                 ))}
               </div>
