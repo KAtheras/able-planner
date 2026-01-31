@@ -1,5 +1,6 @@
 {
   "clientId": "ut",
+  "planStateCode": "UT",
   "defaults": {
     "annualReturn": 0.045,
     "timeHorizonYears": 40

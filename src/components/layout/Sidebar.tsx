@@ -2,7 +2,12 @@
 
 import type { ReactNode } from "react";
 
-export type NavKey = "inputs" | "reports" | "schedule" | "disclosures";
+export type NavKey =
+  | "inputs"
+  | "account_growth"
+  | "tax_benefits"
+  | "schedule"
+  | "disclosures";
 
 type NavItem = {
   key: NavKey;
@@ -43,6 +48,17 @@ function IconChart() {
   );
 }
 
+function IconDollar() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 2v2.1c-2.7.3-4.5 2-4.5 4.1 0 2.4 1.9 3.5 4.8 4.2 2.4.6 3.2 1.2 3.2 2.4 0 1.3-1.3 2.2-3.5 2.2-2.1 0-3.3-.8-3.8-2.3l-2 .8c.7 2 2.5 3.3 5.8 3.6V22h2v-2.1c2.9-.4 4.6-2.2 4.6-4.4 0-2.7-2.2-3.7-5.1-4.4-2.2-.5-2.9-1.1-2.9-2.2 0-1 .9-2 2.8-2 1.9 0 2.9.8 3.4 2l1.9-.8c-.6-1.6-2-2.7-4.7-3V2h-2z"
+      />
+    </svg>
+  );
+}
+
 function IconGear() {
   return (
     <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">
@@ -56,7 +72,8 @@ function IconGear() {
 
 const ITEMS: NavItem[] = [
   { key: "inputs", label: "Inputs", icon: <IconGrid /> },
-  { key: "reports", label: "Reports", icon: <IconChart /> },
+  { key: "account_growth", label: "Account Growth", icon: <IconChart /> },
+  { key: "tax_benefits", label: "Tax Benefits", icon: <IconDollar /> },
   { key: "schedule", label: "Schedule", icon: <IconChat /> },
   { key: "disclosures", label: "Disclosures", icon: <IconGear /> },
 ];
@@ -109,7 +126,7 @@ export default function Sidebar({ active, onChange }: SidebarProps) {
         aria-label="Primary"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:hidden"
       >
-        <div className="mx-auto grid max-w-3xl grid-cols-4 gap-1 px-2 py-2">
+        <div className="mx-auto grid max-w-4xl grid-cols-5 gap-1 px-2 py-2">
           {ITEMS.map((item) => {
             const isActive = item.key === active;
             return (

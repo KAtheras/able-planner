@@ -1,5 +1,6 @@
 {
   "clientId": "il",
+  "planStateCode": "IL",
   "defaults": {
     "annualReturn": 0.06,
     "timeHorizonYears": 40

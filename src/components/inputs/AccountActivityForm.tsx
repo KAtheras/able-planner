@@ -19,6 +19,8 @@ type AccountActivityFormProps = {
   withdrawalYearOptions: string[];
   onChange?: (updates: Partial<AccountActivityFormProps>) => void;
   onAdvancedClick?: () => void;
+  onTimeHorizonBlur?: () => void;
+  timeHorizonLabel?: string;
 };
 
 export default function AccountActivityForm({
@@ -35,6 +37,8 @@ export default function AccountActivityForm({
   withdrawalYearOptions,
   onChange,
   onAdvancedClick,
+  onTimeHorizonBlur,
+  timeHorizonLabel,
 }: AccountActivityFormProps) {
   return (
     <section className="space-y-6">
@@ -43,7 +47,7 @@ export default function AccountActivityForm({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500">
-            Time Horizon (years)
+            {timeHorizonLabel ?? "Time Horizon (years)"}
           </label>
           <input
             type="text"
@@ -51,6 +55,7 @@ export default function AccountActivityForm({
             pattern="[0-9]*"
             value={timeHorizonYears}
             onChange={(e) => onChange?.({ timeHorizonYears: e.target.value })}
+            onBlur={() => onTimeHorizonBlur?.()}
             className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
           />
         </div>

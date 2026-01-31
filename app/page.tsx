@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
@@ -9,6 +10,8 @@ import { getClientConfig } from "@/config/clients";
 import AccountActivityForm from "@/components/inputs/AccountActivityForm";
 import DemographicsForm from "@/components/inputs/DemographicsForm";
 import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrackets.json";
+import planLevelInfo from "@/config/rules/planLevelInfo.json";
+import wtaPovertyLevel from "@/config/rules/wtaPovertyLevel.json";
 
 const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
 
@@ -43,6 +46,24 @@ const SCREEN2_DEFAULT_MESSAGES: string[] = [
   "As you input your information, messages will appear in this window that will help you navigate certain contribution and account balance limits and make suggested changes to your contribution and withdrawal inputs.",
 ];
 
+const WTA_BASE_ANNUAL_LIMIT = 20000;
+type WtaMode = "idle" | "initialPrompt" | "wtaQuestion" | "noPath" | "combinedLimit";
+type WtaStatus = "unknown" | "ineligible" | "eligible";
+
+const formatCurrency = (value: number) =>
+  value.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const getPovertyLevel = (state: PlannerState) => {
+  const entry = (wtaPovertyLevel as Record<string, { onePerson: number }>)[state];
+  if (entry?.onePerson) return entry.onePerson;
+  return wtaPovertyLevel.default.onePerson;
+};
+
 type FederalSaverBracketEntry = (typeof federalSaversCreditBrackets)[number];
 
 function getFederalSaverCreditPercent(status: FilingStatusOption, agi: number) {
@@ -76,9 +97,9 @@ export default function Home() {
   const [annualReturnEdited, setAnnualReturnEdited] = useState(false);
   const [annualReturnWarning, setAnnualReturnWarning] = useState<string | null>(null);
   const [timeHorizonYears, setTimeHorizonYears] = useState("");
-  const [timeHorizonEdited, setTimeHorizonEdited] = useState(false);
   const [screen1Messages, setScreen1Messages] = useState<string[]>(() => [...INITIAL_MESSAGES]);
   const [screen2Messages, setScreen2Messages] = useState<string[]>(() => [...SCREEN2_DEFAULT_MESSAGES]);
+  const [nonResidentProceedAck, setNonResidentProceedAck] = useState(false);
   const [isSsiEligible, setIsSsiEligible] = useState(false);
   const [startingBalance, setStartingBalance] = useState("");
   const [monthlyContribution, setMonthlyContribution] = useState("");
@@ -89,30 +110,31 @@ export default function Home() {
   const [withdrawalStartMonth, setWithdrawalStartMonth] = useState("");
   const [contributionEndTouched, setContributionEndTouched] = useState(false);
   const [withdrawalStartTouched, setWithdrawalStartTouched] = useState(false);
-  const setContributionEndFromIndex = (index: number) => {
-    const { year, month } = monthIndexToParts(index);
-    setContributionEndYear(String(year));
-    setContributionEndMonth(String(month));
-  };
-  const setWithdrawalStartFromIndex = (index: number) => {
-    const { year, month } = monthIndexToParts(index);
-    setWithdrawalStartYear(String(year));
-    setWithdrawalStartMonth(String(month));
-  };
+  const [wtaMode, setWtaMode] = useState<WtaMode>("idle");
+  const [wtaHasEarnedIncome, setWtaHasEarnedIncome] = useState<boolean | null>(null);
+  const [wtaEarnedIncome, setWtaEarnedIncome] = useState("");
+  const [wtaRetirementPlan, setWtaRetirementPlan] = useState<boolean | null>(null);
+  const [wtaStatus, setWtaStatus] = useState<WtaStatus>("unknown");
+  const [wtaAdditionalAllowed, setWtaAdditionalAllowed] = useState(0);
+  const [wtaCombinedLimit, setWtaCombinedLimit] = useState(WTA_BASE_ANNUAL_LIMIT);
   const [fscStatus, setFscStatus] = useState<"idle" | "eligible" | "ineligible">("idle");
   const [fscQ, setFscQ] = useState<FscAnswers>(() => ({ ...EMPTY_FSC }));
   const [messagesMode, setMessagesMode] = useState<"intro" | "fsc">("intro");
   const [agiGateEligible, setAgiGateEligible] = useState<boolean | null>(null);
-  const [calcLoading, setCalcLoading] = useState(false);
-  const [calcError, setCalcError] = useState<string | null>(null);
-  const [calcResult, setCalcResult] = useState<unknown | null>(null);
-  const [acknowledgedWelcome, setAcknowledgedWelcome] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const copy = getCopy(language);
+  const currentClientConfig = getClientConfig(plannerStateCode);
+  const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
+  const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
+  const planState = planStateOverride ?? planStateFallback ?? "UT";
+  const planInfoEntry = (planLevelInfo as Record<string, { name?: string; residencyRequired?: boolean }>)[planState];
+  const planName = planInfoEntry?.name ?? planState;
+  const planLabel = `${planName} Able`;
+  const planResidencyRequired = Boolean(planInfoEntry?.residencyRequired);
 
   const sanitizeAgiInput = (value: string) => {
     if (value === "") return "";
-    let next = value.replace(/-/g, "");
+    const next = value.replace(/-/g, "");
     if (next === "") return "";
     const numeric = Number(next);
     if (Number.isNaN(numeric)) return next;
@@ -132,21 +154,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const percent = Math.round(decimal * 10000) / 100;
   return String(percent);
 };
-
-const MONTH_OPTIONS = [
-  { value: "1", label: "Jan" },
-  { value: "2", label: "Feb" },
-  { value: "3", label: "Mar" },
-  { value: "4", label: "Apr" },
-  { value: "5", label: "May" },
-  { value: "6", label: "Jun" },
-  { value: "7", label: "Jul" },
-  { value: "8", label: "Aug" },
-  { value: "9", label: "Sep" },
-  { value: "10", label: "Oct" },
-  { value: "11", label: "Nov" },
-  { value: "12", label: "Dec" },
-];
 
   const clampNumber = (value: number, min: number, max: number) =>
     Math.max(min, Math.min(max, value));
@@ -202,30 +209,32 @@ const MONTH_OPTIONS = [
     );
   };
 
-  const getHorizonConfig = () => {
+  const getTimeHorizonLimits = useCallback(() => {
     const client = getClientConfig(plannerStateCode);
-    const minYears = client?.constraints?.timeHorizonYearsHardMin ?? 1;
-    const maxYears = client?.constraints?.timeHorizonYearsHardMax ?? 75;
+    const maxYears =
+      client?.constraints?.timeHorizonMax ??
+      client?.constraints?.timeHorizonYearsHardMax ??
+      75;
+    return {
+      minYears: client?.constraints?.timeHorizonYearsHardMin ?? 1,
+      maxYears,
+    };
+  }, [plannerStateCode]);
+
+  const getHorizonConfig = useCallback(() => {
+    const limits = getTimeHorizonLimits();
     const parsed = parseIntegerInput(timeHorizonYears);
-    const safeYears = clampNumber(parsed ?? minYears, minYears, maxYears);
+    const safeYears = clampNumber(parsed ?? limits.minYears, limits.minYears, limits.maxYears);
     const startIndex = getStartMonthIndex();
     const horizonEndIndex = startIndex + safeYears * 12 - 1;
     return {
-      minYears,
-      maxYears,
+      minYears: limits.minYears,
+      maxYears: limits.maxYears,
       safeYears,
       startIndex,
       horizonEndIndex: Math.max(startIndex, horizonEndIndex),
     };
-  };
-
-  const getTimeHorizonLimits = () => {
-    const client = getClientConfig(plannerStateCode);
-    return {
-      minYears: client?.constraints?.timeHorizonYearsHardMin ?? 1,
-      maxYears: client?.constraints?.timeHorizonYearsHardMax ?? 75,
-    };
-  };
+  }, [getTimeHorizonLimits, timeHorizonYears]);
 
   useEffect(() => {
     const storedLanguage = window.localStorage.getItem("language");
@@ -275,47 +284,72 @@ const MONTH_OPTIONS = [
     if (typeof candidate === "number" && Number.isFinite(candidate)) {
       const percent = formatDecimalToPercentString(candidate);
       setAnnualReturn(percent);
-      setAnnualReturnWarning(null);
+    setAnnualReturnWarning(null);
     }
   }, [plannerStateCode, annualReturnEdited]);
 
+  const resetWtaFlow = useCallback(() => {
+    setWtaMode("idle");
+    setWtaHasEarnedIncome(null);
+    setWtaEarnedIncome("");
+    setWtaRetirementPlan(null);
+    setWtaStatus("unknown");
+    setWtaAdditionalAllowed(0);
+    setWtaCombinedLimit(WTA_BASE_ANNUAL_LIMIT);
+  }, []);
+
   useEffect(() => {
-    const client = getClientConfig(plannerStateCode);
-    const defaultYears = client?.defaults?.timeHorizonYears;
-    const minYears = client?.constraints?.timeHorizonYearsHardMin ?? 1;
-    const maxYears = client?.constraints?.timeHorizonYearsHardMax ?? 75;
+    const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
+    const plannedAnnual = Number.isFinite(numeric) ? numeric * 12 : 0;
+    if (wtaStatus === "unknown") {
+      setWtaMode(plannedAnnual > WTA_BASE_ANNUAL_LIMIT ? "initialPrompt" : "idle");
+      return;
+    }
 
-    if (timeHorizonEdited) return;
+    if (wtaStatus === "eligible") {
+      setWtaMode(
+        plannedAnnual > wtaCombinedLimit ? "combinedLimit" : "idle",
+      );
+      return;
+    }
 
-    const base = typeof defaultYears === "number" && Number.isFinite(defaultYears)
-      ? defaultYears
-      : minYears;
-    const clampedDefault = clampNumber(base, minYears, maxYears);
-    setTimeHorizonYears(String(clampedDefault));
-  }, [plannerStateCode, timeHorizonEdited]);
+    setWtaMode(plannedAnnual > WTA_BASE_ANNUAL_LIMIT ? "noPath" : "idle");
+  }, [monthlyContribution, wtaCombinedLimit, wtaStatus]);
 
   useEffect(() => {
     const { startIndex, horizonEndIndex } = getHorizonConfig();
     const minIndex = startIndex;
     const maxIndex = Math.max(startIndex, horizonEndIndex);
 
+    const setContributionFromIndex = (index: number) => {
+      const { year, month } = monthIndexToParts(index);
+      setContributionEndYear(String(year));
+      setContributionEndMonth(String(month));
+    };
+
+    const setWithdrawalFromIndex = (index: number) => {
+      const { year, month } = monthIndexToParts(index);
+      setWithdrawalStartYear(String(year));
+      setWithdrawalStartMonth(String(month));
+    };
+
     const contributionIndex = parseMonthYearToIndex(contributionEndYear, contributionEndMonth);
     if (!contributionEndTouched || contributionIndex === null) {
-      setContributionEndFromIndex(maxIndex);
+      setContributionFromIndex(maxIndex);
     } else {
       const clamped = clampNumber(contributionIndex, minIndex, maxIndex);
       if (clamped !== contributionIndex) {
-        setContributionEndFromIndex(clamped);
+        setContributionFromIndex(clamped);
       }
     }
 
     const withdrawalIndex = parseMonthYearToIndex(withdrawalStartYear, withdrawalStartMonth);
     if (!withdrawalStartTouched || withdrawalIndex === null) {
-      setWithdrawalStartFromIndex(minIndex);
+      setWithdrawalFromIndex(minIndex);
     } else {
       const clamped = clampNumber(withdrawalIndex, minIndex, maxIndex);
       if (clamped !== withdrawalIndex) {
-        setWithdrawalStartFromIndex(clamped);
+        setWithdrawalFromIndex(clamped);
       }
     }
   }, [
@@ -327,6 +361,7 @@ const MONTH_OPTIONS = [
     contributionEndYear,
     withdrawalStartMonth,
     withdrawalStartYear,
+    getHorizonConfig,
   ]);
 
   useEffect(() => {
@@ -347,39 +382,17 @@ const MONTH_OPTIONS = [
     }
   }, [plannerStateCode, beneficiaryStateOfResidence]);
 
+  useEffect(() => {
+    if (!beneficiaryStateOfResidence || beneficiaryStateOfResidence === planState) {
+      setNonResidentProceedAck(false);
+    }
+  }, [beneficiaryStateOfResidence, planState]);
+
   const handleWelcomeContinue = () => {
     sessionStorage.setItem(WELCOME_KEY, "true");
     setShowWelcome(false);
     setActive("inputs");
   };
-
-  const runCalculation = useCallback(async () => {
-    setCalcLoading(true);
-    setCalcError(null);
-    setCalcResult(null);
-
-    const payload = {
-      stateCode: plannerStateCode === "default" ? undefined : plannerStateCode,
-      agi: plannerAgi === "" ? undefined : Number(plannerAgi),
-      filingStatus: plannerFilingStatus,
-    };
-
-    try {
-      const response = await fetch("/api/calculate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error(`Status ${response.status}`);
-
-      setCalcResult(await response.json());
-    } catch (err) {
-      setCalcError(err instanceof Error ? err.message : "Unable to run calculation");
-    } finally {
-      setCalcLoading(false);
-    }
-  }, [plannerStateCode, plannerAgi, plannerFilingStatus]);
 
   const planSelector = (
     <select
@@ -394,7 +407,7 @@ const MONTH_OPTIONS = [
       <option value="UT">UT</option>
       <option value="IL">IL</option>
       <option value="TX">TX</option>
-    </select>
+      </select>
   );
 
   const resetInputs = useCallback(() => {
@@ -413,6 +426,8 @@ const MONTH_OPTIONS = [
     setMonthlyWithdrawal("");
     setWithdrawalStartYear("");
     setWithdrawalStartMonth("");
+    setNonResidentProceedAck(false);
+    resetWtaFlow();
     setFscStatus("idle");
     setFscQ({ ...EMPTY_FSC });
     setMessagesMode("intro");
@@ -420,30 +435,75 @@ const MONTH_OPTIONS = [
     setScreen1Messages([...INITIAL_MESSAGES]);
     setScreen2Messages([...SCREEN2_DEFAULT_MESSAGES]);
     setTimeHorizonYears("");
-    setTimeHorizonEdited(false);
     setContributionEndTouched(false);
     setWithdrawalStartTouched(false);
-  }, []);
+  }, [resetWtaFlow]);
 
   const content = useMemo(() => {
     const agiValue = Number(plannerAgi);
     const agiValid =
       plannerAgi !== "" && !Number.isNaN(agiValue) && (agiValue > 0 || agiValue === 0);
-    const isNextDisabled = inputStep === 1 && !agiValid;
 
-    const goToNextStep = () => {
-      if (inputStep === 1 && !agiValid) {
+    const monthlyContributionNumber = monthlyContribution === "" ? 0 : Number(monthlyContribution);
+    const plannedAnnualContribution = Number.isFinite(monthlyContributionNumber)
+      ? monthlyContributionNumber * 12
+      : 0;
+    const allowedAnnualLimit =
+      wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
+    const hasContributionIssue =
+      inputStep === 2 && plannedAnnualContribution > allowedAnnualLimit;
+    const residencyMismatch =
+      beneficiaryStateOfResidence &&
+      planState &&
+      beneficiaryStateOfResidence !== planState;
+    const residencyBlocking =
+      residencyMismatch &&
+      (planResidencyRequired || !nonResidentProceedAck);
+    const isNextDisabled =
+      (inputStep === 1 && (!agiValid || residencyBlocking)) ||
+      (inputStep === 2 && hasContributionIssue);
+
+    const horizonLimits = getTimeHorizonLimits();
+    const monthOptions = [
+      { value: "1", label: "Jan" },
+      { value: "2", label: "Feb" },
+      { value: "3", label: "Mar" },
+      { value: "4", label: "Apr" },
+      { value: "5", label: "May" },
+      { value: "6", label: "Jun" },
+      { value: "7", label: "Jul" },
+      { value: "8", label: "Aug" },
+      { value: "9", label: "Sep" },
+      { value: "10", label: "Oct" },
+      { value: "11", label: "Nov" },
+      { value: "12", label: "Dec" },
+    ];
+    const enforceTimeHorizonLimits = () => {
+      const { minYears, maxYears } = horizonLimits;
+      if (timeHorizonYears === "") {
         return;
       }
+      const parsed = parseIntegerInput(timeHorizonYears);
+      if (parsed === null) {
+        return;
+      }
+      let next = parsed;
+      if (next < minYears) next = minYears;
+      if (next > maxYears) next = maxYears;
+      if (String(next) !== timeHorizonYears) {
+        setTimeHorizonYears(String(next));
+      }
+    };
+
+    const goToNextStep = () => {
       if (inputStep === 1) {
+        if (!agiValid || residencyBlocking) return;
         setInputStep(2);
         return;
       }
-      setActive("reports");
-    };
-
-    const toggleLanguage = () => {
-      setLanguage((prev) => (prev === "en" ? "es" : "en"));
+      if (hasContributionIssue) return;
+      enforceTimeHorizonLimits();
+      setActive("account_growth");
     };
 
     const questions: Array<{ key: keyof FscAnswers; label: string }> = [
@@ -481,10 +541,374 @@ const MONTH_OPTIONS = [
     };
 
     const horizonConfig = getHorizonConfig();
+
     const horizonYearOptions = getYearOptions(
       horizonConfig.startIndex,
       horizonConfig.horizonEndIndex,
     );
+
+    const promptlyStartWta = () => {
+      setWtaMode("wtaQuestion");
+      setWtaHasEarnedIncome(null);
+      setWtaEarnedIncome("");
+      setWtaRetirementPlan(null);
+    };
+
+    const resolveBaseLimitWithAutoContribution = () => {
+      const monthly = Math.floor(WTA_BASE_ANNUAL_LIMIT / 12);
+      setMonthlyContribution(String(monthly));
+    };
+
+    const resolveCombinedLimitWithAutoContribution = () => {
+      const monthly = Math.floor(wtaCombinedLimit / 12);
+      setMonthlyContribution(String(monthly));
+    };
+
+    const handleOverLimitNo = () => {
+      setWtaMode("noPath");
+      setWtaHasEarnedIncome(false);
+      setWtaRetirementPlan(null);
+      setWtaAdditionalAllowed(0);
+      setWtaCombinedLimit(WTA_BASE_ANNUAL_LIMIT);
+      setWtaStatus("ineligible");
+    };
+
+    const handleEarnedIncomeAnswer = (hasIncome: boolean) => {
+      if (!hasIncome) {
+        handleOverLimitNo();
+        return;
+      }
+      setWtaHasEarnedIncome(true);
+      setWtaEarnedIncome("");
+    };
+
+    const evaluateWtaEligibility = (retirementAnswer: boolean) => {
+      setWtaRetirementPlan(retirementAnswer);
+      const earnedIncomeValue = Number(wtaEarnedIncome);
+      if (!wtaHasEarnedIncome || Number.isNaN(earnedIncomeValue) || earnedIncomeValue <= 0) {
+        setWtaStatus("ineligible");
+        setWtaAdditionalAllowed(0);
+        setWtaCombinedLimit(WTA_BASE_ANNUAL_LIMIT);
+        setWtaMode("noPath");
+        return;
+      }
+      if (retirementAnswer) {
+        handleOverLimitNo();
+        return;
+      }
+      const povertyLevel = getPovertyLevel(plannerStateCode);
+      const additionalAllowed = Math.min(earnedIncomeValue, povertyLevel);
+      const combinedLimitValue = WTA_BASE_ANNUAL_LIMIT + additionalAllowed;
+      setWtaAdditionalAllowed(additionalAllowed);
+      setWtaCombinedLimit(combinedLimitValue);
+      setWtaStatus("eligible");
+      const monthlyNumeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
+      const plannedAnnual = Number.isFinite(monthlyNumeric) ? monthlyNumeric * 12 : 0;
+      setWtaMode(plannedAnnual > combinedLimitValue ? "combinedLimit" : "idle");
+    };
+
+    const changeResidencyToPlan = () => {
+      setBeneficiaryStateOfResidence(planState);
+      setNonResidentProceedAck(false);
+    };
+
+    const acknowledgeNonResident = () => {
+      setNonResidentProceedAck(true);
+    };
+
+    const showResidencyWarning =
+      residencyMismatch && (planResidencyRequired || !nonResidentProceedAck);
+
+    const renderResidencyWarning = () => {
+      const primaryButtonClass =
+        "w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white whitespace-nowrap";
+      const secondaryButtonClass =
+        "w-full rounded-full border border-zinc-200 px-4 py-2 text-xs font-semibold text-zinc-700 whitespace-nowrap hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-900";
+      const buttonContainerClass = "flex flex-col gap-3 mt-4";
+
+      if (planResidencyRequired) {
+        return (
+          <div className="space-y-3">
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              The beneficiary is not eligible to open a {planLabel} account because the {planLabel} plan requires the beneficiary
+              to be a resident of {planName}. You should check to see if your home state offers an Able plan,
+              which may provide certain state tax benefits.
+            </p>
+            <div className={buttonContainerClass}>
+              <button
+                type="button"
+                className={primaryButtonClass}
+                onClick={changeResidencyToPlan}
+              >
+                CHANGE MY RESIDENCY AND PROCEED TO THE CALCULATOR
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="space-y-3">
+          <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            You should check to see if your home state offers an Able plan, which may provide certain state tax benefits.
+          </p>
+          <div className={buttonContainerClass}>
+            <button
+              type="button"
+              className={primaryButtonClass}
+              onClick={acknowledgeNonResident}
+            >
+              I UNDERSTAND AND WOULD LIKE TO PROCEED
+            </button>
+            <button
+              type="button"
+              className={secondaryButtonClass}
+              onClick={changeResidencyToPlan}
+            >
+              CHANGE MY RESIDENCY AND PROCEED TO THE CALCULATOR
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    const renderScreen2Messages = () => (
+      <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+        {screen2Messages.map((message, index) => (
+          <p
+            key={`${message}-${index}`}
+            className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
+          >
+            {message}
+          </p>
+        ))}
+      </div>
+    );
+
+    const renderScreen2Panel = () => {
+      if (plannedAnnualContribution <= WTA_BASE_ANNUAL_LIMIT) {
+        return renderScreen2Messages();
+      }
+
+      const baseLimitOverage = Math.max(0, plannedAnnualContribution - WTA_BASE_ANNUAL_LIMIT);
+      if (wtaStatus === "ineligible") {
+        return (
+          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of $20,000.00.
+            </p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              AMOUNT OVER THE ANNUAL LIMIT:
+            </p>
+            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              {formatCurrency(baseLimitOverage)}
+            </p>
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Would you like to set contributions to the maximum allowed amount?
+            </p>
+            <p className="text-xs leading-relaxed text-zinc-500">
+              We&apos;ll reduce the recurring contribution to keep a rolling 12-month total within the limit.
+            </p>
+            <button
+              type="button"
+              className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
+              onClick={resolveBaseLimitWithAutoContribution}
+            >
+              Yes
+            </button>
+          </div>
+        );
+      }
+
+      if (wtaStatus === "eligible") {
+        const combinedLimitOverage = Math.max(0, plannedAnnualContribution - wtaCombinedLimit);
+        if (combinedLimitOverage <= 0) {
+          return renderScreen2Messages();
+        }
+        return (
+          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              You qualify for additional contributions of {formatCurrency(wtaAdditionalAllowed)}, but your total contributions exceed the combined limit of {formatCurrency(
+                wtaCombinedLimit,
+              )}.
+            </p>
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Please revise your contribution amounts to bring total contributions below the combined limit.
+            </p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              AMOUNT OVER THE COMBINED LIMIT:
+            </p>
+            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              {formatCurrency(combinedLimitOverage)}
+            </p>
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Would you like to set contributions to the maximum allowed amount?
+            </p>
+            <p className="text-xs leading-relaxed text-zinc-500">
+              We&apos;ll reduce the recurring contribution to keep a rolling 12-month total within the limit.
+            </p>
+            <button
+              type="button"
+              className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
+              onClick={resolveCombinedLimitWithAutoContribution}
+            >
+              Yes
+            </button>
+          </div>
+        );
+      }
+
+      const buttonBase =
+        "flex-1 rounded-full border px-3 py-1 text-xs font-semibold transition";
+
+      if (wtaMode === "initialPrompt") {
+        return (
+          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Your planned contributions exceed the annual ABLE limit of $20,000.00. If you are working, you may qualify to contribute more (the “work to ABLE” provision). Would you like to find out if you qualify?
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className={[
+                  buttonBase,
+                  "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black",
+                ].join(" ")}
+                onClick={promptlyStartWta}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                className={[
+                  buttonBase,
+                  "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
+                ].join(" ")}
+                onClick={handleOverLimitNo}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (wtaMode === "wtaQuestion") {
+        const earnedIncomeValue = Number(wtaEarnedIncome);
+        const showStep3 = earnedIncomeValue > 0;
+        return (
+          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Does the Beneficiary have Earned Income?
+                </label>
+                <div className="flex gap-2 mt-1">
+                  <button
+                    type="button"
+                    className={[
+                      buttonBase,
+                      wtaHasEarnedIncome === true
+                        ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
+                        : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
+                    ].join(" ")}
+                    onClick={() => handleEarnedIncomeAnswer(true)}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    className={[
+                      buttonBase,
+                      wtaHasEarnedIncome === false
+                        ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
+                        : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
+                    ].join(" ")}
+                    onClick={() => handleEarnedIncomeAnswer(false)}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+              {wtaHasEarnedIncome === true && (
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                    Please input estimated earned income:
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={wtaEarnedIncome}
+                    onChange={(e) => setWtaEarnedIncome(sanitizeAmountInput(e.target.value))}
+                    className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+                  />
+                </div>
+              )}
+              {showStep3 && (
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                    Is the beneficiary covered by a retirement plan?
+                  </label>
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      type="button"
+                      className={[
+                        buttonBase,
+                        wtaRetirementPlan === true
+                          ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
+                          : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
+                      ].join(" ")}
+                      onClick={() => evaluateWtaEligibility(true)}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      className={[
+                        buttonBase,
+                        wtaRetirementPlan === false
+                          ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
+                          : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
+                      ].join(" ")}
+                      onClick={() => evaluateWtaEligibility(false)}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      return renderScreen2Messages();
+    };
+
+    if (active !== "inputs") {
+      const screenLabel =
+        active === "account_growth"
+          ? "Account Growth"
+          : active === "tax_benefits"
+            ? "Tax Benefits"
+            : active === "schedule"
+              ? "Schedule"
+              : active === "disclosures"
+                ? "Disclosures"
+                : active.toUpperCase();
+      return (
+        <div className="space-y-6">
+          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
+            <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
+              {screenLabel} (Shell)
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Placeholder content is coming soon.
+            </p>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="space-y-6">
@@ -503,20 +927,6 @@ const MONTH_OPTIONS = [
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
-              onClick={resetInputs}
-            >
-              Refresh
-            </button>
-            <button
-              type="button"
-              className="rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
-              onClick={toggleLanguage}
-            >
-              {language.toUpperCase()}
-            </button>
-            <button
-              type="button"
               disabled={isNextDisabled}
               className={[
                 "rounded-full px-4 py-1 text-xs font-semibold transition",
@@ -528,6 +938,41 @@ const MONTH_OPTIONS = [
             >
               Next
             </button>
+            <button
+              type="button"
+              className="rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
+              onClick={resetInputs}
+            >
+              Refresh
+            </button>
+            <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-black">
+              <button
+                type="button"
+                aria-pressed={language === "en"}
+                className={[
+                  "rounded-full px-3 py-1 text-xs font-semibold",
+                  language === "en"
+                    ? "bg-[var(--brand-primary)] text-white"
+                    : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
+                ].join(" ")}
+                onClick={() => setLanguage("en")}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                aria-pressed={language === "es"}
+                className={[
+                  "rounded-full px-3 py-1 text-xs font-semibold",
+                  language === "es"
+                    ? "bg-[var(--brand-primary)] text-white"
+                    : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
+                ].join(" ")}
+                onClick={() => setLanguage("es")}
+              >
+                ES
+              </button>
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-6 items-stretch md:grid-cols-2">
@@ -606,23 +1051,13 @@ const MONTH_OPTIONS = [
               monthlyWithdrawal={monthlyWithdrawal}
               withdrawalStartYear={withdrawalStartYear}
               withdrawalStartMonth={withdrawalStartMonth}
-              monthOptions={MONTH_OPTIONS}
+              monthOptions={monthOptions}
               contributionYearOptions={horizonYearOptions}
               withdrawalYearOptions={horizonYearOptions}
               onChange={(updates) => {
-                const limits = getTimeHorizonLimits();
                 if ("timeHorizonYears" in updates) {
-                  setTimeHorizonEdited(true);
                   const raw = (updates.timeHorizonYears ?? "").replace(/\D/g, "");
-                  if (raw === "") {
-                    setTimeHorizonYears("");
-                  } else {
-                    const numeric = Number(raw);
-                    if (!Number.isNaN(numeric)) {
-                      const clamped = clampNumber(Math.round(numeric), limits.minYears, limits.maxYears);
-                      setTimeHorizonYears(String(clamped));
-                    }
-                  }
+                  setTimeHorizonYears(raw);
                 }
                 if ("startingBalance" in updates)
                   setStartingBalance(sanitizeAmountInput(updates.startingBalance ?? ""));
@@ -650,6 +1085,8 @@ const MONTH_OPTIONS = [
               onAdvancedClick={() => {
                 /* placeholder */
               }}
+              onTimeHorizonBlur={enforceTimeHorizonLimits}
+              timeHorizonLabel={`Time Horizon (MAX ${horizonLimits.maxYears} YEARS)`}
             />
             )}
           </div>
@@ -663,7 +1100,9 @@ const MONTH_OPTIONS = [
                         {annualReturnWarning}
                       </div>
                     ) : null}
-                    {showQuestionnaire ? (
+                    {showResidencyWarning ? (
+                      renderResidencyWarning()
+                    ) : showQuestionnaire ? (
                       <div className="space-y-4">
                         <div>
                           <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
@@ -739,16 +1178,7 @@ const MONTH_OPTIONS = [
                     )}
                   </>
                 ) : (
-                  <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-                    {screen2Messages.map((message, index) => (
-                      <p
-                        key={`${message}-${index}`}
-                        className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
-                      >
-                        {message}
-                      </p>
-                    ))}
-                  </div>
+                  renderScreen2Panel()
                 )}
               </div>
             </div>
@@ -757,39 +1187,41 @@ const MONTH_OPTIONS = [
       </div>
     );
   }, [
-    active,
     agiGateEligible,
     annualReturn,
     annualReturnWarning,
-    annualReturnEdited,
     beneficiaryName,
     beneficiaryStateOfResidence,
-    calcError,
-    calcLoading,
-    calcResult,
     contributionEndMonth,
     contributionEndYear,
     fscQ,
     fscStatus,
+    active,
     inputStep,
     isSsiEligible,
     language,
     messagesMode,
     monthlyContribution,
+    wtaAdditionalAllowed,
+    wtaCombinedLimit,
+    wtaEarnedIncome,
+    wtaHasEarnedIncome,
+    wtaMode,
+    wtaRetirementPlan,
+    wtaStatus,
     monthlyWithdrawal,
     plannerAgi,
     plannerFilingStatus,
     plannerStateCode,
     resetInputs,
-    runCalculation,
     startingBalance,
-    timeHorizonEdited,
     timeHorizonYears,
     withdrawalStartMonth,
     withdrawalStartYear,
-    contributionEndTouched,
-    withdrawalStartTouched,
+    getHorizonConfig,
+    getTimeHorizonLimits,
     screen1Messages,
+    nonResidentProceedAck,
     screen2Messages,
   ]);
 

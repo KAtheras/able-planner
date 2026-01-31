@@ -1,5 +1,6 @@
 {
   "clientId": "tx",
+  "planStateCode": "TX",
   "defaults": {
     "annualReturn": 0.05,
     "timeHorizonYears": 40
