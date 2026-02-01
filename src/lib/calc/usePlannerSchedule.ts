@@ -3,8 +3,10 @@ import { useMemo } from "react";
 import {
   buildAmortizationSchedule,
   extractSsiMessages,
+  extractPlanMessages,
   type YearRow,
   type SsiMessage,
+  type PlanMessage,
 } from "@/lib/amortization";
 
 export type UsePlannerScheduleArgs = {
@@ -21,11 +23,13 @@ export type UsePlannerScheduleArgs = {
   annualReturnDecimal: number;
   isSsiEligible: boolean;
   enabled: boolean;
+  planMaxBalance: number | null;
 };
 
 export type PlannerScheduleResult = {
   scheduleRows: YearRow[];
   ssiMessages: SsiMessage[];
+  planMessages: PlanMessage[];
 };
 
 export function usePlannerSchedule({
@@ -42,10 +46,11 @@ export function usePlannerSchedule({
   annualReturnDecimal,
   isSsiEligible,
   enabled,
+  planMaxBalance,
 }: UsePlannerScheduleArgs): PlannerScheduleResult {
   return useMemo(() => {
     if (!enabled) {
-      return { scheduleRows: [], ssiMessages: [] };
+      return { scheduleRows: [], ssiMessages: [], planMessages: [] };
     }
 
     const scheduleRows = buildAmortizationSchedule({
@@ -61,11 +66,13 @@ export function usePlannerSchedule({
       withdrawalStartIndex,
       annualReturnDecimal,
       isSsiEligible,
+      planMaxBalance,
     });
 
     return {
       scheduleRows,
       ssiMessages: extractSsiMessages(scheduleRows),
+      planMessages: extractPlanMessages(scheduleRows, planMaxBalance),
     };
   }, [
     startMonthIndex,
@@ -80,6 +87,7 @@ export function usePlannerSchedule({
     withdrawalStartIndex,
     annualReturnDecimal,
     isSsiEligible,
+    planMaxBalance,
     enabled,
   ]);
 }

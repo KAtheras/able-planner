@@ -11,6 +11,7 @@ export type MonthlyRow = {
   saversCredit: number;
   stateBenefit: number;
   ssiCodes?: string[];
+  planCodes?: string[];
 };
 
 export type YearRow = {
@@ -40,6 +41,7 @@ export type AmortizationInputs = {
   withdrawalStartIndex: number;
   annualReturnDecimal: number;
   isSsiEligible?: boolean;
+  planMaxBalance?: number | null;
 };
 
 const MONTH_NAMES = [
@@ -60,10 +62,16 @@ const MONTH_NAMES = [
 const MAX_MONTHS = 900;
 
 const SSI_LIMIT = 100000;
+const PLAN_STOP_CODE = "PLAN_MAX_CONTRIBUTIONS_STOPPED";
 
 export type SsiMessage = {
   code: string;
   data: { monthLabel: string };
+};
+
+export type PlanMessage = {
+  code: typeof PLAN_STOP_CODE;
+  data: { monthLabel: string; planMax: number };
 };
 
 export function extractSsiMessages(rows: YearRow[]): SsiMessage[] {
@@ -79,6 +87,30 @@ export function extractSsiMessages(rows: YearRow[]): SsiMessage[] {
         let label = monthRow.monthLabel;
         label = label.replace(/^[-–—]+\s*/, "");
         out.push({ code, data: { monthLabel: label } });
+      }
+    }
+  }
+
+  return out;
+}
+
+export function extractPlanMessages(rows: YearRow[], planMaxBalance: number | null): PlanMessage[] {
+  if (!Number.isFinite(planMaxBalance ?? NaN) || planMaxBalance === null) {
+    return [];
+  }
+
+  const seen: Record<string, boolean> = {};
+  const out: PlanMessage[] = [];
+  for (const yearRow of rows) {
+    for (const monthRow of yearRow.months) {
+      if (!monthRow.planCodes?.length) continue;
+      for (const code of monthRow.planCodes) {
+        if (seen[code]) continue;
+        if (code !== PLAN_STOP_CODE) continue;
+        seen[code] = true;
+        let label = monthRow.monthLabel;
+        label = label.replace(/^[-–—]+\s*/, "");
+        out.push({ code: PLAN_STOP_CODE, data: { monthLabel: label, planMax: planMaxBalance } });
       }
     }
   }
@@ -106,6 +138,11 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
 
   let contributionsStopped = false;
   let forcedWithdrawalsStarted = false;
+  let planMaxContribStopped = false;
+  const planMaxBalanceValue = Number.isFinite(inputs.planMaxBalance ?? NaN)
+    ? inputs.planMaxBalance ?? 0
+    : null;
+  let ssiCapMode = false;
   for (let offset = 0; offset < monthsToBuild; offset += 1) {
     const monthIndex = inputs.startMonthIndex + offset;
     if (monthIndex > inputs.horizonEndIndex) {
@@ -145,27 +182,58 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
     let endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
 
     const monthSsiCodes: string[] = [];
+    const monthPlanCodes: string[] = [];
+    const hasPlanMax =
+      planMaxBalanceValue !== null && Number.isFinite(planMaxBalanceValue) && planMaxBalanceValue > 0;
+    if (
+      hasPlanMax &&
+      !planMaxContribStopped &&
+      endingBalance >= planMaxBalanceValue!
+    ) {
+      planMaxContribStopped = true;
+      contributionValue = 0;
+      monthPlanCodes.push(PLAN_STOP_CODE);
+      endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
+    }
+    if (planMaxContribStopped) {
+      contributionValue = 0;
+      endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
+    }
     if (contributionsStopped) {
       contributionValue = 0;
       endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
     }
 
-    if (inputs.isSsiEligible && endingBalance > SSI_LIMIT) {
+    const projectedBase = currentBalance + earnings + contributionValue - withdrawalValue;
+    if (inputs.isSsiEligible && projectedBase > SSI_LIMIT) {
       if (!contributionsStopped) {
         contributionsStopped = true;
         monthSsiCodes.push("SSI_CONTRIBUTIONS_STOPPED");
       }
       contributionValue = 0;
-      endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
 
-      if (endingBalance > SSI_LIMIT && earnings > 0) {
-        if (!forcedWithdrawalsStarted) {
+      let forcedWithdrawal = 0;
+      const projectedAfterContrib = currentBalance + earnings + contributionValue - withdrawalValue;
+      if (!ssiCapMode) {
+        forcedWithdrawal = projectedAfterContrib - SSI_LIMIT;
+        if (forcedWithdrawal > 0) {
+          ssiCapMode = true;
+          if (!forcedWithdrawalsStarted) {
+            forcedWithdrawalsStarted = true;
+            monthSsiCodes.push("SSI_FORCED_WITHDRAWALS_APPLIED");
+          }
+        }
+      } else {
+        forcedWithdrawal = Math.max(0, earnings);
+        if (forcedWithdrawal > 0 && !forcedWithdrawalsStarted) {
           forcedWithdrawalsStarted = true;
           monthSsiCodes.push("SSI_FORCED_WITHDRAWALS_APPLIED");
         }
-        withdrawalValue += Math.floor(earnings);
-        endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
       }
+
+      forcedWithdrawal = Math.max(0, forcedWithdrawal);
+      withdrawalValue += forcedWithdrawal;
+      endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
 
       if (endingBalance > SSI_LIMIT) {
         endingBalance = SSI_LIMIT;
@@ -185,6 +253,7 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
       saversCredit: 0,
       stateBenefit: 0,
       ssiCodes: monthSsiCodes.length ? monthSsiCodes : undefined,
+      planCodes: monthPlanCodes.length ? monthPlanCodes : undefined,
     };
 
     currentBalance = endingBalance;

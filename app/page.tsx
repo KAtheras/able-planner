@@ -198,10 +198,14 @@ export default function Home() {
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
   const planState = planStateOverride ?? planStateFallback ?? "UT";
-  const planInfoEntry = (planLevelInfo as Record<string, { name?: string; residencyRequired?: boolean }>)[planState];
+  const planInfoEntry = (planLevelInfo as Record<string, { name?: string; residencyRequired?: boolean } & { maxAccountBalance?: number }>)[planState];
   const planName = planInfoEntry?.name ?? planState;
   const planLabel = `${planName} Able`;
   const planResidencyRequired = Boolean(planInfoEntry?.residencyRequired);
+  const planMaxBalance =
+    (planLevelInfo as Record<string, any>)[planState]?.maxAccountBalance ??
+    (planLevelInfo as Record<string, any>)?.default?.maxAccountBalance ??
+    null;
   const monthlyContributionNum =
     Number((monthlyContribution ?? "").replace(/[^0-9.]/g, "")) || 0;
   const annualContributionLimit =
@@ -885,6 +889,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
       return (
         <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+          {planMessages.length > 0 && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
+              <p className="text-sm leading-relaxed">
+                In this planning tool, contributions stop in {planMessages[0].data.monthLabel} because
+                the projected balance reaches the plan maximum of {formatCurrency(planMessages[0].data.planMax)}.
+              </p>
+            </div>
+          )}
           {ssiMessages.length > 0 && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
               <p className="mb-2 text-sm leading-relaxed">
@@ -1140,25 +1152,26 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const contributionIncreaseValue = Number(contributionIncreasePct);
     const withdrawalIncreaseValue = Number(withdrawalIncreasePct);
 
-    const { scheduleRows, ssiMessages } = usePlannerSchedule({
-      startMonthIndex: startIndex,
-      totalMonths,
-      horizonEndIndex,
-      startingBalance: startingBalanceValue,
-      monthlyContribution: monthlyContributionValue,
-      monthlyWithdrawal: monthlyWithdrawalValue,
-      contributionIncreasePct: Number.isFinite(contributionIncreaseValue)
-        ? Math.max(0, contributionIncreaseValue)
-        : 0,
-      withdrawalIncreasePct: Number.isFinite(withdrawalIncreaseValue)
-        ? Math.max(0, withdrawalIncreaseValue)
-        : 0,
-      contributionEndIndex: contributionEndIndexValue,
-      withdrawalStartIndex: withdrawalStartIndexValue,
-      annualReturnDecimal: parsePercentStringToDecimal(annualReturn) ?? 0,
-      isSsiEligible,
-      enabled: hasTimeHorizon,
-    });
+    const { scheduleRows, ssiMessages, planMessages } = usePlannerSchedule({
+        startMonthIndex: startIndex,
+        totalMonths,
+        horizonEndIndex,
+        startingBalance: startingBalanceValue,
+        monthlyContribution: monthlyContributionValue,
+        monthlyWithdrawal: monthlyWithdrawalValue,
+        contributionIncreasePct: Number.isFinite(contributionIncreaseValue)
+          ? Math.max(0, contributionIncreaseValue)
+          : 0,
+        withdrawalIncreasePct: Number.isFinite(withdrawalIncreaseValue)
+          ? Math.max(0, withdrawalIncreaseValue)
+          : 0,
+        contributionEndIndex: contributionEndIndexValue,
+        withdrawalStartIndex: withdrawalStartIndexValue,
+        annualReturnDecimal: parsePercentStringToDecimal(annualReturn) ?? 0,
+        isSsiEligible,
+        enabled: hasTimeHorizon,
+        planMaxBalance,
+      });
 
     if (active === "schedule") {
       if (!hasTimeHorizon) {
