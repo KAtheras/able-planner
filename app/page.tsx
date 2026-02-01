@@ -15,7 +15,7 @@ import federalSaversContributionLimits from "@/config/rules/federalSaversContrib
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
 import wtaPovertyLevel from "@/config/rules/wtaPovertyLevel.json";
-import { buildAmortizationSchedule } from "@/lib/amortization";
+import { usePlannerSchedule } from "@/lib/calc/usePlannerSchedule";
 
 const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
 
@@ -869,18 +869,48 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       );
     };
 
-    const renderScreen2Messages = () => (
-      <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-        {screen2Messages.map((message, index) => (
-          <p
-            key={`${message}-${index}`}
-            className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
-          >
-            {message}
-          </p>
-        ))}
-      </div>
-    );
+    const renderScreen2Messages = () => {
+      const stopMsg =
+        ssiMessages.find((message) => message.code === "SSI_CONTRIBUTIONS_STOPPED") ?? null;
+      const forcedMsg =
+        ssiMessages.find((message) => message.code === "SSI_FORCED_WITHDRAWALS_APPLIED") ?? null;
+      const exceedLabel =
+        forcedMsg?.data?.monthLabel ||
+        stopMsg?.data?.monthLabel ||
+        "Month Unknown";
+      const stopLabel =
+        stopMsg?.data?.monthLabel ||
+        forcedMsg?.data?.monthLabel ||
+        exceedLabel;
+
+      return (
+        <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+          {ssiMessages.length > 0 && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
+              <p className="mb-2 text-sm leading-relaxed">
+                Based on your planned contributions, withdrawals and earnings assumptions the account is projected
+                to exceed $100,000.00 in {exceedLabel}.
+              </p>
+              <p className="mb-2 text-sm leading-relaxed">
+                This may result in suspension of SSI benefits and have an adverse financial impact.
+              </p>
+              <p className="text-sm leading-relaxed">
+                Accordingly, in this planning tool, contributions are stopped in {stopLabel}. Recurring withdrawals
+                are also initiated to keep the balance at $100,000.00 by withdrawing the projected monthly earnings.
+              </p>
+            </div>
+          )}
+          {screen2Messages.map((message, index) => (
+            <p
+              key={`${message}-${index}`}
+              className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
+            >
+              {message}
+            </p>
+          ))}
+        </div>
+      );
+    };
 
     const renderScreen2Panel = () => {
       const buttonBase =
@@ -1085,6 +1115,51 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const parsedTimeHorizon = parseIntegerInput(timeHorizonYears);
     const hasTimeHorizon = timeHorizonYears.trim() !== "" && parsedTimeHorizon !== null;
 
+    const startIndex = horizonConfig.startIndex;
+    const horizonEndIndex = horizonConfig.horizonEndIndex;
+    const totalMonths = horizonConfig.safeYears * 12;
+    const parseAmount = (value: string) => {
+      const cleaned = sanitizeAmountInput(value);
+      const numeric = Number(cleaned || "0");
+      if (!Number.isFinite(numeric)) return 0;
+      return Math.max(0, numeric);
+    };
+    const startingBalanceValue = parseAmount(startingBalance);
+    const monthlyContributionValue = parseAmount(monthlyContribution);
+    const monthlyWithdrawalValue = parseAmount(monthlyWithdrawal);
+    const contributionEndRaw = parseMonthYearToIndex(contributionEndYear, contributionEndMonth);
+    const contributionEndIndexValue =
+      contributionEndRaw !== null
+        ? clampNumber(contributionEndRaw, startIndex, horizonEndIndex)
+        : horizonEndIndex;
+    const withdrawalStartRaw = parseMonthYearToIndex(withdrawalStartYear, withdrawalStartMonth);
+    const withdrawalStartIndexValue =
+      withdrawalStartRaw !== null
+        ? clampNumber(withdrawalStartRaw, startIndex, horizonEndIndex)
+        : startIndex;
+    const contributionIncreaseValue = Number(contributionIncreasePct);
+    const withdrawalIncreaseValue = Number(withdrawalIncreasePct);
+
+    const { scheduleRows, ssiMessages } = usePlannerSchedule({
+      startMonthIndex: startIndex,
+      totalMonths,
+      horizonEndIndex,
+      startingBalance: startingBalanceValue,
+      monthlyContribution: monthlyContributionValue,
+      monthlyWithdrawal: monthlyWithdrawalValue,
+      contributionIncreasePct: Number.isFinite(contributionIncreaseValue)
+        ? Math.max(0, contributionIncreaseValue)
+        : 0,
+      withdrawalIncreasePct: Number.isFinite(withdrawalIncreaseValue)
+        ? Math.max(0, withdrawalIncreaseValue)
+        : 0,
+      contributionEndIndex: contributionEndIndexValue,
+      withdrawalStartIndex: withdrawalStartIndexValue,
+      annualReturnDecimal: parsePercentStringToDecimal(annualReturn) ?? 0,
+      isSsiEligible,
+      enabled: hasTimeHorizon,
+    });
+
     if (active === "schedule") {
       if (!hasTimeHorizon) {
         return (
@@ -1100,49 +1175,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           </div>
         );
       }
-
-      const startIndex = horizonConfig.startIndex;
-      const horizonEndIndex = horizonConfig.horizonEndIndex;
-      const totalMonths = horizonConfig.safeYears * 12;
-      const parseAmount = (value: string) => {
-        const cleaned = sanitizeAmountInput(value);
-        const numeric = Number(cleaned || "0");
-        if (!Number.isFinite(numeric)) return 0;
-        return Math.max(0, numeric);
-      };
-      const startingBalanceValue = parseAmount(startingBalance);
-      const monthlyContributionValue = parseAmount(monthlyContribution);
-      const monthlyWithdrawalValue = parseAmount(monthlyWithdrawal);
-      const contributionEndRaw = parseMonthYearToIndex(contributionEndYear, contributionEndMonth);
-      const contributionEndIndexValue =
-        contributionEndRaw !== null
-          ? clampNumber(contributionEndRaw, startIndex, horizonEndIndex)
-          : horizonEndIndex;
-      const withdrawalStartRaw = parseMonthYearToIndex(withdrawalStartYear, withdrawalStartMonth);
-      const withdrawalStartIndexValue =
-        withdrawalStartRaw !== null
-          ? clampNumber(withdrawalStartRaw, startIndex, horizonEndIndex)
-          : startIndex;
-      const contributionIncreaseValue = Number(contributionIncreasePct);
-      const withdrawalIncreaseValue = Number(withdrawalIncreasePct);
-      const scheduleRows = buildAmortizationSchedule({
-        startMonthIndex: startIndex,
-        totalMonths,
-        horizonEndIndex,
-        startingBalance: startingBalanceValue,
-        monthlyContribution: monthlyContributionValue,
-        monthlyWithdrawal: monthlyWithdrawalValue,
-        contributionIncreasePct: Number.isFinite(contributionIncreaseValue)
-          ? Math.max(0, contributionIncreaseValue)
-          : 0,
-        withdrawalIncreasePct: Number.isFinite(withdrawalIncreaseValue)
-          ? Math.max(0, withdrawalIncreaseValue)
-          : 0,
-        contributionEndIndex: contributionEndIndexValue,
-        withdrawalStartIndex: withdrawalStartIndexValue,
-        annualReturnDecimal: parsePercentStringToDecimal(annualReturn) ?? 0,
-        isSsiEligible: isSsiEligible,
-      });  
 
       const fscCreditPercent = getFederalSaverCreditPercent(
         plannerFilingStatus,
