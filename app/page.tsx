@@ -1,17 +1,21 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import SettingsMenu from "@/components/layout/SettingsMenu";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
 import { getClientConfig } from "@/config/clients";
 import AccountActivityForm from "@/components/inputs/AccountActivityForm";
+import AmortizationScheduleTable from "@/components/schedule/AmortizationScheduleTable";
 import DemographicsForm from "@/components/inputs/DemographicsForm";
 import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrackets.json";
+import federalSaversContributionLimits from "@/config/rules/federalSaversContributionLimits.json";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
+import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
 import wtaPovertyLevel from "@/config/rules/wtaPovertyLevel.json";
+import { buildAmortizationSchedule } from "@/lib/amortization";
 
 const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
 
@@ -83,6 +87,63 @@ function getFederalSaverCreditPercent(status: FilingStatusOption, agi: number) {
   return 0;
 }
 
+type StateTaxBenefitType = "none" | "deduction" | "credit";
+
+type StateTaxBenefitConfig = {
+  type: StateTaxBenefitType;
+  amount: number;
+  creditPercent: number;
+};
+
+type StateTaxDeductionEntry = {
+  name: string;
+  benefits: Record<string, StateTaxBenefitConfig>;
+};
+
+const getStateTaxBenefitConfig = (
+  stateCode: string,
+  filingStatus: FilingStatusOption,
+): StateTaxBenefitConfig | null => {
+  const entries = stateTaxDeductions as Record<string, StateTaxDeductionEntry>;
+  const entry = entries[stateCode];
+  if (!entry) return null;
+  return entry.benefits[filingStatus] ?? entry.benefits.single ?? null;
+};
+
+const computeStateTaxBenefitAmount = (
+  benefit: StateTaxBenefitConfig | null,
+  contributions: number,
+): number => {
+  if (!benefit || contributions <= 0) return 0;
+  const percent = Math.max(0, benefit.creditPercent ?? 0);
+  const cap = Math.max(0, benefit.amount ?? 0);
+  const contributionValue = Math.max(0, contributions);
+
+  if (benefit.type === "credit" || (benefit.type === "none" && percent > 0)) {
+    const fromPercent = percent > 0 ? contributionValue * percent : 0;
+    if (cap > 0 && percent > 0) {
+      return Math.min(fromPercent, cap);
+    }
+    if (percent > 0) {
+      return fromPercent;
+    }
+    if (cap > 0) {
+      return cap;
+    }
+    return 0;
+  }
+
+  if (benefit.type === "deduction") {
+    if (percent > 0) {
+      const fromPercent = contributionValue * percent;
+      return cap > 0 ? Math.min(fromPercent, cap) : fromPercent;
+    }
+    return cap > 0 ? Math.min(contributionValue, cap) : 0;
+  }
+
+  return 0;
+};
+
 
 export default function Home() {
   const [language, setLanguage] = useState<SupportedLanguage>("en");
@@ -108,6 +169,15 @@ export default function Home() {
   const [monthlyWithdrawal, setMonthlyWithdrawal] = useState("");
   const [withdrawalStartYear, setWithdrawalStartYear] = useState("");
   const [withdrawalStartMonth, setWithdrawalStartMonth] = useState("");
+  const [contributionIncreasePct, setContributionIncreasePct] = useState("");
+  const [withdrawalIncreasePct, setWithdrawalIncreasePct] = useState("");
+  const [contributionIncreaseHelperText, setContributionIncreaseHelperText] = useState<string | undefined>(
+    undefined,
+  );
+  const [contributionBreachYear, setContributionBreachYear] = useState<number | null>(null);
+  const [stopContributionIncreasesAfterYear, setStopContributionIncreasesAfterYear] = useState<number | null>(
+    null,
+  );
   const [contributionEndTouched, setContributionEndTouched] = useState(false);
   const [withdrawalStartTouched, setWithdrawalStartTouched] = useState(false);
   const [wtaMode, setWtaMode] = useState<WtaMode>("idle");
@@ -115,6 +185,7 @@ export default function Home() {
   const [wtaEarnedIncome, setWtaEarnedIncome] = useState("");
   const [wtaRetirementPlan, setWtaRetirementPlan] = useState<boolean | null>(null);
   const [wtaStatus, setWtaStatus] = useState<WtaStatus>("unknown");
+  const [wtaAutoPromptedForIncrease, setWtaAutoPromptedForIncrease] = useState(false);
   const [wtaAdditionalAllowed, setWtaAdditionalAllowed] = useState(0);
   const [wtaCombinedLimit, setWtaCombinedLimit] = useState(WTA_BASE_ANNUAL_LIMIT);
   const [fscStatus, setFscStatus] = useState<"idle" | "eligible" | "ineligible">("idle");
@@ -131,6 +202,10 @@ export default function Home() {
   const planName = planInfoEntry?.name ?? planState;
   const planLabel = `${planName} Able`;
   const planResidencyRequired = Boolean(planInfoEntry?.residencyRequired);
+  const monthlyContributionNum =
+    Number((monthlyContribution ?? "").replace(/[^0-9.]/g, "")) || 0;
+  const annualContributionLimit =
+    wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
 
   const sanitizeAgiInput = (value: string) => {
     if (value === "") return "";
@@ -296,12 +371,17 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setWtaStatus("unknown");
     setWtaAdditionalAllowed(0);
     setWtaCombinedLimit(WTA_BASE_ANNUAL_LIMIT);
+    setWtaAutoPromptedForIncrease(false);
   }, []);
 
   useEffect(() => {
     const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
     const plannedAnnual = Number.isFinite(numeric) ? numeric * 12 : 0;
+
     if (wtaStatus === "unknown") {
+      if (wtaAutoPromptedForIncrease) {
+        return;
+      }
       setWtaMode(plannedAnnual > WTA_BASE_ANNUAL_LIMIT ? "initialPrompt" : "idle");
       return;
     }
@@ -314,7 +394,101 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     }
 
     setWtaMode(plannedAnnual > WTA_BASE_ANNUAL_LIMIT ? "noPath" : "idle");
-  }, [monthlyContribution, wtaCombinedLimit, wtaStatus]);
+  }, [monthlyContribution, wtaCombinedLimit, wtaStatus, wtaAutoPromptedForIncrease]);
+
+  useEffect(() => {
+    const pctRaw = Number(contributionIncreasePct);
+    if (monthlyContributionNum <= 0 || !Number.isFinite(pctRaw) || pctRaw <= 0) {
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+
+    const baseAnnual = monthlyContributionNum * 12;
+    const pctDecimal = pctRaw / 100;
+    const horizonInput = Number(timeHorizonYears);
+    const maxYearsToCheck =
+      Number.isFinite(horizonInput) && horizonInput > 0 ? Math.floor(horizonInput) : 75;
+
+    const computeBreachYear = (limit: number): number | null => {
+      if (baseAnnual >= limit) {
+        return 0;
+      }
+      for (let year = 1; year <= maxYearsToCheck; year += 1) {
+        const projectedAnnual = baseAnnual * Math.pow(1 + pctDecimal, year);
+        if (projectedAnnual > limit) {
+          return year;
+        }
+      }
+      return null;
+    };
+
+    const baseBreachYear = computeBreachYear(WTA_BASE_ANNUAL_LIMIT);
+    const projectionBreachesBaseLimit = baseBreachYear !== null && baseBreachYear > 0;
+
+    const shouldPromptWtaFromIncrease =
+      wtaStatus === "unknown" &&
+      projectionBreachesBaseLimit &&
+      !wtaAutoPromptedForIncrease;
+
+    if (shouldPromptWtaFromIncrease) {
+      setWtaAutoPromptedForIncrease(true);
+      setWtaMode("initialPrompt");
+      setWtaHasEarnedIncome(null);
+      setWtaEarnedIncome("");
+      setWtaRetirementPlan(null);
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+
+    if (wtaStatus === "unknown") {
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+
+    if (annualContributionLimit <= 0) {
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+
+    const limitBreachYear = computeBreachYear(annualContributionLimit);
+    if (limitBreachYear === null) {
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+
+    setContributionBreachYear(limitBreachYear);
+    setStopContributionIncreasesAfterYear(limitBreachYear > 0 ? limitBreachYear - 1 : null);
+
+    if (limitBreachYear === 0) {
+      setContributionIncreaseHelperText(
+        "Base contributions already meet the annual limit; increases are disabled.",
+      );
+      return;
+    }
+
+    setContributionIncreaseHelperText(
+      `At ${contributionIncreasePct}%, contributions exceed the annual limit in year ${limitBreachYear}. Contribution increases will stop after year ${
+        limitBreachYear - 1
+      }.`,
+    );
+  }, [
+    annualContributionLimit,
+    contributionIncreasePct,
+    monthlyContributionNum,
+    timeHorizonYears,
+    wtaStatus,
+    wtaAutoPromptedForIncrease,
+  ]);
 
   useEffect(() => {
     const { startIndex, horizonEndIndex } = getHorizonConfig();
@@ -365,15 +539,30 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   ]);
 
   useEffect(() => {
-  const client = getClientConfig(plannerStateCode);
-  const brand = client.brand;
-  if (!brand) return;
+    const client = getClientConfig(plannerStateCode);
+    const brand = client.brand;
+    const typography = client.typography;
+    if (!brand && !typography) return;
 
-  const root = document.documentElement.style;
-  root.setProperty("--brand-primary", brand.primary);
-  root.setProperty("--brand-primary-hover", brand.primaryHover);
-  root.setProperty("--brand-on-primary", brand.onPrimary);
-    root.setProperty("--brand-ring", brand.ring);
+    const root = document.documentElement.style;
+    if (brand) {
+      root.setProperty("--brand-primary", brand.primary);
+      root.setProperty("--brand-primary-hover", brand.primaryHover);
+      root.setProperty("--brand-on-primary", brand.onPrimary);
+      root.setProperty("--brand-ring", brand.ring);
+    }
+
+    if (typography?.fontFamily) {
+      root.setProperty("--app-font-family", typography.fontFamily);
+    }
+    const baseFontSize = typography?.baseFontSizePx;
+    if (Number.isFinite(baseFontSize ?? NaN)) {
+      root.setProperty("--app-font-size", `${baseFontSize}px`);
+    }
+    const lineHeight = typography?.lineHeight;
+    if (Number.isFinite(lineHeight ?? NaN)) {
+      root.setProperty("--app-line-height", `${lineHeight}`);
+    }
   }, [plannerStateCode]);
 
   useEffect(() => {
@@ -433,13 +622,21 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setMessagesMode("intro");
     setAgiGateEligible(null);
     setScreen1Messages([...INITIAL_MESSAGES]);
+    setContributionIncreasePct("");
+    setWithdrawalIncreasePct("");
+    setContributionIncreaseHelperText(undefined);
+    setContributionBreachYear(null);
+    setStopContributionIncreasesAfterYear(null);
+    setWtaAutoPromptedForIncrease(false);
     setScreen2Messages([...SCREEN2_DEFAULT_MESSAGES]);
     setTimeHorizonYears("");
     setContributionEndTouched(false);
     setWithdrawalStartTouched(false);
   }, [resetWtaFlow]);
 
-  const content = useMemo(() => {
+  const contributionIncreaseDisabled = contributionBreachYear === 0;
+
+  const content = (() => {
     const agiValue = Number(plannerAgi);
     const agiValid =
       plannerAgi !== "" && !Number.isNaN(agiValue) && (agiValue > 0 || agiValue === 0);
@@ -686,78 +883,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     );
 
     const renderScreen2Panel = () => {
-      if (plannedAnnualContribution <= WTA_BASE_ANNUAL_LIMIT) {
-        return renderScreen2Messages();
-      }
-
-      const baseLimitOverage = Math.max(0, plannedAnnualContribution - WTA_BASE_ANNUAL_LIMIT);
-      if (wtaStatus === "ineligible") {
-        return (
-          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of $20,000.00.
-            </p>
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-              AMOUNT OVER THE ANNUAL LIMIT:
-            </p>
-            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-              {formatCurrency(baseLimitOverage)}
-            </p>
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Would you like to set contributions to the maximum allowed amount?
-            </p>
-            <p className="text-xs leading-relaxed text-zinc-500">
-              We&apos;ll reduce the recurring contribution to keep a rolling 12-month total within the limit.
-            </p>
-            <button
-              type="button"
-              className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
-              onClick={resolveBaseLimitWithAutoContribution}
-            >
-              Yes
-            </button>
-          </div>
-        );
-      }
-
-      if (wtaStatus === "eligible") {
-        const combinedLimitOverage = Math.max(0, plannedAnnualContribution - wtaCombinedLimit);
-        if (combinedLimitOverage <= 0) {
-          return renderScreen2Messages();
-        }
-        return (
-          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              You qualify for additional contributions of {formatCurrency(wtaAdditionalAllowed)}, but your total contributions exceed the combined limit of {formatCurrency(
-                wtaCombinedLimit,
-              )}.
-            </p>
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Please revise your contribution amounts to bring total contributions below the combined limit.
-            </p>
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-              AMOUNT OVER THE COMBINED LIMIT:
-            </p>
-            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-              {formatCurrency(combinedLimitOverage)}
-            </p>
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Would you like to set contributions to the maximum allowed amount?
-            </p>
-            <p className="text-xs leading-relaxed text-zinc-500">
-              We&apos;ll reduce the recurring contribution to keep a rolling 12-month total within the limit.
-            </p>
-            <button
-              type="button"
-              className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
-              onClick={resolveCombinedLimitWithAutoContribution}
-            >
-              Yes
-            </button>
-          </div>
-        );
-      }
-
       const buttonBase =
         "flex-1 rounded-full border px-3 py-1 text-xs font-semibold transition";
 
@@ -882,8 +1007,215 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         );
       }
 
+      if (plannedAnnualContribution <= WTA_BASE_ANNUAL_LIMIT) {
+        return renderScreen2Messages();
+      }
+
+      const baseLimitOverage = Math.max(0, plannedAnnualContribution - WTA_BASE_ANNUAL_LIMIT);
+      if (wtaStatus === "ineligible") {
+        return (
+          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of $20,000.00.
+            </p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              AMOUNT OVER THE ANNUAL LIMIT:
+            </p>
+            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              {formatCurrency(baseLimitOverage)}
+            </p>
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Would you like to set contributions to the maximum allowed amount?
+            </p>
+            <p className="text-xs leading-relaxed text-zinc-500">
+              We&apos;ll reduce the recurring contribution to keep a rolling 12-month total within the limit.
+            </p>
+            <button
+              type="button"
+              className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
+              onClick={resolveBaseLimitWithAutoContribution}
+            >
+              Yes
+            </button>
+          </div>
+        );
+      }
+
+      if (wtaStatus === "eligible") {
+        const combinedLimitOverage = Math.max(0, plannedAnnualContribution - wtaCombinedLimit);
+        if (combinedLimitOverage <= 0) {
+          return renderScreen2Messages();
+        }
+        return (
+          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              You qualify for additional contributions of {formatCurrency(wtaAdditionalAllowed)}, but your total contributions exceed the combined limit of {formatCurrency(
+                wtaCombinedLimit,
+              )}.
+            </p>
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Please revise your contribution amounts to bring total contributions below the combined limit.
+            </p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              AMOUNT OVER THE COMBINED LIMIT:
+            </p>
+            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              {formatCurrency(combinedLimitOverage)}
+            </p>
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Would you like to set contributions to the maximum allowed amount?
+            </p>
+            <p className="text-xs leading-relaxed text-zinc-500">
+              We&apos;ll reduce the recurring contribution to keep a rolling 12-month total within the limit.
+            </p>
+            <button
+              type="button"
+              className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
+              onClick={resolveCombinedLimitWithAutoContribution}
+            >
+              Yes
+            </button>
+          </div>
+        );
+      }
+
       return renderScreen2Messages();
     };
+
+    const parsedTimeHorizon = parseIntegerInput(timeHorizonYears);
+    const hasTimeHorizon = timeHorizonYears.trim() !== "" && parsedTimeHorizon !== null;
+
+    if (active === "schedule") {
+      if (!hasTimeHorizon) {
+        return (
+          <div className="space-y-6">
+            <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
+              <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                Amortization schedule
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                Enter a time horizon to view the schedule.
+              </p>
+            </div>
+          </div>
+        );
+      }
+
+      const startIndex = horizonConfig.startIndex;
+      const horizonEndIndex = horizonConfig.horizonEndIndex;
+      const totalMonths = horizonConfig.safeYears * 12;
+      const parseAmount = (value: string) => {
+        const cleaned = sanitizeAmountInput(value);
+        const numeric = Number(cleaned || "0");
+        if (!Number.isFinite(numeric)) return 0;
+        return Math.max(0, numeric);
+      };
+      const startingBalanceValue = parseAmount(startingBalance);
+      const monthlyContributionValue = parseAmount(monthlyContribution);
+      const monthlyWithdrawalValue = parseAmount(monthlyWithdrawal);
+      const contributionEndRaw = parseMonthYearToIndex(contributionEndYear, contributionEndMonth);
+      const contributionEndIndexValue =
+        contributionEndRaw !== null
+          ? clampNumber(contributionEndRaw, startIndex, horizonEndIndex)
+          : horizonEndIndex;
+      const withdrawalStartRaw = parseMonthYearToIndex(withdrawalStartYear, withdrawalStartMonth);
+      const withdrawalStartIndexValue =
+        withdrawalStartRaw !== null
+          ? clampNumber(withdrawalStartRaw, startIndex, horizonEndIndex)
+          : startIndex;
+      const contributionIncreaseValue = Number(contributionIncreasePct);
+      const withdrawalIncreaseValue = Number(withdrawalIncreasePct);
+      const scheduleRows = buildAmortizationSchedule({
+        startMonthIndex: startIndex,
+        totalMonths,
+        horizonEndIndex,
+        startingBalance: startingBalanceValue,
+        monthlyContribution: monthlyContributionValue,
+        monthlyWithdrawal: monthlyWithdrawalValue,
+        contributionIncreasePct: Number.isFinite(contributionIncreaseValue)
+          ? Math.max(0, contributionIncreaseValue)
+          : 0,
+        withdrawalIncreasePct: Number.isFinite(withdrawalIncreaseValue)
+          ? Math.max(0, withdrawalIncreaseValue)
+          : 0,
+        contributionEndIndex: contributionEndIndexValue,
+        withdrawalStartIndex: withdrawalStartIndexValue,
+        annualReturnDecimal: parsePercentStringToDecimal(annualReturn) ?? 0,
+      });
+
+      const fscCreditPercent = getFederalSaverCreditPercent(
+        plannerFilingStatus,
+        agiValid ? agiValue : 0,
+      );
+      const fscContributionLimit =
+        (federalSaversContributionLimits as Record<string, number>)[plannerFilingStatus] ?? 0;
+      const showFederalSaverCredit =
+        fscStatus === "eligible" &&
+        agiGateEligible === true &&
+        Number.isFinite(fscCreditPercent) &&
+        fscCreditPercent > 0 &&
+        fscContributionLimit > 0;
+      const stateBenefitConfig = getStateTaxBenefitConfig(planState, plannerFilingStatus);
+      const scheduleRowsWithBenefits = scheduleRows.map((yearRow) => {
+        const contributionsForYear = Math.max(0, yearRow.contribution);
+        const federalCredit = showFederalSaverCredit
+          ? Math.min(contributionsForYear, fscContributionLimit) * fscCreditPercent
+          : 0;
+        const stateBenefitAmount = computeStateTaxBenefitAmount(
+          stateBenefitConfig,
+          contributionsForYear,
+        );
+        const months = yearRow.months.map((monthRow) => {
+          const monthNumber = (monthRow.monthIndex % 12) + 1;
+          const isDecember = monthNumber === 12;
+          return {
+            ...monthRow,
+            saversCredit: isDecember ? federalCredit : 0,
+            stateBenefit: isDecember ? stateBenefitAmount : 0,
+          };
+        });
+        return {
+          ...yearRow,
+          saversCredit: federalCredit,
+          stateBenefit: stateBenefitAmount,
+          months,
+        };
+      });
+
+      return (
+        <div className="space-y-6">
+          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                Amortization schedule
+              </h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  className="rounded-full bg-[var(--brand-primary)] px-4 py-1 text-xs font-semibold text-[var(--brand-on-primary)] shadow-sm"
+                >
+                  ABLE Account
+                </button>
+                <button
+                  type="button"
+                  aria-disabled="true"
+                  disabled
+                  className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white/50 px-4 py-1 text-xs font-semibold text-zinc-500 opacity-50 cursor-not-allowed pointer-events-none"
+                >
+                  <span>Taxable Account</span>
+                  <span className="text-[10px] font-normal uppercase tracking-wide text-zinc-400">
+                    Coming soon
+                  </span>
+                </button>
+              </div>
+            </div>
+              <div className="mt-4">
+                <AmortizationScheduleTable rows={scheduleRowsWithBenefits} />
+              </div>
+          </div>
+        </div>
+      );
+    }
 
     if (active !== "inputs") {
       const screenLabel =
@@ -1051,6 +1383,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               monthlyWithdrawal={monthlyWithdrawal}
               withdrawalStartYear={withdrawalStartYear}
               withdrawalStartMonth={withdrawalStartMonth}
+              contributionIncreaseDisabled={contributionIncreaseDisabled}
+              contributionIncreaseHelperText={contributionIncreaseHelperText}
+              contributionIncreasePct={contributionIncreasePct}
+              withdrawalIncreasePct={withdrawalIncreasePct}
+              contributionIncreaseStopYear={stopContributionIncreasesAfterYear}
               monthOptions={monthOptions}
               contributionYearOptions={horizonYearOptions}
               withdrawalYearOptions={horizonYearOptions}
@@ -1061,8 +1398,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 }
                 if ("startingBalance" in updates)
                   setStartingBalance(sanitizeAmountInput(updates.startingBalance ?? ""));
-                if ("monthlyContribution" in updates)
+                if ("monthlyContribution" in updates) {
                   setMonthlyContribution(sanitizeAmountInput(updates.monthlyContribution ?? ""));
+                }
                 if ("contributionEndYear" in updates) {
                   setContributionEndTouched(true);
                   setContributionEndYear(updates.contributionEndYear ?? "");
@@ -1080,6 +1418,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 if ("withdrawalStartMonth" in updates) {
                   setWithdrawalStartTouched(true);
                   setWithdrawalStartMonth(updates.withdrawalStartMonth ?? "");
+                }
+                if ("contributionIncreasePct" in updates) {
+                  setContributionIncreasePct(updates.contributionIncreasePct ?? "");
+                }
+                if ("withdrawalIncreasePct" in updates) {
+                  setWithdrawalIncreasePct(updates.withdrawalIncreasePct ?? "");
                 }
               }}
               onAdvancedClick={() => {
@@ -1186,44 +1530,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         </div>
       </div>
     );
-  }, [
-    agiGateEligible,
-    annualReturn,
-    annualReturnWarning,
-    beneficiaryName,
-    beneficiaryStateOfResidence,
-    contributionEndMonth,
-    contributionEndYear,
-    fscQ,
-    fscStatus,
-    active,
-    inputStep,
-    isSsiEligible,
-    language,
-    messagesMode,
-    monthlyContribution,
-    wtaAdditionalAllowed,
-    wtaCombinedLimit,
-    wtaEarnedIncome,
-    wtaHasEarnedIncome,
-    wtaMode,
-    wtaRetirementPlan,
-    wtaStatus,
-    monthlyWithdrawal,
-    plannerAgi,
-    plannerFilingStatus,
-    plannerStateCode,
-    resetInputs,
-    startingBalance,
-    timeHorizonYears,
-    withdrawalStartMonth,
-    withdrawalStartYear,
-    getHorizonConfig,
-    getTimeHorizonLimits,
-    screen1Messages,
-    nonResidentProceedAck,
-    screen2Messages,
-  ]);
+  })();
 
   if (showWelcome) {
     return (

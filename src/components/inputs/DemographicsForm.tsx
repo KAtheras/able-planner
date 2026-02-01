@@ -40,12 +40,16 @@ export default function DemographicsForm({
     <section className="space-y-6">
       <h1 className="text-2xl font-semibold">Demographic Information</h1>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500">
-              Beneficiary Name
-            </label>
+      <div className="grid gap-6 md:grid-cols-2">
+        <div>
+          <label
+            htmlFor="demographics-beneficiary-name"
+            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+          >
+            Beneficiary Name
+          </label>
           <input
+            id="demographics-beneficiary-name"
             type="text"
             value={beneficiaryName}
             onChange={(e) => onChange?.({ beneficiaryName: e.target.value })}
@@ -53,10 +57,14 @@ export default function DemographicsForm({
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          <label
+            htmlFor="demographics-residence"
+            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+          >
             State of Residence
           </label>
           <select
+            id="demographics-residence"
             value={stateOfResidence}
             onChange={(e) => onChange?.({ stateOfResidence: e.target.value })}
             className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
@@ -70,10 +78,14 @@ export default function DemographicsForm({
           </select>
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          <label
+            htmlFor="demographics-filing-status"
+            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+          >
             Filing Status
           </label>
           <select
+            id="demographics-filing-status"
             value={filingStatus}
             onChange={(e) => onChange?.({ filingStatus: e.target.value })}
             className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
@@ -85,14 +97,19 @@ export default function DemographicsForm({
           </select>
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          <label
+            htmlFor="demographics-agi"
+            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+          >
             Adjusted Gross Income (AGI)
           </label>
           <input
+            id="demographics-agi"
             type="number"
             min={0}
             step={1}
             inputMode="numeric"
+            autoComplete="off"
             value={agi}
             onChange={(e) => {
               const raw = e.target.value;
@@ -111,14 +128,19 @@ export default function DemographicsForm({
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          <label
+            htmlFor="demographics-annual-return"
+            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+          >
             Annual Investment Return Assumption (%)
           </label>
           <input
+            id="demographics-annual-return"
             type="number"
             min={0}
             step={0.1}
             inputMode="decimal"
+            autoComplete="off"
             value={annualReturn}
             onChange={(e) => {
               const raw = e.target.value;
@@ -137,15 +159,19 @@ export default function DemographicsForm({
           />
         </div>
         <div className="md:col-span-2">
-          <div className="flex items-center gap-3">
+          <label
+            htmlFor="demographics-ssi"
+            className="flex items-center gap-3 text-sm"
+          >
             <input
+              id="demographics-ssi"
               type="checkbox"
               checked={isSsiEligible}
               onChange={(e) => onChange?.({ isSsiEligible: e.target.checked })}
               className="h-4 w-4 rounded border-zinc-300"
             />
-            <span className="text-sm">Beneficiary is eligible for SSI</span>
-          </div>
+            Beneficiary is eligible for SSI
+          </label>
         </div>
         <div className="md:col-span-2">
           <div className="space-y-2 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">

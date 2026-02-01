@@ -16,5 +16,10 @@
     "primaryHover": "#1A5ECD",
     "onPrimary": "#FFFFFF",
     "ring": "rgba(31, 111, 235, 0.3)"
+  },
+  "typography": {
+    "fontFamily": "Chalkboard SE, Chalkboard, Comic Sans MS, cursive",
+    "baseFontSizePx": 17,
+    "lineHeight": 1.45
   }
 }

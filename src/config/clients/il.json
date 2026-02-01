@@ -1,20 +1,24 @@
 {
   "clientId": "il",
-  "planStateCode": "IL",
   "defaults": {
     "annualReturn": 0.06,
     "timeHorizonYears": 40
   },
   "constraints": {
-    "annualReturnWarningMax": 0.08,
-    "annualReturnHardMax": 0.20,
+    "annualReturnWarningMax": 0.12,
+    "annualReturnHardMax": 0.25,
     "timeHorizonYearsHardMin": 1,
-    "timeHorizonYearsHardMax": 75
+    "timeHorizonYearsHardMax": 60
   },
   "brand": {
     "primary": "#E8590C",
     "primaryHover": "#C14708",
     "onPrimary": "#FFFFFF",
     "ring": "rgba(232, 89, 12, 0.35)"
+  },
+  "typography": {
+    "fontFamily": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", system-ui, sans-serif",
+    "baseFontSizePx": 16,
+    "lineHeight": 1.45
   }
 }

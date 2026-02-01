@@ -16,5 +16,10 @@
     "primaryHover": "#0A723F",
     "onPrimary": "#FFFFFF",
     "ring": "rgba(12, 140, 78, 0.35)"
+  },
+  "typography": {
+    "fontFamily": "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+    "baseFontSizePx": 16,
+    "lineHeight": 1.45
   }
 }

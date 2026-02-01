@@ -1103,22 +1103,22 @@
     "name": "Utah",
     "benefits": {
       "single": {
-        "type": "none",
+        "type": "credit",
         "amount": 0,
         "creditPercent": 0.0455
       },
       "married_joint": {
-        "type": "none",
+        "type": "credit",
         "amount": 0,
         "creditPercent": 0.0455
       },
       "married_separate": {
-        "type": "none",
+        "type": "credit",
         "amount": 0,
         "creditPercent": 0.0455
       },
       "head_of_household": {
-        "type": "none",
+        "type": "credit",
         "amount": 0,
         "creditPercent": 0.0455
       }
