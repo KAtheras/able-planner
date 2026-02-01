@@ -1141,7 +1141,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         contributionEndIndex: contributionEndIndexValue,
         withdrawalStartIndex: withdrawalStartIndexValue,
         annualReturnDecimal: parsePercentStringToDecimal(annualReturn) ?? 0,
-      });
+        isSsiEligible: isSsiEligible,
+      });  
 
       const fscCreditPercent = getFederalSaverCreditPercent(
         plannerFilingStatus,

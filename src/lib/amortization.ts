@@ -10,6 +10,7 @@ export type MonthlyRow = {
   stateTax: number;
   saversCredit: number;
   stateBenefit: number;
+  ssiCodes?: string[];
 };
 
 export type YearRow = {
@@ -38,6 +39,7 @@ export type AmortizationInputs = {
   contributionEndIndex: number;
   withdrawalStartIndex: number;
   annualReturnDecimal: number;
+  isSsiEligible?: boolean;
 };
 
 const MONTH_NAMES = [
@@ -57,6 +59,33 @@ const MONTH_NAMES = [
 
 const MAX_MONTHS = 900;
 
+const SSI_LIMIT = 100000;
+
+export type SsiMessage = {
+  code: string;
+  data: { monthLabel: string };
+};
+
+export function extractSsiMessages(rows: YearRow[]): SsiMessage[] {
+  const seen: Record<string, boolean> = {};
+  const out: SsiMessage[] = [];
+
+  for (const yearRow of rows) {
+    for (const monthRow of yearRow.months) {
+      if (!monthRow.ssiCodes?.length) continue;
+      for (const code of monthRow.ssiCodes) {
+        if (seen[code]) continue;
+        seen[code] = true;
+        let label = monthRow.monthLabel;
+        label = label.replace(/^[-–—]+\s*/, "");
+        out.push({ code, data: { monthLabel: label } });
+      }
+    }
+  }
+
+  return out;
+}
+
 export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[] {
   const monthsToBuild = Math.min(Math.max(0, inputs.totalMonths), MAX_MONTHS);
   if (monthsToBuild <= 0) {
@@ -75,6 +104,8 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
   const rows: YearRow[] = [];
   let currentYearRow: YearRow | null = null;
 
+  let contributionsStopped = false;
+  let forcedWithdrawalsStarted = false;
   for (let offset = 0; offset < monthsToBuild; offset += 1) {
     const monthIndex = inputs.startMonthIndex + offset;
     if (monthIndex > inputs.horizonEndIndex) {
@@ -108,10 +139,38 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
       currentWithdrawal *= withdrawalIncreaseFactor;
     }
 
-    const contributionValue = contributionActive ? currentContribution : 0;
-    const withdrawalValue = withdrawalActive ? currentWithdrawal : 0;
+    let contributionValue = contributionActive ? currentContribution : 0;
+    let withdrawalValue = withdrawalActive ? currentWithdrawal : 0;
     const earnings = currentBalance * monthlyRate;
-    const endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
+    let endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
+
+    const monthSsiCodes: string[] = [];
+    if (contributionsStopped) {
+      contributionValue = 0;
+      endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
+    }
+
+    if (inputs.isSsiEligible && endingBalance > SSI_LIMIT) {
+      if (!contributionsStopped) {
+        contributionsStopped = true;
+        monthSsiCodes.push("SSI_CONTRIBUTIONS_STOPPED");
+      }
+      contributionValue = 0;
+      endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
+
+      if (endingBalance > SSI_LIMIT && earnings > 0) {
+        if (!forcedWithdrawalsStarted) {
+          forcedWithdrawalsStarted = true;
+          monthSsiCodes.push("SSI_FORCED_WITHDRAWALS_APPLIED");
+        }
+        withdrawalValue += Math.floor(earnings);
+        endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
+      }
+
+      if (endingBalance > SSI_LIMIT) {
+        endingBalance = SSI_LIMIT;
+      }
+    }
 
     const monthRow: MonthlyRow = {
       monthLabel,
@@ -125,6 +184,7 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
       stateTax: 0,
       saversCredit: 0,
       stateBenefit: 0,
+      ssiCodes: monthSsiCodes.length ? monthSsiCodes : undefined,
     };
 
     currentBalance = endingBalance;
