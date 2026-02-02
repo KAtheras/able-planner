@@ -1152,7 +1152,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const contributionIncreaseValue = Number(contributionIncreasePct);
     const withdrawalIncreaseValue = Number(withdrawalIncreasePct);
 
-    const { scheduleRows, ssiMessages, planMessages } = usePlannerSchedule({
+    const { scheduleRows, ssiMessages, planMessages, taxableRows } = usePlannerSchedule({
         startMonthIndex: startIndex,
         totalMonths,
         horizonEndIndex,
@@ -1169,6 +1169,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         withdrawalStartIndex: withdrawalStartIndexValue,
         annualReturnDecimal: parsePercentStringToDecimal(annualReturn) ?? 0,
         isSsiEligible,
+        agi: agiValid ? agiValue : null,
+        filingStatus: plannerFilingStatus,
+        stateOfResidence: beneficiaryStateOfResidence || null,
         enabled: hasTimeHorizon,
         planMaxBalance,
       });
@@ -1256,7 +1259,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               </div>
             </div>
               <div className="mt-4">
-                <AmortizationScheduleTable rows={scheduleRowsWithBenefits} />
+                <AmortizationScheduleTable rows={scheduleRowsWithBenefits} taxableRows={taxableRows} />
               </div>
           </div>
         </div>
