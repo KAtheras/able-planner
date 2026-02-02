@@ -359,8 +359,8 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
         federalTaxOnEarnings = taxableEarnings * federalTaxRateDecimal;
         stateTaxOnEarnings = taxableEarnings * stateTaxRateDecimal;
         monthEndingBalance = balanceBeforeEarnings + earnings - withdrawal - federalTaxOnEarnings - stateTaxOnEarnings;
-        yearFederalTax = federalTaxOnEarnings;
-        yearStateTax = stateTaxOnEarnings;
+        yearFederalTax += federalTaxOnEarnings;
+        yearStateTax += stateTaxOnEarnings;
         yearEarnings = 0;
       }
 
@@ -378,6 +378,21 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
       taxableMonths.push(taxableMonth);
       prevBalance = monthEndingBalance;
       yearEndingBalance = monthEndingBalance;
+    }
+
+    if (taxableMonths.length > 0 && yearEarnings > 0) {
+      const taxableEarnings = Math.max(0, yearEarnings);
+      const extraFederal = taxableEarnings * federalTaxRateDecimal;
+      const extraState = taxableEarnings * stateTaxRateDecimal;
+      const lastIdx = taxableMonths.length - 1;
+      taxableMonths[lastIdx].federalTaxOnEarnings += extraFederal;
+      taxableMonths[lastIdx].stateTaxOnEarnings += extraState;
+      taxableMonths[lastIdx].endingBalance -= extraFederal + extraState;
+      prevBalance = taxableMonths[lastIdx].endingBalance;
+      yearEndingBalance = prevBalance;
+      yearFederalTax += extraFederal;
+      yearStateTax += extraState;
+      yearEarnings = 0;
     }
 
     taxableYears.push({

@@ -1,20 +1,33 @@
 {
-  "meta": {
-    "language": "es",
-    "direction": "ltr"
-  },
   "app": {
     "title": "Planificador ABLE (andamiaje)",
     "tagline": "Primero móvil • Accesible • Bilingüe"
   },
   "home": {
     "heading": "Bienvenido",
-    "intro":
-      "Esta es la base limpia para el Planificador ABLE. La interfaz, el texto y la lógica se incorporarán gradualmente.",
+    "intro": "Esta es la base limpia para el Planificador ABLE. La interfaz, el texto y la lógica se incorporarán gradualmente.",
     "languageLoaded": "Idioma cargado: {{lang}}"
   },
   "labels": {},
   "messages": {},
   "buttons": {},
-  "disclosures": {}
+  "disclosures": {},
+  "metadata": {
+    "language": "es",
+    "direction": "ltr"
+  },
+  "blocks": {
+    "landingWelcome": {
+      "default": "Bienvenido al Planificador ABLE. Use las entradas para experimentar con contribuciones, retiros y planificación fiscal."
+    },
+    "disclosuresAssumptions": {
+      "default": "Las suposiciones y divulgaciones aparecerán aquí."
+    },
+    "rightCardPrimary": {
+      "default": "TESTOS PAGOS"
+    },
+    "rightCardSecondary": {
+      "default": "TESTOS PAGOS"
+    }
+  }
 }

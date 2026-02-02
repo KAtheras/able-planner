@@ -14,16 +14,26 @@ const formatCurrency = (value: number) =>
     maximumFractionDigits: 2,
   });
 
-type Props = {
-  rows: YearRow[];
-  taxableRows?: TaxableYearRow[];
+const formatCurrencyDisplay = (value: number) => {
+  if (value === 0) {
+    return "-";
+  }
+  if (value < 0) {
+    return `(${formatCurrency(Math.abs(value))})`;
+  }
+  return formatCurrency(value);
 };
 
 type ViewMode = "able" | "taxable";
 
-export default function AmortizationScheduleTable({ rows, taxableRows = [] }: Props) {
+type Props = {
+  rows: YearRow[];
+  taxableRows?: TaxableYearRow[];
+  view: ViewMode;
+};
+
+export default function AmortizationScheduleTable({ rows, taxableRows = [], view }: Props) {
   const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
-  const [viewMode, setViewMode] = useState<ViewMode>("able");
 
   const toggleYear = (year: number) => {
     setExpandedYears((prev) => {
@@ -39,107 +49,92 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [] }: Pr
 
   return (
     <div className="overflow-x-auto rounded-3xl border border-sky-200 bg-white">
-      <div className="flex flex-wrap items-center gap-2 border-b border-sky-200 bg-slate-50 px-4 py-3">
-        <button
-          type="button"
-          className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide transition ${
-            viewMode === "able"
-              ? "bg-sky-800 text-white"
-              : "border border-slate-200 text-slate-600 hover:border-slate-400"
-          }`}
-          onClick={() => setViewMode("able")}
-        >
-          ABLE
-        </button>
-        <button
-          type="button"
-          className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide transition ${
-            viewMode === "taxable"
-              ? "bg-sky-800 text-white"
-              : "border border-slate-200 text-slate-600 hover:border-slate-400"
-          }`}
-          onClick={() => setViewMode("taxable")}
-        >
-          Taxable
-        </button>
-      </div>
-      {viewMode === "able" ? (
+      {view === "able" ? (
         <table className="min-w-full border-collapse text-left text-[13px]">
           <thead className="bg-slate-100 text-[10px] uppercase tracking-widest text-sky-700">
             <tr>
-              <th className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap">Month</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">Contributions</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">Monthly Withdrawals</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">Earnings</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">Balance</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">Federal Savers Credit</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">State Tax Deduction / Credit</th>
+              <th className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap text-center">MONTH/YEAR</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">CONTRIBUTIONS</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">WITHDRAWALS</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">INVESTMENT RETURNS</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">ACCOUNT BALANCE</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">FEDERAL SAVERS CREDIT</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">STATE TAX BENEFIT</th>
             </tr>
           </thead>
           <tbody className="text-[13px] text-slate-700">
             {rows.map((yearRow) => {
               const isExpanded = expandedYears.has(yearRow.year);
-              return (
-                <Fragment key={yearRow.year}>
-                  <tr
-                    className="cursor-pointer bg-sky-50 text-sm text-slate-800 transition hover:bg-sky-100"
-                    onClick={() => toggleYear(yearRow.year)}
-                    role="button"
-                    aria-expanded={isExpanded}
-                  >
-                    <td className="border-b border-sky-200 px-3 py-3 font-bold whitespace-nowrap">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-semibold text-slate-800">
-                          {`${yearRow.yearLabel} ${isExpanded ? "–" : "+"}`}
-                        </span>
-                      </div>
+              const yearSummary = (
+                <tr
+                  className="cursor-pointer bg-sky-50 text-sm text-slate-800 transition hover:bg-sky-100"
+                  onClick={() => toggleYear(yearRow.year)}
+                  role="button"
+                  aria-expanded={isExpanded}
+                >
+                  <td className="border-b border-sky-200 px-3 py-3 font-bold whitespace-nowrap">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-slate-800">
+                        {`${yearRow.yearLabel} ${isExpanded ? "–" : "+"}`}
+                      </span>
+                    </div>
+                  </td>
+                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
+                      {formatCurrencyDisplay(yearRow.contribution)}
                     </td>
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
-                      {formatCurrency(yearRow.contribution)}
+                      {formatCurrencyDisplay(yearRow.withdrawal)}
                     </td>
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
-                      {formatCurrency(yearRow.withdrawal)}
-                    </td>
-                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
-                      {formatCurrency(yearRow.earnings)}
+                      {formatCurrencyDisplay(yearRow.earnings)}
                     </td>
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-50">
-                      {formatCurrency(yearRow.endingBalance)}
+                      {formatCurrencyDisplay(yearRow.endingBalance)}
                     </td>
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
-                      {formatCurrency(yearRow.saversCredit)}
+                      {formatCurrencyDisplay(yearRow.saversCredit)}
                     </td>
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
-                      {formatCurrency(yearRow.stateBenefit)}
+                      {formatCurrencyDisplay(yearRow.stateBenefit)}
                     </td>
-                  </tr>
-                  {isExpanded &&
-                    yearRow.months.map((monthRow) => (
-                      <tr
-                        key={`${yearRow.year}-${monthRow.monthIndex}`}
-                        className="bg-white text-[13px] text-slate-600"
-                      >
-                        <td className="border-b border-sky-100 px-3 py-2 pl-8 whitespace-nowrap">{monthRow.monthLabel}</td>
+                </tr>
+              );
+
+              return (
+                <Fragment key={yearRow.year}>
+                  {isExpanded ? (
+                    <>
+                      {yearRow.months.map((monthRow) => (
+                        <tr
+                          key={`${yearRow.year}-${monthRow.monthIndex}`}
+                          className="bg-white text-[13px] text-slate-600"
+                        >
+                          <td className="border-b border-sky-100 px-3 py-2 pl-8 whitespace-nowrap">{monthRow.monthLabel}</td>
                         <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(monthRow.contribution)}
+                          {formatCurrencyDisplay(monthRow.contribution)}
                         </td>
                         <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(monthRow.withdrawal)}
+                          {formatCurrencyDisplay(monthRow.withdrawal)}
                         </td>
                         <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(monthRow.earnings)}
+                          {formatCurrencyDisplay(monthRow.earnings)}
                         </td>
                         <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(monthRow.endingBalance)}
+                          {formatCurrencyDisplay(monthRow.endingBalance)}
                         </td>
                         <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(monthRow.saversCredit)}
+                          {formatCurrencyDisplay(monthRow.saversCredit)}
                         </td>
                         <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(monthRow.stateBenefit)}
+                          {formatCurrencyDisplay(monthRow.stateBenefit)}
                         </td>
-                      </tr>
-                    ))}
+                        </tr>
+                      ))}
+                      {yearSummary}
+                    </>
+                  ) : (
+                    yearSummary
+                  )}
                 </Fragment>
               );
             })}
@@ -149,79 +144,88 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [] }: Pr
         <table className="min-w-full border-collapse text-left text-[13px]">
           <thead className="bg-slate-100 text-[10px] uppercase tracking-widest text-sky-700">
             <tr>
-              <th className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap">Month</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">Contributions</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">Monthly Withdrawals</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">Investment Return</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">(-) Federal Tax on Earnings</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">(-) State Tax on Earnings</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-right">Balance</th>
+              <th className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap text-center">MONTH/YEAR</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">CONTRIBUTIONS</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">WITHDRAWALS</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">INVESTMENT RETURNS</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">FEDERAL TAXES</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">STATE TAXES</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">ACCOUNT BALANCE</th>
             </tr>
           </thead>
           <tbody className="text-[13px] text-slate-700">
             {taxableRows.map((yearRow) => {
               const isExpanded = expandedYears.has(yearRow.year);
+              const yearSummary = (
+                <tr
+                  className="cursor-pointer bg-sky-50 text-sm text-slate-800 transition hover:bg-sky-100"
+                  onClick={() => toggleYear(yearRow.year)}
+                  role="button"
+                  aria-expanded={isExpanded}
+                >
+                  <td className="border-b border-sky-200 px-3 py-3 font-bold whitespace-nowrap">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-slate-800">
+                        {`${yearRow.year} ${isExpanded ? "–" : "+"}`}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
+                    {formatCurrencyDisplay(yearRow.contribution)}
+                  </td>
+                  <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
+                    {formatCurrencyDisplay(yearRow.withdrawal)}
+                  </td>
+                  <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
+                    {formatCurrencyDisplay(yearRow.investmentReturn)}
+                  </td>
+                  <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
+                    {formatCurrencyDisplay(-yearRow.federalTaxOnEarnings)}
+                  </td>
+                  <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
+                    {formatCurrencyDisplay(-yearRow.stateTaxOnEarnings)}
+                  </td>
+                  <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-50">
+                    {formatCurrencyDisplay(yearRow.endingBalance)}
+                  </td>
+                </tr>
+              );
+
               return (
                 <Fragment key={`taxable-${yearRow.year}`}>
-                  <tr
-                    className="cursor-pointer bg-sky-50 text-sm text-slate-800 transition hover:bg-sky-100"
-                    onClick={() => toggleYear(yearRow.year)}
-                    role="button"
-                    aria-expanded={isExpanded}
-                  >
-                    <td className="border-b border-sky-200 px-3 py-3 font-bold whitespace-nowrap">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-semibold text-slate-800">
-                          {`Year ${yearRow.year} ${isExpanded ? "–" : "+"}`}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
-                      {formatCurrency(yearRow.contribution)}
-                    </td>
-                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
-                      {formatCurrency(yearRow.withdrawal)}
-                    </td>
-                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
-                      {formatCurrency(yearRow.investmentReturn)}
-                    </td>
-                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
-                      {formatCurrency(-yearRow.federalTaxOnEarnings)}
-                    </td>
-                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
-                      {formatCurrency(-yearRow.stateTaxOnEarnings)}
-                    </td>
-                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-50">
-                      {formatCurrency(yearRow.endingBalance)}
-                    </td>
-                  </tr>
-                  {isExpanded &&
-                    yearRow.months.map((monthRow) => (
-                      <tr
-                        key={`taxable-${yearRow.year}-${monthRow.monthIndex}`}
-                        className="bg-white text-[13px] text-slate-600"
-                      >
-                        <td className="border-b border-sky-100 px-3 py-2 pl-8 whitespace-nowrap">{monthRow.monthLabel}</td>
-                        <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(monthRow.contribution)}
-                        </td>
-                        <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(monthRow.withdrawal)}
-                        </td>
-                        <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(monthRow.investmentReturn)}
-                        </td>
-                        <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(-monthRow.federalTaxOnEarnings)}
-                        </td>
-                        <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(-monthRow.stateTaxOnEarnings)}
-                        </td>
-                        <td className="border-b border-sky-100 px-3 py-2 text-right">
-                          {formatCurrency(monthRow.endingBalance)}
-                        </td>
-                      </tr>
-                    ))}
+                  {isExpanded ? (
+                    <>
+                      {yearRow.months.map((monthRow) => (
+                        <tr
+                          key={`taxable-${yearRow.year}-${monthRow.monthIndex}`}
+                          className="bg-white text-[13px] text-slate-600"
+                        >
+                          <td className="border-b border-sky-100 px-3 py-2 pl-8 whitespace-nowrap">{monthRow.monthLabel}</td>
+                          <td className="border-b border-sky-100 px-3 py-2 text-right">
+                            {formatCurrencyDisplay(monthRow.contribution)}
+                          </td>
+                          <td className="border-b border-sky-100 px-3 py-2 text-right">
+                            {formatCurrencyDisplay(monthRow.withdrawal)}
+                          </td>
+                          <td className="border-b border-sky-100 px-3 py-2 text-right">
+                            {formatCurrencyDisplay(monthRow.investmentReturn)}
+                          </td>
+                            <td className="border-b border-sky-100 px-3 py-2 text-right">
+                              {formatCurrencyDisplay(-monthRow.federalTaxOnEarnings)}
+                            </td>
+                            <td className="border-b border-sky-100 px-3 py-2 text-right">
+                              {formatCurrencyDisplay(-monthRow.stateTaxOnEarnings)}
+                            </td>
+                          <td className="border-b border-sky-100 px-3 py-2 text-right">
+                            {formatCurrencyDisplay(monthRow.endingBalance)}
+                          </td>
+                        </tr>
+                      ))}
+                      {yearSummary}
+                    </>
+                  ) : (
+                    yearSummary
+                  )}
                 </Fragment>
               );
             })}

@@ -5,6 +5,21 @@ type Option = {
   label: string;
 };
 
+type AccountActivityCopy = {
+  title?: string;
+  labels?: {
+    inputs?: {
+      accountActivityTitle?: string;
+      timeHorizonYearsFallback?: string;
+      startingBalanceLabel?: string;
+      monthlyContributionLabel?: string;
+      monthlyWithdrawalLabel?: string;
+      monthPlaceholder?: string;
+      yearPlaceholder?: string;
+    };
+  };
+};
+
 type AccountActivityFormProps = {
   timeHorizonYears?: string;
   startingBalance?: string;
@@ -26,6 +41,7 @@ type AccountActivityFormProps = {
   contributionIncreaseDisabled?: boolean;
   contributionIncreaseHelperText?: string;
   contributionIncreaseStopYear?: number | null;
+  copy?: AccountActivityCopy;
 };
 
 const sanitizePercentageInput = (value: string) => {
@@ -66,6 +82,7 @@ export default function AccountActivityForm({
   onAdvancedClick,
   onTimeHorizonBlur,
   timeHorizonLabel,
+  copy,
 }: AccountActivityFormProps) {
   const contributionIncreaseHelperId = contributionIncreaseHelperText
     ? "activity-contribution-increase-helper"
@@ -78,7 +95,9 @@ export default function AccountActivityForm({
       className="space-y-6"
       data-contribution-stop-year={stopYearAttr}
     >
-      <h1 className="text-2xl font-semibold">Account Activity</h1>
+      <h1 className="text-2xl font-semibold">
+        {copy?.title ?? copy?.labels?.inputs?.accountActivityTitle ?? "Account Activity"}
+      </h1>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
@@ -86,7 +105,9 @@ export default function AccountActivityForm({
             htmlFor="activity-horizon"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            {timeHorizonLabel ?? "Time Horizon (years)"}
+            {timeHorizonLabel ??
+              copy?.labels?.inputs?.timeHorizonYearsFallback ??
+              "Time Horizon (years)"}
           </label>
           <input
             id="activity-horizon"
@@ -102,9 +123,9 @@ export default function AccountActivityForm({
         <div>
           <label
             htmlFor="activity-starting-balance"
-            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+            class="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            Starting Balance
+            {copy?.labels?.inputs?.startingBalanceLabel ?? "Starting Balance"}
           </label>
           <input
             id="activity-starting-balance"
@@ -122,7 +143,7 @@ export default function AccountActivityForm({
             htmlFor="activity-monthly-contribution"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            Monthly Contribution
+            {copy?.labels?.inputs?.monthlyContributionLabel ?? "Monthly Contribution"}
           </label>
           <input
             id="activity-monthly-contribution"
@@ -140,7 +161,7 @@ export default function AccountActivityForm({
             htmlFor="activity-monthly-withdrawal"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            Monthly Withdrawal
+            {copy?.labels?.inputs?.monthlyWithdrawalLabel ?? "Monthly Withdrawal"}
           </label>
           <input
             id="activity-monthly-withdrawal"
@@ -167,7 +188,9 @@ export default function AccountActivityForm({
               onChange={(e) => onChange?.({ contributionEndMonth: e.target.value })}
               className="flex-1 bg-transparent focus:outline-none"
             >
-              <option value="">Month</option>
+              <option value="">
+                {copy?.labels?.inputs?.monthPlaceholder ?? "Month"}
+              </option>
               {monthOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -183,7 +206,9 @@ export default function AccountActivityForm({
               onChange={(e) => onChange?.({ contributionEndYear: e.target.value })}
               className="flex-1 bg-transparent focus:outline-none"
             >
-              <option value="">Year</option>
+              <option value="">
+                {copy?.labels?.inputs?.yearPlaceholder ?? "Year"}
+              </option>
               {contributionYearOptions.map((year) => (
                 <option key={year} value={year}>
                   {year}
@@ -207,7 +232,9 @@ export default function AccountActivityForm({
               onChange={(e) => onChange?.({ withdrawalStartMonth: e.target.value })}
               className="flex-1 bg-transparent focus:outline-none"
             >
-              <option value="">Month</option>
+              <option value="">
+                {copy?.labels?.inputs?.monthPlaceholder ?? "Month"}
+              </option>
               {monthOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -223,7 +250,9 @@ export default function AccountActivityForm({
               onChange={(e) => onChange?.({ withdrawalStartYear: e.target.value })}
               className="flex-1 bg-transparent focus:outline-none"
             >
-              <option value="">Year</option>
+              <option value="">
+                {copy?.labels?.inputs?.yearPlaceholder ?? "Year"}
+              </option>
               {withdrawalYearOptions.map((year) => (
                 <option key={year} value={year}>
                   {year}

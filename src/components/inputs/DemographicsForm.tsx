@@ -14,6 +14,7 @@ type DemographicsFormProps = {
   fscDisabled?: boolean;
   onChange?: (updates: Partial<DemographicsFormProps>) => void;
   onFscClick?: () => void;
+  copy?: any;
 };
 
 export default function DemographicsForm({
@@ -28,17 +29,20 @@ export default function DemographicsForm({
   fscDisabled = false,
   onChange,
   onFscClick,
+  copy,
 }: DemographicsFormProps) {
   const defaultButtonLabel =
     fscStatus === "idle"
-      ? "Check eligibility"
+      ? copy?.labels?.inputs?.checkEligibility ?? "Check eligibility"
       : fscStatus === "eligible"
       ? "Eligible — Retest"
       : "Not eligible — Retest";
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">Demographic Information</h1>
+      <h1 className="text-2xl font-semibold">
+        {copy?.labels?.inputs?.demographicsTitle ?? "Demographic Information"}
+      </h1>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>
@@ -69,7 +73,9 @@ export default function DemographicsForm({
             onChange={(e) => onChange?.({ stateOfResidence: e.target.value })}
             className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
           >
-            <option value="">Select a state</option>
+            <option value="">
+              {copy?.labels?.inputs?.selectState ?? "Select a state"}
+            </option>
             {Object.entries(planLevelInfo).map(([code, info]) => (
               <option key={code} value={code}>
                 {info.name}
@@ -90,10 +96,18 @@ export default function DemographicsForm({
             onChange={(e) => onChange?.({ filingStatus: e.target.value })}
             className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
           >
-            <option value="single">Single</option>
-            <option value="married_joint">Married Filing Jointly</option>
-            <option value="married_separate">Married Filing Separately</option>
-            <option value="head_of_household">Head of Household</option>
+            <option value="single">
+              {copy?.labels?.inputs?.filing?.single ?? "Single"}
+            </option>
+            <option value="married_joint">
+              {copy?.labels?.inputs?.filing?.married_joint ?? "Married Filing Jointly"}
+            </option>
+            <option value="married_separate">
+              {copy?.labels?.inputs?.filing?.married_separate ?? "Married Filing Separately"}
+            </option>
+            <option value="head_of_household">
+              {copy?.labels?.inputs?.filing?.head_of_household ?? "Head of Household"}
+            </option>
           </select>
         </div>
         <div>

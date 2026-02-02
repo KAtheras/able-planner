@@ -1,5 +1,5 @@
 {
-  "meta": {
+  "metadata": {
     "language": "en",
     "direction": "ltr"
   },
@@ -9,12 +9,25 @@
   },
   "home": {
     "heading": "Welcome",
-    "intro":
-      "This is the clean foundation for the ABLE Planner. UI, copy, and logic will be layered in gradually.",
+    "intro": "This is the clean foundation for the ABLE Planner. UI, copy, and logic will be layered in gradually.",
     "languageLoaded": "Language loaded: {{lang}}"
   },
   "labels": {},
   "messages": {},
   "buttons": {},
-  "disclosures": {}
+  "disclosures": {},
+  "blocks": {
+    "landingWelcome": {
+      "default": "Welcome to ABLE Planner. Use the inputs to experiment with contributions, withdrawals, and tax planning."
+    },
+    "disclosuresAssumptions": {
+      "default": "Assumptions and disclosures will appear here."
+    },
+    "rightCardPrimary": {
+      "default": ""
+    },
+    "rightCardSecondary": {
+      "default": ""
+    }
+  }
 }

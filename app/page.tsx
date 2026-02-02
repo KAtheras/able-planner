@@ -3,9 +3,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
-import SettingsMenu from "@/components/layout/SettingsMenu";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
+import { getClientBlockText } from "@/lib/copy/clientBlocks";
 import { getClientConfig } from "@/config/clients";
 import AccountActivityForm from "@/components/inputs/AccountActivityForm";
 import AmortizationScheduleTable from "@/components/schedule/AmortizationScheduleTable";
@@ -158,8 +158,11 @@ export default function Home() {
   const [annualReturnEdited, setAnnualReturnEdited] = useState(false);
   const [annualReturnWarning, setAnnualReturnWarning] = useState<string | null>(null);
   const [timeHorizonYears, setTimeHorizonYears] = useState("");
-  const [screen1Messages, setScreen1Messages] = useState<string[]>(() => [...INITIAL_MESSAGES]);
-  const [screen2Messages, setScreen2Messages] = useState<string[]>(() => [...SCREEN2_DEFAULT_MESSAGES]);
+  const copy = getCopy(language);
+  const screen1DefaultMessages = copy.flows?.screen1?.defaultMessages ?? INITIAL_MESSAGES;
+  const screen2DefaultMessages = copy.flows?.screen2?.defaultMessages ?? SCREEN2_DEFAULT_MESSAGES;
+  const [screen1Messages, setScreen1Messages] = useState<string[]>(() => [...screen1DefaultMessages]);
+  const [screen2Messages, setScreen2Messages] = useState<string[]>(() => [...screen2DefaultMessages]);
   const [nonResidentProceedAck, setNonResidentProceedAck] = useState(false);
   const [isSsiEligible, setIsSsiEligible] = useState(false);
   const [startingBalance, setStartingBalance] = useState("");
@@ -193,11 +196,70 @@ export default function Home() {
   const [messagesMode, setMessagesMode] = useState<"intro" | "fsc">("intro");
   const [agiGateEligible, setAgiGateEligible] = useState<boolean | null>(null);
   const [showWelcome, setShowWelcome] = useState(true);
-  const copy = getCopy(language);
+  const [amortizationView, setAmortizationView] = useState<"able" | "taxable">("able");
   const currentClientConfig = getClientConfig(plannerStateCode);
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
   const planState = planStateOverride ?? planStateFallback ?? "UT";
+  const blockCopies = {
+    landingWelcome: getClientBlockText({
+      slot: "landingWelcome",
+      copy,
+      clientConfig: currentClientConfig,
+      planState,
+    }),
+    disclosuresAssumptions: getClientBlockText({
+      slot: "disclosuresAssumptions",
+      copy,
+      clientConfig: currentClientConfig,
+      planState,
+    }),
+    rightCardPrimary: getClientBlockText({
+      slot: "rightCardPrimary",
+      copy,
+      clientConfig: currentClientConfig,
+      planState,
+    }),
+    rightCardSecondary: getClientBlockText({
+      slot: "rightCardSecondary",
+      copy,
+      clientConfig: currentClientConfig,
+      planState,
+    }),
+  };
+  const rightCardTextBlocks = [blockCopies.rightCardPrimary, blockCopies.rightCardSecondary].filter(
+    (text) => Boolean(text?.trim()),
+  );
+  const languageToggle = (
+    <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-black">
+      <button
+        type="button"
+        aria-pressed={language === "en"}
+        className={[
+          "rounded-full px-3 py-1 text-xs font-semibold",
+          language === "en"
+            ? "bg-[var(--brand-primary)] text-white"
+            : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
+        ].join(" ")}
+        onClick={() => setLanguage("en")}
+      >
+        EN
+      </button>
+      <button
+        type="button"
+        aria-pressed={language === "es"}
+        className={[
+          "rounded-full px-3 py-1 text-xs font-semibold",
+          language === "es"
+            ? "bg-[var(--brand-primary)] text-white"
+            : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
+        ].join(" ")}
+        onClick={() => setLanguage("es")}
+      >
+        ES
+      </button>
+    </div>
+  );
   const planInfoEntry = (planLevelInfo as Record<string, { name?: string; residencyRequired?: boolean } & { maxAccountBalance?: number }>)[planState];
   const planName = planInfoEntry?.name ?? planState;
   const planLabel = `${planName} Able`;
@@ -321,6 +383,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       setLanguage(storedLanguage);
     }
   }, []);
+
+  useEffect(() => {
+    if (messagesMode !== "intro") {
+      return;
+    }
+    setScreen1Messages([...screen1DefaultMessages]);
+    setScreen2Messages([...screen2DefaultMessages]);
+  }, [language, messagesMode, screen1DefaultMessages, screen2DefaultMessages]);
 
   useEffect(() => {
     setShowWelcome(sessionStorage.getItem(WELCOME_KEY) !== "true");
@@ -625,14 +695,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setFscQ({ ...EMPTY_FSC });
     setMessagesMode("intro");
     setAgiGateEligible(null);
-    setScreen1Messages([...INITIAL_MESSAGES]);
+    setScreen1Messages([...screen1DefaultMessages]);
     setContributionIncreasePct("");
     setWithdrawalIncreasePct("");
     setContributionIncreaseHelperText(undefined);
     setContributionBreachYear(null);
     setStopContributionIncreasesAfterYear(null);
     setWtaAutoPromptedForIncrease(false);
-    setScreen2Messages([...SCREEN2_DEFAULT_MESSAGES]);
+    setScreen2Messages([...screen2DefaultMessages]);
     setTimeHorizonYears("");
     setContributionEndTouched(false);
     setWithdrawalStartTouched(false);
@@ -1241,25 +1311,38 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  className="rounded-full bg-[var(--brand-primary)] px-4 py-1 text-xs font-semibold text-[var(--brand-on-primary)] shadow-sm"
+                  aria-pressed={amortizationView === "able"}
+                  className={[
+                    "rounded-full px-4 py-1 text-xs font-semibold transition",
+                    amortizationView === "able"
+                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                      : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400",
+                  ].join(" ")}
+                  onClick={() => setAmortizationView("able")}
                 >
                   ABLE Account
                 </button>
                 <button
                   type="button"
-                  aria-disabled="true"
-                  disabled
-                  className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white/50 px-4 py-1 text-xs font-semibold text-zinc-500 opacity-50 cursor-not-allowed pointer-events-none"
+                  aria-pressed={amortizationView === "taxable"}
+                  className={[
+                    "flex items-center gap-2 rounded-full px-4 py-1 text-xs font-semibold transition",
+                    amortizationView === "taxable"
+                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                      : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400",
+                  ].join(" ")}
+                  onClick={() => setAmortizationView("taxable")}
                 >
                   <span>Taxable Account</span>
-                  <span className="text-[10px] font-normal uppercase tracking-wide text-zinc-400">
-                    Coming soon
-                  </span>
                 </button>
               </div>
             </div>
               <div className="mt-4">
-                <AmortizationScheduleTable rows={scheduleRowsWithBenefits} taxableRows={taxableRows} />
+                <AmortizationScheduleTable
+                  rows={scheduleRowsWithBenefits}
+                  taxableRows={taxableRows}
+                  view={amortizationView}
+                />
               </div>
           </div>
         </div>
@@ -1326,34 +1409,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             >
               Refresh
             </button>
-            <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-black">
-              <button
-                type="button"
-                aria-pressed={language === "en"}
-                className={[
-                  "rounded-full px-3 py-1 text-xs font-semibold",
-                  language === "en"
-                    ? "bg-[var(--brand-primary)] text-white"
-                    : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
-                ].join(" ")}
-                onClick={() => setLanguage("en")}
-              >
-                EN
-              </button>
-              <button
-                type="button"
-                aria-pressed={language === "es"}
-                className={[
-                  "rounded-full px-3 py-1 text-xs font-semibold",
-                  language === "es"
-                    ? "bg-[var(--brand-primary)] text-white"
-                    : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
-                ].join(" ")}
-                onClick={() => setLanguage("es")}
-              >
-                ES
-              </button>
-            </div>
+            {languageToggle}
           </div>
         </div>
         <div className="grid grid-cols-1 gap-6 items-stretch md:grid-cols-2">
@@ -1369,6 +1425,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 fscStatus={fscStatus}
                 fscButtonLabel={getFscButtonLabel()}
                 fscDisabled={agiGateEligible !== true}
+                copy={copy?.ui?.inputs?.demographics}
                 onChange={(updates) => {
                   if ("beneficiaryName" in updates) setBeneficiaryName(updates.beneficiaryName ?? "");
                   if ("stateOfResidence" in updates)
@@ -1479,7 +1536,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 /* placeholder */
               }}
               onTimeHorizonBlur={enforceTimeHorizonLimits}
-              timeHorizonLabel={`Time Horizon (MAX ${horizonLimits.maxYears} YEARS)`}
+              timeHorizonLabel={
+                language === "es"
+                  ? `Horizonte temporal (MÁX ${horizonLimits.maxYears} AÑOS)`
+                  : `Time Horizon (MAX ${horizonLimits.maxYears} YEARS)`
+              }
+              copy={{
+                title: copy?.ui?.inputs?.accountActivity?.title,
+              }}
             />
             )}
           </div>
@@ -1595,22 +1659,26 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               </span>
             </div>
           }
-          settingsSlot={<SettingsMenu language={language} setLanguage={setLanguage} />}
         />
 
         <main className="mx-auto flex h-[calc(100vh-6rem)] w-full max-w-6xl items-center justify-center px-4">
-          <div className="text-center">
-            <h1 className="text-3xl font-semibold">Welcome to ABLE Planner</h1>
+        <div className="text-center">
+          <h1 className="text-3xl font-semibold">Welcome to ABLE Planner</h1>
+          {languageToggle}
 
-            <p className="mt-4 max-w-xl text-sm text-zinc-600 dark:text-zinc-400">
-              Please review the disclaimer before entering the planner. This tool
-              is for planning purposes only and is not investment, tax, or legal
-              advice.
-            </p>
+          <p className="mt-4 max-w-xl text-sm text-zinc-600 dark:text-zinc-400">
+            {blockCopies.landingWelcome}
+          </p>
+          <p className="mt-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+            DISCLOSURES/ASSUMPTIONS (TEST)
+          </p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            {blockCopies.disclosuresAssumptions}
+          </p>
 
-            <button
-              type="button"
-              onClick={handleWelcomeContinue}
+          <button
+            type="button"
+            onClick={handleWelcomeContinue}
               className="mt-6 rounded-full bg-[var(--brand-primary)] px-6 py-2 text-xs font-semibold text-white"
             >
               I Understand — Continue
@@ -1629,12 +1697,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         rightSlot={
           <div className="flex items-center gap-2">
             {planSelector}
-            <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-800 dark:border-zinc-800 dark:bg-black dark:text-zinc-200">
-              {active.toUpperCase()}
-            </span>
           </div>
         }
-        settingsSlot={<SettingsMenu language={language} setLanguage={setLanguage} />}
       />
       <div className="mx-auto flex w-full max-w-6xl">
         <Sidebar active={active} onChange={setActive} />
