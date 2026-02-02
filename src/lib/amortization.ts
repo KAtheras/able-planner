@@ -28,6 +28,28 @@ export type YearRow = {
   months: MonthlyRow[];
 };
 
+export type TaxableMonthRow = {
+  monthIndex: number;
+  monthLabel: string;
+  contribution: number;
+  withdrawal: number;
+  investmentReturn: number;
+  federalTaxOnEarnings: number;
+  stateTaxOnEarnings: number;
+  endingBalance: number;
+};
+
+export type TaxableYearRow = {
+  year: number;
+  months: TaxableMonthRow[];
+  contribution: number;
+  withdrawal: number;
+  investmentReturn: number;
+  federalTaxOnEarnings: number;
+  stateTaxOnEarnings: number;
+  endingBalance: number;
+};
+
 export type AmortizationInputs = {
   startMonthIndex: number;
   totalMonths: number;
@@ -178,8 +200,9 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
 
     let contributionValue = contributionActive ? currentContribution : 0;
     let withdrawalValue = withdrawalActive ? currentWithdrawal : 0;
-    const earnings = currentBalance * monthlyRate;
-    let endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
+    let balanceAfterCashflow = currentBalance + contributionValue - withdrawalValue;
+    let earnings = balanceAfterCashflow * monthlyRate;
+    let endingBalance = balanceAfterCashflow + earnings;
 
     const monthSsiCodes: string[] = [];
     const monthPlanCodes: string[] = [];
@@ -203,6 +226,10 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
       contributionValue = 0;
       endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
     }
+
+    balanceAfterCashflow = currentBalance + contributionValue - withdrawalValue;
+    earnings = balanceAfterCashflow * monthlyRate;
+    endingBalance = balanceAfterCashflow + earnings;
 
     const projectedBase = currentBalance + earnings + contributionValue - withdrawalValue;
     if (inputs.isSsiEligible && projectedBase > SSI_LIMIT) {
@@ -283,4 +310,87 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
   }
 
   return rows;
+}
+
+export function buildTaxableInvestmentScheduleFromAbleSchedule({
+  ableRows,
+  annualReturnDecimal,
+  federalTaxRateDecimal,
+  stateTaxRateDecimal,
+  startingBalance,
+}: {
+  ableRows: YearRow[];
+  annualReturnDecimal: number;
+  federalTaxRateDecimal: number;
+  stateTaxRateDecimal: number;
+  startingBalance: number;
+}): TaxableYearRow[] {
+  const monthlyReturnDecimal = Math.pow(1 + annualReturnDecimal, 1 / 12) - 1;
+  let prevBalance = Math.max(0, startingBalance);
+  const taxableYears: TaxableYearRow[] = [];
+
+  for (const ableYear of ableRows) {
+    let yearContribution = 0;
+    let yearWithdrawal = 0;
+    let yearEarnings = 0;
+    let yearInvestmentReturn = 0;
+    let yearFederalTax = 0;
+    let yearStateTax = 0;
+    let yearEndingBalance = prevBalance;
+    const taxableMonths: TaxableMonthRow[] = [];
+
+    for (const ableMonth of ableYear.months) {
+      const contribution = Math.max(0, ableMonth.contribution);
+      const withdrawal = Math.max(0, ableMonth.withdrawal);
+      const balanceBeforeEarnings = prevBalance + contribution;
+      const earnings = balanceBeforeEarnings * monthlyReturnDecimal;
+     yearContribution += contribution;
+     yearWithdrawal += withdrawal;
+     yearInvestmentReturn += earnings;
+     yearEarnings += earnings;
+
+      const normalizedLabel = ableMonth.monthLabel.replace(/^[-–—]+\s*/, "");
+      const isDecember = normalizedLabel.startsWith("Dec ");
+      let federalTaxOnEarnings = 0;
+      let stateTaxOnEarnings = 0;
+      let monthEndingBalance = balanceBeforeEarnings + earnings - withdrawal;
+      if (isDecember) {
+        const taxableEarnings = Math.max(0, yearEarnings);
+        federalTaxOnEarnings = taxableEarnings * federalTaxRateDecimal;
+        stateTaxOnEarnings = taxableEarnings * stateTaxRateDecimal;
+        monthEndingBalance = balanceBeforeEarnings + earnings - withdrawal - federalTaxOnEarnings - stateTaxOnEarnings;
+        yearFederalTax = federalTaxOnEarnings;
+        yearStateTax = stateTaxOnEarnings;
+        yearEarnings = 0;
+      }
+
+      const taxableMonth: TaxableMonthRow = {
+        monthIndex: ableMonth.monthIndex,
+        monthLabel: ableMonth.monthLabel,
+        contribution,
+        withdrawal,
+        investmentReturn: earnings,
+        federalTaxOnEarnings,
+        stateTaxOnEarnings,
+        endingBalance: monthEndingBalance,
+      };
+
+      taxableMonths.push(taxableMonth);
+      prevBalance = monthEndingBalance;
+      yearEndingBalance = monthEndingBalance;
+    }
+
+    taxableYears.push({
+      year: ableYear.year,
+      months: taxableMonths,
+      contribution: yearContribution,
+      withdrawal: yearWithdrawal,
+      investmentReturn: yearInvestmentReturn,
+      federalTaxOnEarnings: yearFederalTax,
+      stateTaxOnEarnings: yearStateTax,
+      endingBalance: yearEndingBalance,
+    });
+  }
+
+  return taxableYears;
 }

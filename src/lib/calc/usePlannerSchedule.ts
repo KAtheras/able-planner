@@ -2,11 +2,13 @@ import { useMemo } from "react";
 
 import {
   buildAmortizationSchedule,
+  buildTaxableInvestmentScheduleFromAbleSchedule,
   extractSsiMessages,
   extractPlanMessages,
   type YearRow,
-  type SsiMessage,
   type PlanMessage,
+  type SsiMessage,
+  type TaxableYearRow,
 } from "@/lib/amortization";
 
 export type UsePlannerScheduleArgs = {
@@ -30,6 +32,7 @@ export type PlannerScheduleResult = {
   scheduleRows: YearRow[];
   ssiMessages: SsiMessage[];
   planMessages: PlanMessage[];
+  taxableRows: TaxableYearRow[];
 };
 
 export function usePlannerSchedule({
@@ -50,7 +53,7 @@ export function usePlannerSchedule({
 }: UsePlannerScheduleArgs): PlannerScheduleResult {
   return useMemo(() => {
     if (!enabled) {
-      return { scheduleRows: [], ssiMessages: [], planMessages: [] };
+      return { scheduleRows: [], ssiMessages: [], planMessages: [], taxableRows: [] };
     }
 
     const scheduleRows = buildAmortizationSchedule({
@@ -69,10 +72,21 @@ export function usePlannerSchedule({
       planMaxBalance,
     });
 
+    // TODO: wire to user inputs / bracket logic
+    const FEDERAL_TAX_RATE_DECIMAL = 0.22;
+    const STATE_TAX_RATE_DECIMAL = 0.05;
+
     return {
       scheduleRows,
       ssiMessages: extractSsiMessages(scheduleRows),
       planMessages: extractPlanMessages(scheduleRows, planMaxBalance),
+      taxableRows: buildTaxableInvestmentScheduleFromAbleSchedule({
+        ableRows: scheduleRows,
+        annualReturnDecimal,
+        federalTaxRateDecimal: FEDERAL_TAX_RATE_DECIMAL,
+        stateTaxRateDecimal: STATE_TAX_RATE_DECIMAL,
+        startingBalance,
+      }),
     };
   }, [
     startMonthIndex,
