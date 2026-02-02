@@ -8,7 +8,58 @@
     "intro": "Esta es la base limpia para el Planificador ABLE. La interfaz, el texto y la lógica se incorporarán gradualmente.",
     "languageLoaded": "Idioma cargado: {{lang}}"
   },
-  "labels": {},
+  "labels": {
+    "inputs": {
+      "demographicsTitle": "INFORMACIÓN DEMOGRÁFICA",
+      "checkEligibility": "Verificar elegibilidad",
+      "selectState": "Seleccione un estado",
+      "filing": {
+        "single": "Soltero",
+        "married_joint": "Casado presentando en conjunto",
+        "married_separate": "Casado declarando por separado",
+        "head_of_household": "Cabeza de familia"
+      },
+      "nameLabel": "Nombre del beneficiario",
+      "stateOfResidenceLabel": "Estado de residencia",
+      "filingStatusLabel": "Estado civil para impuestos",
+      "agiLabel": "Ingreso bruto ajustado (AGI)",
+      "accountActivityTitle": "Actividad de la cuenta",
+      "timeHorizonYearsFallback": "Horizonte de tiempo (años)",
+      "monthPlaceholder": "Mes",
+      "yearPlaceholder": "Año",
+      "startingBalanceLabel": "Saldo inicial",
+      "monthlyContributionLabel": "Contribución mensual",
+      "monthlyWithdrawalLabel": "Retiro mensual",
+      "annualReturnLabel": "Suposición de rendimiento anual de la inversión (%)",
+      "ssiEligibilityLabel": "El beneficiario es elegible para SSI",
+      "fscHeading": "Elegibilidad para el Crédito Federal del Ahorrista",
+      "fscEligibleLabel": "Elegible para evaluar",
+      "ssiEligibleLabel": "El beneficiario es elegible para SSI",
+      "fscEligibilityTitle": "Elegibilidad para el Crédito del Ahorrador Federal",
+      "eligibleToEvaluate": "Elegible para evaluar",
+      "fscIntro": "Responda estas preguntas para estimar su elegibilidad.",
+      "fscTaxLiability": "¿Tiene obligación de pagar impuestos federales sobre la renta?",
+      "fscAge18": "¿Tiene 18 años o más?",
+      "contributionEndLabel": "Fin de contribución",
+      "withdrawalStartLabel": "Inicio del retiro",
+      "contributionIncreaseLabel": "Aumento anual de contribución (%)",
+      "withdrawalIncreaseLabel": "Aumento anual de retiro (%)"
+    },
+    "fsc": {
+      "intro": "Responda estas preguntas para estimar la elegibilidad.",
+      "taxLiability": "¿Tiene obligación de pagar impuestos federales sobre la renta?",
+      "age18": "¿Tiene 18 años o más?",
+      "student": "¿Es estudiante de tiempo completo?",
+      "dependent": "¿Alguien puede declararle como dependiente?"
+    },
+    "nav": {
+      "inputs": "Entradas",
+      "growth": "Crecimiento de la cuenta",
+      "taxBenefits": "Beneficios fiscales",
+      "amortization": "Amortización",
+      "disclosures": "Divulgaciones"
+    }
+  },
   "messages": {},
   "buttons": {},
   "disclosures": {},
@@ -28,6 +79,24 @@
     },
     "rightCardSecondary": {
       "default": "TESTOS PAGOS"
+    }
+  },
+  "ui": {
+    "inputs": {
+      "demographics": {
+        "title": "INFORMACIÓN DEMOGRÁFICA"
+      },
+      "accountActivity": {
+        "title": "Actividad de la cuenta",
+        "startingBalanceLabel": "Saldo inicial"
+      }
+    },
+    "sidebar": {
+      "inputs": "Entradas",
+      "account_growth": "Crecimiento de la cuenta",
+      "tax_benefits": "Beneficios fiscales",
+      "schedule": "Amortización",
+      "disclosures": "Divulgaciones"
     }
   }
 }

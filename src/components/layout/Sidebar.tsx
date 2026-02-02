@@ -81,9 +81,10 @@ const ITEMS: NavItem[] = [
 type SidebarProps = {
   active: NavKey;
   onChange: (key: NavKey) => void;
+  labels?: Partial<Record<NavKey, string>>;
 };
 
-export default function Sidebar({ active, onChange }: SidebarProps) {
+export default function Sidebar({ active, onChange, labels }: SidebarProps) {
   return (
     <>
       {/* Desktop / wide: left sidebar */}
@@ -115,7 +116,7 @@ export default function Sidebar({ active, onChange }: SidebarProps) {
               >
                 {item.icon}
               </span>
-              <span className="tracking-wide">{item.label}</span>
+              <span className="tracking-wide">{labels?.[item.key] ?? item.label}</span>
             </button>
           );
         })}
@@ -144,7 +145,7 @@ export default function Sidebar({ active, onChange }: SidebarProps) {
               ].join(" ")}
               >
                 <span className="grid place-items-center">{item.icon}</span>
-                <span className="tracking-wide">{item.label}</span>
+                <span className="tracking-wide">{labels?.[item.key] ?? item.label}</span>
               </button>
             );
           })}

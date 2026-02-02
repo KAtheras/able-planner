@@ -12,7 +12,58 @@
     "intro": "This is the clean foundation for the ABLE Planner. UI, copy, and logic will be layered in gradually.",
     "languageLoaded": "Language loaded: {{lang}}"
   },
-  "labels": {},
+  "labels": {
+    "inputs": {
+      "demographicsTitle": "Demographic Information",
+      "checkEligibility": "Check eligibility",
+      "selectState": "Select a state",
+      "filing": {
+        "single": "Single",
+        "married_joint": "Married Filing Jointly",
+        "married_separate": "Married Filing Separately",
+        "head_of_household": "Head of Household"
+      },
+      "nameLabel": "Beneficiary Name",
+      "stateOfResidenceLabel": "State of residence",
+      "filingStatusLabel": "Filing status",
+      "agiLabel": "Adjusted Gross Income (AGI)",
+      "accountActivityTitle": "Account Activity",
+      "timeHorizonYearsFallback": "Time Horizon (years)",
+      "monthPlaceholder": "Month",
+      "yearPlaceholder": "Year",
+      "startingBalanceLabel": "Starting Balance",
+      "monthlyContributionLabel": "Monthly Contribution",
+      "monthlyWithdrawalLabel": "Monthly Withdrawal",
+      "annualReturnLabel": "Annual Investment Return Assumption (%)",
+      "ssiEligibilityLabel": "Beneficiary is eligible for SSI",
+      "fscHeading": "Federal Saver’s Credit Eligibility",
+      "fscEligibleLabel": "Eligible to evaluate",
+      "ssiEligibleLabel": "Beneficiary is eligible for SSI",
+      "fscEligibilityTitle": "Federal Saver’s Credit Eligibility",
+      "eligibleToEvaluate": "Eligible to Evaluate",
+      "fscIntro": "Answer these questions to estimate eligibility.",
+      "fscTaxLiability": "Do you have federal income tax liability?",
+      "fscAge18": "Are you age 18 or older?",
+      "contributionEndLabel": "Contribution End",
+      "withdrawalStartLabel": "Withdrawal Start",
+      "contributionIncreaseLabel": "Annual contribution increase (%)",
+      "withdrawalIncreaseLabel": "Annual withdrawal increase (%)"
+    },
+    "fsc": {
+      "intro": "Answer these questions to estimate eligibility.",
+      "taxLiability": "Do you have federal income tax liability?",
+      "age18": "Are you age 18 or older?",
+      "student": "Are you a full-time student?",
+      "dependent": "Can someone claim you as a dependent?"
+    },
+    "nav": {
+      "inputs": "Inputs",
+      "growth": "Account Growth",
+      "taxBenefits": "Tax Benefits",
+      "amortization": "Amortization",
+      "disclosures": "Disclosures"
+    }
+  },
   "messages": {},
   "buttons": {},
   "disclosures": {},
@@ -28,6 +79,24 @@
     },
     "rightCardSecondary": {
       "default": ""
+    }
+  },
+  "ui": {
+    "inputs": {
+      "demographics": {
+        "title": "Demographic Information"
+      },
+      "accountActivity": {
+        "title": "Account Activity",
+        "startingBalanceLabel": "Starting Balance"
+      }
+    },
+    "sidebar": {
+      "inputs": "Inputs",
+      "account_growth": "Account Growth",
+      "tax_benefits": "Tax Benefits",
+      "schedule": "Amortization",
+      "disclosures": "Disclosures"
     }
   }
 }

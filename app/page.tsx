@@ -735,20 +735,13 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       (inputStep === 2 && hasContributionIssue);
 
     const horizonLimits = getTimeHorizonLimits();
-    const monthOptions = [
-      { value: "1", label: "Jan" },
-      { value: "2", label: "Feb" },
-      { value: "3", label: "Mar" },
-      { value: "4", label: "Apr" },
-      { value: "5", label: "May" },
-      { value: "6", label: "Jun" },
-      { value: "7", label: "Jul" },
-      { value: "8", label: "Aug" },
-      { value: "9", label: "Sep" },
-      { value: "10", label: "Oct" },
-      { value: "11", label: "Nov" },
-      { value: "12", label: "Dec" },
-    ];
+    const monthOptions = Array.from({ length: 12 }, (_, i) => {
+  const date = new Date(2020, i, 1);
+  return {
+    value: String(i + 1).padStart(2, "0"),
+    label: new Intl.DateTimeFormat(language === "es" ? "es" : "en", { month: "long" }).format(date),
+  };
+});
     const enforceTimeHorizonLimits = () => {
       const { minYears, maxYears } = horizonLimits;
       if (timeHorizonYears === "") {
@@ -778,10 +771,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     };
 
     const questions: Array<{ key: keyof FscAnswers; label: string }> = [
-      { key: "hasTaxLiability", label: "Do you have federal income tax liability?" },
-      { key: "isOver18", label: "Are you age 18 or older?" },
-      { key: "isStudent", label: "Are you a full-time student?" },
-      { key: "isDependent", label: "Can someone claim you as a dependent?" },
+      { key: "hasTaxLiability", label: (copy.labels?.fsc?.taxLiability ?? "Do you have federal income tax liability?")},
+      { key: "isOver18", label: (copy.labels?.fsc?.age18 ?? "Are you age 18 or older?")},
+      { key: "isStudent", label: (copy.labels?.fsc?.student ?? "Are you a full-time student?")},
+      { key: "isDependent", label: (copy.labels?.fsc?.dependent ?? "Can someone claim you as a dependent?")},
     ];
 
     const allAnswered = Object.values(fscQ).every((value) => value !== null);
@@ -1425,7 +1418,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 fscStatus={fscStatus}
                 fscButtonLabel={getFscButtonLabel()}
                 fscDisabled={agiGateEligible !== true}
-                copy={copy?.ui?.inputs?.demographics}
+                copy={{
+                  title: copy.ui?.inputs?.demographics?.title,
+                  labels: copy.labels?.inputs,
+                }}
                 onChange={(updates) => {
                   if ("beneficiaryName" in updates) setBeneficiaryName(updates.beneficiaryName ?? "");
                   if ("stateOfResidence" in updates)
@@ -1543,6 +1539,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               }
               copy={{
                 title: copy?.ui?.inputs?.accountActivity?.title,
+                labels: copy.labels?.inputs,
               }}
             />
             )}
@@ -1562,11 +1559,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                     ) : showQuestionnaire ? (
                       <div className="space-y-4">
                         <div>
-                          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-                            Federal Saver’s Credit Eligibility
-                          </h2>
+                          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">{copy?.labels?.inputs?.fscEligibilityTitle ?? "Federal Saver’s Credit Eligibility"}</h2>
                           <p className="text-xs text-zinc-500">
-                            Answer these questions to estimate eligibility.
+                            {copy?.labels?.fscIntro ?? "Answer these questions to estimate eligibility."}
                           </p>
                         </div>
                         <div className="space-y-3">
@@ -1701,7 +1696,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         }
       />
       <div className="mx-auto flex w-full max-w-6xl">
-        <Sidebar active={active} onChange={setActive} />
+        <Sidebar active={active} onChange={setActive} labels={copy.ui?.sidebar} />
         <main className="w-full px-6 py-8">{content}</main>
       </div>
     </div>

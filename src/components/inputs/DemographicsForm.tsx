@@ -2,6 +2,21 @@
 
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 
+type DemographicsCopy = {
+  title?: string;
+  labels?: {
+    selectState?: string;
+    checkEligibility?: string;
+    filing?: {
+      single?: string;
+      married_joint?: string;
+      married_separate?: string;
+      head_of_household?: string;
+    };
+    demographicsTitle?: string;
+  };
+};
+
 type DemographicsFormProps = {
   beneficiaryName?: string;
   stateOfResidence?: string;
@@ -14,7 +29,7 @@ type DemographicsFormProps = {
   fscDisabled?: boolean;
   onChange?: (updates: Partial<DemographicsFormProps>) => void;
   onFscClick?: () => void;
-  copy?: any;
+  copy?: DemographicsCopy;
 };
 
 export default function DemographicsForm({
@@ -33,7 +48,7 @@ export default function DemographicsForm({
 }: DemographicsFormProps) {
   const defaultButtonLabel =
     fscStatus === "idle"
-      ? copy?.labels?.inputs?.checkEligibility ?? "Check eligibility"
+      ? copy?.labels?.checkEligibility ?? "Check eligibility"
       : fscStatus === "eligible"
       ? "Eligible — Retest"
       : "Not eligible — Retest";
@@ -41,7 +56,7 @@ export default function DemographicsForm({
   return (
     <section className="space-y-6">
       <h1 className="text-2xl font-semibold">
-        {copy?.labels?.inputs?.demographicsTitle ?? "Demographic Information"}
+        {copy?.title ?? copy?.labels?.demographicsTitle ?? "Demographic Information"}
       </h1>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -50,7 +65,7 @@ export default function DemographicsForm({
             htmlFor="demographics-beneficiary-name"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            Beneficiary Name
+            {copy?.labels?.nameLabel ?? "Beneficiary Name"}
           </label>
           <input
             id="demographics-beneficiary-name"
@@ -65,7 +80,7 @@ export default function DemographicsForm({
             htmlFor="demographics-residence"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            State of Residence
+            {copy?.labels?.stateOfResidenceLabel ?? "State of Residence"}
           </label>
           <select
             id="demographics-residence"
@@ -74,7 +89,7 @@ export default function DemographicsForm({
             className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
           >
             <option value="">
-              {copy?.labels?.inputs?.selectState ?? "Select a state"}
+              {copy?.labels?.selectState ?? "Select a state"}
             </option>
             {Object.entries(planLevelInfo).map(([code, info]) => (
               <option key={code} value={code}>
@@ -88,7 +103,7 @@ export default function DemographicsForm({
             htmlFor="demographics-filing-status"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            Filing Status
+            {copy?.labels?.filingStatusLabel ?? "Filing Status"}
           </label>
           <select
             id="demographics-filing-status"
@@ -97,16 +112,16 @@ export default function DemographicsForm({
             className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
           >
             <option value="single">
-              {copy?.labels?.inputs?.filing?.single ?? "Single"}
+              {copy?.labels?.filing?.single ?? "Single"}
             </option>
             <option value="married_joint">
-              {copy?.labels?.inputs?.filing?.married_joint ?? "Married Filing Jointly"}
+              {copy?.labels?.filing?.married_joint ?? "Married Filing Jointly"}
             </option>
             <option value="married_separate">
-              {copy?.labels?.inputs?.filing?.married_separate ?? "Married Filing Separately"}
+              {copy?.labels?.filing?.married_separate ?? "Married Filing Separately"}
             </option>
             <option value="head_of_household">
-              {copy?.labels?.inputs?.filing?.head_of_household ?? "Head of Household"}
+              {copy?.labels?.filing?.head_of_household ?? "Head of Household"}
             </option>
           </select>
         </div>
@@ -115,7 +130,7 @@ export default function DemographicsForm({
             htmlFor="demographics-agi"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            Adjusted Gross Income (AGI)
+            {copy?.labels?.agiLabel ?? "Adjusted Gross Income (AGI)"}
           </label>
           <input
             id="demographics-agi"
@@ -145,9 +160,7 @@ export default function DemographicsForm({
           <label
             htmlFor="demographics-annual-return"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
-          >
-            Annual Investment Return Assumption (%)
-          </label>
+          >{copy?.labels?.annualReturnLabel ?? "Annual Investment Return Assumption (%)"}</label>
           <input
             id="demographics-annual-return"
             type="number"
@@ -183,15 +196,11 @@ export default function DemographicsForm({
               checked={isSsiEligible}
               onChange={(e) => onChange?.({ isSsiEligible: e.target.checked })}
               className="h-4 w-4 rounded border-zinc-300"
-            />
-            Beneficiary is eligible for SSI
-          </label>
+            />{copy?.labels?.ssiEligibilityLabel ?? "Beneficiary is eligible for SSI"}</label>
         </div>
         <div className="md:col-span-2">
           <div className="space-y-2 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-              Federal Saver’s Credit Eligibility
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{copy?.labels?.fscHeading ?? "Federal Saver’s Credit Eligibility"}</p>
             <button
               type="button"
               disabled={fscDisabled}

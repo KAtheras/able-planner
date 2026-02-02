@@ -8,15 +8,13 @@ type Option = {
 type AccountActivityCopy = {
   title?: string;
   labels?: {
-    inputs?: {
-      accountActivityTitle?: string;
-      timeHorizonYearsFallback?: string;
-      startingBalanceLabel?: string;
-      monthlyContributionLabel?: string;
-      monthlyWithdrawalLabel?: string;
-      monthPlaceholder?: string;
-      yearPlaceholder?: string;
-    };
+    accountActivityTitle?: string;
+    timeHorizonYearsFallback?: string;
+    startingBalanceLabel?: string;
+    monthlyContributionLabel?: string;
+    monthlyWithdrawalLabel?: string;
+    monthPlaceholder?: string;
+    yearPlaceholder?: string;
   };
 };
 
@@ -96,7 +94,7 @@ export default function AccountActivityForm({
       data-contribution-stop-year={stopYearAttr}
     >
       <h1 className="text-2xl font-semibold">
-        {copy?.title ?? copy?.labels?.inputs?.accountActivityTitle ?? "Account Activity"}
+        {copy?.title ?? copy?.labels?.accountActivityTitle ?? "Account Activity"}
       </h1>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -105,9 +103,7 @@ export default function AccountActivityForm({
             htmlFor="activity-horizon"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            {timeHorizonLabel ??
-              copy?.labels?.inputs?.timeHorizonYearsFallback ??
-              "Time Horizon (years)"}
+            {timeHorizonLabel ?? copy?.labels?.timeHorizonYearsFallback ?? "Time Horizon (years)"}
           </label>
           <input
             id="activity-horizon"
@@ -123,9 +119,9 @@ export default function AccountActivityForm({
         <div>
           <label
             htmlFor="activity-starting-balance"
-            class="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            {copy?.labels?.inputs?.startingBalanceLabel ?? "Starting Balance"}
+            {copy?.labels?.startingBalanceLabel ?? "Starting Balance"}
           </label>
           <input
             id="activity-starting-balance"
@@ -143,7 +139,7 @@ export default function AccountActivityForm({
             htmlFor="activity-monthly-contribution"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            {copy?.labels?.inputs?.monthlyContributionLabel ?? "Monthly Contribution"}
+            {copy?.labels?.monthlyContributionLabel ?? "Monthly Contribution"}
           </label>
           <input
             id="activity-monthly-contribution"
@@ -161,7 +157,7 @@ export default function AccountActivityForm({
             htmlFor="activity-monthly-withdrawal"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            {copy?.labels?.inputs?.monthlyWithdrawalLabel ?? "Monthly Withdrawal"}
+            {copy?.labels?.monthlyWithdrawalLabel ?? "Monthly Withdrawal"}
           </label>
           <input
             id="activity-monthly-withdrawal"
@@ -179,7 +175,7 @@ export default function AccountActivityForm({
             htmlFor="activity-contribution-end-month"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            Contribution End
+            {copy?.labels?.contributionEndLabel ?? "Contribution End"}
           </label>
           <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm">
             <select
@@ -189,7 +185,7 @@ export default function AccountActivityForm({
               className="flex-1 bg-transparent focus:outline-none"
             >
               <option value="">
-                {copy?.labels?.inputs?.monthPlaceholder ?? "Month"}
+                {copy?.labels?.monthPlaceholder ?? "Month"}
               </option>
               {monthOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -207,7 +203,7 @@ export default function AccountActivityForm({
               className="flex-1 bg-transparent focus:outline-none"
             >
               <option value="">
-                {copy?.labels?.inputs?.yearPlaceholder ?? "Year"}
+                {copy?.labels?.yearPlaceholder ?? "Year"}
               </option>
               {contributionYearOptions.map((year) => (
                 <option key={year} value={year}>
@@ -223,7 +219,7 @@ export default function AccountActivityForm({
             htmlFor="activity-withdrawal-start-month"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            Withdrawal Start
+            {copy?.labels?.withdrawalStartLabel ?? "Withdrawal Start"}
           </label>
           <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm">
             <select
@@ -233,7 +229,7 @@ export default function AccountActivityForm({
               className="flex-1 bg-transparent focus:outline-none"
             >
               <option value="">
-                {copy?.labels?.inputs?.monthPlaceholder ?? "Month"}
+                {copy?.labels?.monthPlaceholder ?? "Month"}
               </option>
               {monthOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -251,7 +247,7 @@ export default function AccountActivityForm({
               className="flex-1 bg-transparent focus:outline-none"
             >
               <option value="">
-                {copy?.labels?.inputs?.yearPlaceholder ?? "Year"}
+                {copy?.labels?.yearPlaceholder ?? "Year"}
               </option>
               {withdrawalYearOptions.map((year) => (
                 <option key={year} value={year}>
@@ -267,7 +263,7 @@ export default function AccountActivityForm({
             htmlFor="activity-contribution-increase"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            Annual contribution increase (%)
+            {copy?.labels?.contributionIncreaseLabel ?? "Annual contribution increase (%)"}
           </label>
           <input
             id="activity-contribution-increase"
@@ -299,7 +295,7 @@ export default function AccountActivityForm({
             htmlFor="activity-withdrawal-increase"
             className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
           >
-            Annual withdrawal increase (%)
+            {copy?.labels?.withdrawalIncreaseLabel ?? "Annual withdrawal increase (%)"}
           </label>
           <input
             id="activity-withdrawal-increase"
