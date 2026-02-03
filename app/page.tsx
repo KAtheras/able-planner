@@ -797,11 +797,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const showQuestionnaire = messagesMode === "fsc" && agiGateEligible === true;
 
     const getFscButtonLabel = () => {
-      if (agiGateEligible === null) return "Enter AGI to test eligibility";
-      if (agiGateEligible === false) return "Not eligible based on AGI";
-      if (fscStatus === "eligible") return "Eligible — Retest";
-      if (fscStatus === "ineligible") return "Not eligible — Retest";
-      return "Eligible to evaluate";
+      if (agiGateEligible === null) return copy?.buttons?.enterAgiToTestEligibility ?? "Enter AGI to test eligibility";
+      if (agiGateEligible === false) return copy?.buttons?.notEligibleBasedOnAgi ?? "Not eligible based on AGI";
+      if (fscStatus === "eligible") return copy?.buttons?.eligibleRetest ?? "Eligible — Retest";
+      if (fscStatus === "ineligible") return copy?.buttons?.notEligibleRetest ?? "Not eligible — Retest";
+      return copy?.buttons?.eligibleToEvaluate ?? "Eligible to evaluate";
     };
 
     const horizonConfig = getHorizonConfig();
@@ -1005,9 +1005,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                   "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black",
                 ].join(" ")}
                 onClick={promptlyStartWta}
-              >
-                Yes
-              </button>
+              >{copy?.buttons?.yes ?? "Yes"}</button>
               <button
                 type="button"
                 className={[
@@ -1015,9 +1013,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                   "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                 ].join(" ")}
                 onClick={handleOverLimitNo}
-              >
-                No
-              </button>
+              >{copy?.buttons?.no ?? "No"}</button>
             </div>
           </div>
         );
@@ -1043,9 +1039,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                     ].join(" ")}
                     onClick={() => handleEarnedIncomeAnswer(true)}
-                  >
-                    Yes
-                  </button>
+                  >{copy?.buttons?.yes ?? "Yes"}</button>
                   <button
                     type="button"
                     className={[
@@ -1055,9 +1049,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                     ].join(" ")}
                     onClick={() => handleEarnedIncomeAnswer(false)}
-                  >
-                    No
-                  </button>
+                  >{copy?.buttons?.no ?? "No"}</button>
                 </div>
               </div>
               {wtaHasEarnedIncome === true && (
@@ -1089,9 +1081,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                           : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                       ].join(" ")}
                       onClick={() => evaluateWtaEligibility(true)}
-                    >
-                      Yes
-                    </button>
+                    >{copy?.buttons?.yes ?? "Yes"}</button>
                     <button
                       type="button"
                       className={[
@@ -1101,9 +1091,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                           : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                       ].join(" ")}
                       onClick={() => evaluateWtaEligibility(false)}
-                    >
-                      No
-                    </button>
+                    >{copy?.buttons?.no ?? "No"}</button>
                   </div>
                 </div>
               )}
@@ -1139,9 +1127,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               type="button"
               className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
               onClick={resolveBaseLimitWithAutoContribution}
-            >
-              Yes
-            </button>
+            >{copy?.buttons?.yes ?? "Yes"}</button>
           </div>
         );
       }
@@ -1177,9 +1163,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               type="button"
               className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
               onClick={resolveCombinedLimitWithAutoContribution}
-            >
-              Yes
-            </button>
+            >{copy?.buttons?.yes ?? "Yes"}</button>
           </div>
         );
       }
@@ -1377,7 +1361,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 className="rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
                 onClick={() => setInputStep(1)}
               >
-                Back
+                {copy?.buttons?.back ?? "Back"}
               </button>
             )}
           </div>
@@ -1393,14 +1377,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               ].join(" ")}
               onClick={goToNextStep}
             >
-              Next
+              {copy?.buttons?.next ?? "Next"}
             </button>
             <button
               type="button"
               className="rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
               onClick={resetInputs}
             >
-              Refresh
+              {copy?.buttons?.refresh ?? "Refresh"}
             </button>
             {languageToggle}
           </div>
@@ -1580,9 +1564,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                                     ].join(" ")}
                                     onClick={() => updateAnswer(question.key, true)}
-                                  >
-                                    Yes
-                                  </button>
+                                  >{copy?.buttons?.yes ?? "Yes"}</button>
                                   <button
                                     type="button"
                                     className={[
@@ -1592,9 +1574,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                                     ].join(" ")}
                                     onClick={() => updateAnswer(question.key, false)}
-                                  >
-                                    No
-                                  </button>
+                                  >{copy?.buttons?.no ?? "No"}</button>
                                 </div>
                               </div>
                             );
@@ -1611,9 +1591,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                                 : "border border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed",
                             ].join(" ")}
                             onClick={evaluateFsc}
-                          >
-                            Evaluate
-                          </button>
+                          >{copy?.buttons?.evaluate ?? "Evaluate"}</button>
                         </div>
                       </div>
                     ) : (
@@ -1675,9 +1653,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             type="button"
             onClick={handleWelcomeContinue}
               className="mt-6 rounded-full bg-[var(--brand-primary)] px-6 py-2 text-xs font-semibold text-white"
-            >
-              I Understand — Continue
-            </button>
+            >{copy?.buttons?.welcomeContinue ?? "I Understand — Continue"}</button>
           </div>
         </main>
       </div>

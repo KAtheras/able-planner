@@ -62,10 +62,24 @@
       "taxBenefits": "Tax Benefits",
       "amortization": "Amortization",
       "disclosures": "Disclosures"
-    }
+    },
+    "fscIntro": "Answer these questions to estimate eligibility."
   },
   "messages": {},
-  "buttons": {},
+  "buttons": {
+    "welcomeContinue": "I Understand — Continue",
+    "yes": "Yes",
+    "no": "No",
+    "enterAgiToTestEligibility": "Enter AGI to test eligibility",
+    "eligibleToEvaluate": "Eligible to evaluate",
+    "evaluate": "Evaluate",
+    "notEligibleBasedOnAgi": "Not eligible based on AGI",
+    "eligibleRetest": "Eligible — Retest",
+    "notEligibleRetest": "Not eligible — Retest",
+    "back": "Back",
+    "next": "Next",
+    "refresh": "Refresh"
+  },
   "disclosures": {},
   "blocks": {
     "landingWelcome": {

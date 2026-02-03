@@ -58,10 +58,24 @@
       "taxBenefits": "Beneficios fiscales",
       "amortization": "Amortización",
       "disclosures": "Divulgaciones"
-    }
+    },
+    "fscIntro": "Responda estas preguntas para estimar la elegibilidad."
   },
   "messages": {},
-  "buttons": {},
+  "buttons": {
+    "welcomeContinue": "Entiendo — Continuar",
+    "yes": "Sí",
+    "no": "No",
+    "enterAgiToTestEligibility": "Ingrese el AGI para probar la elegibilidad",
+    "eligibleToEvaluate": "Elegible para evaluar",
+    "evaluate": "Evaluar",
+    "notEligibleBasedOnAgi": "No elegible según AGI",
+    "eligibleRetest": "Elegible — Reintentar",
+    "notEligibleRetest": "No elegible — Reintentar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "refresh": "Actualizar"
+  },
   "disclosures": {},
   "metadata": {
     "language": "es",
