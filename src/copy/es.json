@@ -62,7 +62,20 @@
     "fscIntro": "Responda estas preguntas para estimar la elegibilidad.",
     "highReturnWarning": "Esa suposición de rendimiento es inusualmente alta. Considere ≤ {{max}}%.",
     "residencyNotAllowed": "El beneficiario no es elegible para abrir una cuenta {{plan}} porque el plan {{plan}} requiere que el beneficiario sea residente de {{state}}.",
-    "residencyGeneralAdvice": "Debe verificar si su estado de residencia ofrece un plan ABLE, que puede proporcionar ciertos beneficios fiscales estatales."
+    "residencyGeneralAdvice": "Debe verificar si su estado de residencia ofrece un plan ABLE, que puede proporcionar ciertos beneficios fiscales estatales.",
+    "schedule": {
+      "monthYear": "Mes/Año",
+      "contributions": "Contribuciones",
+      "withdrawals": "Retiros",
+      "investmentReturns": "Rendimientos",
+      "accountBalance": "Saldo",
+      "federalSaversCredit": "Crédito federal del ahorrador",
+      "stateTaxBenefit": "Beneficio fiscal estatal",
+      "federalTaxes": "Impuestos federales",
+      "stateTaxes": "Impuestos estatales",
+      "scheduleTitle": "Cronograma",
+      "amortizationTitle": "Amortización"
+    }
   },
   "messages": {
     "balanceCapWarning": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}. También se inician retiros recurrentes para mantener el saldo en {{cap}} retirando las ganancias mensuales proyectadas."

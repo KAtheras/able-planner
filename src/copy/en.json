@@ -66,7 +66,20 @@
     "fscIntro": "Answer these questions to estimate eligibility.",
     "highReturnWarning": "That return assumption is unusually high. Consider ≤ {{max}}%.",
     "residencyNotAllowed": "The beneficiary is not eligible to open a {{plan}} account because the {{plan}} plan requires the beneficiary to be a resident of {{state}}.",
-    "residencyGeneralAdvice": "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits."
+    "residencyGeneralAdvice": "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits.",
+    "schedule": {
+      "monthYear": "Month/Year",
+      "contributions": "Contributions",
+      "withdrawals": "Withdrawals",
+      "investmentReturns": "Investment Returns",
+      "accountBalance": "Account Balance",
+      "federalSaversCredit": "Federal Saver’s Credit",
+      "stateTaxBenefit": "State Tax Benefit",
+      "federalTaxes": "Federal Taxes",
+      "stateTaxes": "State Taxes",
+      "scheduleTitle": "Schedule",
+      "amortizationTitle": "Amortization"
+    }
   },
   "messages": {
     "balanceCapWarning": "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated to keep the balance at {{cap}} by withdrawing the projected monthly earnings."

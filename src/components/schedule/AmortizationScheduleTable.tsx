@@ -30,9 +30,31 @@ type Props = {
   rows: YearRow[];
   taxableRows?: TaxableYearRow[];
   view: ViewMode;
+  labels?: {
+    monthYear?: string;
+    contributions?: string;
+    withdrawals?: string;
+    investmentReturns?: string;
+    accountBalance?: string;
+    federalSaversCredit?: string;
+    stateTaxBenefit?: string;
+    federalTaxes?: string;
+    stateTaxes?: string;
+  };
+  labels?: {
+    monthYear?: string;
+    contributions?: string;
+    withdrawals?: string;
+    investmentReturns?: string;
+    accountBalance?: string;
+    federalSaversCredit?: string;
+    stateTaxBenefit?: string;
+    federalTaxes?: string;
+    stateTaxes?: string;
+  };
 };
 
-export default function AmortizationScheduleTable({ rows, taxableRows = [], view }: Props) {
+export default function AmortizationScheduleTable({ rows, taxableRows = [], view, labels }: Props) {
   const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
 
   const toggleYear = (year: number) => {
@@ -53,13 +75,13 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
         <table className="min-w-full border-collapse text-left text-[13px]">
           <thead className="bg-slate-100 text-[10px] uppercase tracking-widest text-sky-700">
             <tr>
-              <th className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap text-center">MONTH/YEAR</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">CONTRIBUTIONS</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">WITHDRAWALS</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">INVESTMENT RETURNS</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">ACCOUNT BALANCE</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">FEDERAL SAVERS CREDIT</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">STATE TAX BENEFIT</th>
+              <th className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap text-center">{labels?.monthYear ?? "MONTH/YEAR"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.contributions ?? "CONTRIBUTIONS"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.withdrawals ?? "WITHDRAWALS"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.investmentReturns ?? "INVESTMENT RETURNS"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.accountBalance ?? "ACCOUNT BALANCE"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.federalSaversCredit ?? "FEDERAL SAVERS CREDIT"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.stateTaxBenefit ?? "STATE TAX BENEFIT"}</th>
             </tr>
           </thead>
           <tbody className="text-[13px] text-slate-700">
@@ -144,13 +166,13 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
         <table className="min-w-full border-collapse text-left text-[13px]">
           <thead className="bg-slate-100 text-[10px] uppercase tracking-widest text-sky-700">
             <tr>
-              <th className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap text-center">MONTH/YEAR</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">CONTRIBUTIONS</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">WITHDRAWALS</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">INVESTMENT RETURNS</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">FEDERAL TAXES</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">STATE TAXES</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center">ACCOUNT BALANCE</th>
+              <th className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap text-center">{labels?.monthYear ?? "MONTH/YEAR"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.contributions ?? "CONTRIBUTIONS"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.withdrawals ?? "WITHDRAWALS"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.investmentReturns ?? "INVESTMENT RETURNS"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.federalTaxes ?? "FEDERAL TAXES"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.stateTaxes ?? "STATE TAXES"}</th>
+              <th className="border-b border-sky-200 px-3 py-3 text-center">{labels?.accountBalance ?? "ACCOUNT BALANCE"}</th>
             </tr>
           </thead>
           <tbody className="text-[13px] text-slate-700">

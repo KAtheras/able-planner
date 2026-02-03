@@ -1303,6 +1303,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 >
                   <span>Taxable Account</span>
                 </button>
+                {languageToggle}
               </div>
             </div>
               <div className="mt-4">
@@ -1310,6 +1311,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                   rows={scheduleRowsWithBenefits}
                   taxableRows={taxableRows}
                   view={amortizationView}
+                  labels={copy?.labels?.schedule}
                 />
               </div>
           </div>
