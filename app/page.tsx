@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
@@ -156,9 +156,15 @@ export default function Home() {
   const [beneficiaryStateOfResidence, setBeneficiaryStateOfResidence] = useState("");
   const [annualReturn, setAnnualReturn] = useState("");
   const [annualReturnEdited, setAnnualReturnEdited] = useState(false);
-  const [annualReturnWarning, setAnnualReturnWarning] = useState<string | null>(null);
-  const [timeHorizonYears, setTimeHorizonYears] = useState("");
+  const [annualReturnWarningMax, setAnnualReturnWarningMax] = useState<number | null>(null);
+const [timeHorizonYears, setTimeHorizonYears] = useState("");
   const copy = getCopy(language);
+  const annualReturnWarningText =
+    annualReturnWarningMax === null
+      ? null
+      : (copy?.labels?.highReturnWarning ?? "That return assumption is unusually high. Consider ≤ {{max}}%.")
+          .replace("{{max}}", formatDecimalToPercentString(annualReturnWarningMax));
+
   const screen1DefaultMessages = copy.flows?.screen1?.defaultMessages ?? INITIAL_MESSAGES;
   const screen2DefaultMessages = copy.flows?.screen2?.defaultMessages ?? SCREEN2_DEFAULT_MESSAGES;
   const [screen1Messages, setScreen1Messages] = useState<string[]>(() => [...screen1DefaultMessages]);
@@ -291,10 +297,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     return num / 100;
   };
 
-  const formatDecimalToPercentString = (decimal: number): string => {
+  function formatDecimalToPercentString(decimal: number): string {
     const percent = Math.round(decimal * 10000) / 100;
   return String(percent);
-};
+}
 
   const clampNumber = (value: number, min: number, max: number) =>
     Math.max(min, Math.min(max, value));
@@ -433,7 +439,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     if (typeof candidate === "number" && Number.isFinite(candidate)) {
       const percent = formatDecimalToPercentString(candidate);
       setAnnualReturn(percent);
-    setAnnualReturnWarning(null);
+    setAnnualReturnWarningMax(null);
     }
   }, [plannerStateCode, annualReturnEdited]);
 
@@ -894,18 +900,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="space-y-3">
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              The beneficiary is not eligible to open a {planLabel} account because the {planLabel} plan requires the beneficiary
-              to be a resident of {planName}. You should check to see if your home state offers an Able plan,
-              which may provide certain state tax benefits.
+              {(copy?.labels?.residencyNotAllowed ?? "The beneficiary is not eligible to open a {{plan}} account because the {{plan}} plan requires the beneficiary to be a resident of {{state}}.").replace("{{plan}}", planLabel).replace("{{state}}", planName) + " " + (copy?.labels?.residencyGeneralAdvice ?? "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits.")}
             </p>
             <div className={buttonContainerClass}>
               <button
                 type="button"
                 className={primaryButtonClass}
                 onClick={changeResidencyToPlan}
-              >
-                CHANGE MY RESIDENCY AND PROCEED TO THE CALCULATOR
-              </button>
+              >{copy?.buttons?.changeResidencyProceed ?? "Change my residency and proceed to the calculator"}</button>
             </div>
           </div>
         );
@@ -914,23 +916,19 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return (
         <div className="space-y-3">
           <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-            You should check to see if your home state offers an Able plan, which may provide certain state tax benefits.
+            {copy?.labels?.residencyGeneralAdvice ?? "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits."}
           </p>
           <div className={buttonContainerClass}>
             <button
               type="button"
               className={primaryButtonClass}
               onClick={acknowledgeNonResident}
-            >
-              I UNDERSTAND AND WOULD LIKE TO PROCEED
-            </button>
+            >{copy?.buttons?.understandProceed ?? "I understand and would like to proceed"}</button>
             <button
               type="button"
               className={secondaryButtonClass}
               onClick={changeResidencyToPlan}
-            >
-              CHANGE MY RESIDENCY AND PROCEED TO THE CALCULATOR
-            </button>
+            >{copy?.buttons?.changeResidencyProceed ?? "Change my residency and proceed to the calculator"}</button>
           </div>
         </div>
       );
@@ -962,17 +960,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           )}
           {ssiMessages.length > 0 && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
-              <p className="mb-2 text-sm leading-relaxed">
-                Based on your planned contributions, withdrawals and earnings assumptions the account is projected
-                to exceed $100,000.00 in {exceedLabel}.
-              </p>
-              <p className="mb-2 text-sm leading-relaxed">
-                This may result in suspension of SSI benefits and have an adverse financial impact.
-              </p>
-              <p className="text-sm leading-relaxed">
-                Accordingly, in this planning tool, contributions are stopped in {stopLabel}. Recurring withdrawals
-                are also initiated to keep the balance at $100,000.00 by withdrawing the projected monthly earnings.
-              </p>
+              <div className="mb-2 whitespace-pre-line text-sm leading-relaxed">{(copy?.messages?.balanceCapWarning ?? "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated to keep the balance at {{cap}} by withdrawing the projected monthly earnings.")
+.split("{{cap}}").join("$100,000.00")
+.replace("{{breach}}", (ssiMessages[0]?.data?.breachLabel ?? ssiMessages[0]?.data?.monthLabel ?? "Month Unknown"))
+.replace("{{stop}}", (ssiMessages[0]?.data?.stopLabel ?? planMessages[0]?.data?.monthLabel ?? "Month Unknown"))}</div>
             </div>
           )}
           {screen2Messages.map((message, index) => (
@@ -1421,7 +1412,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
                     if (dec === null) {
                       setAnnualReturn("");
-                      setAnnualReturnWarning(null);
+                      setAnnualReturnWarningMax(null);
                     } else {
                       const client = getClientConfig(plannerStateCode);
                       const warningMax = client?.constraints?.annualReturnWarningMax;
@@ -1437,16 +1428,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
                       if (typeof warningMax === "number" && Number.isFinite(warningMax)) {
                         if (nextDec > warningMax) {
-                          setAnnualReturnWarning(
-                            `That return assumption is unusually high. Consider ≤ ${formatDecimalToPercentString(
-                              warningMax,
-                            )}%.`,
-                          );
-                        } else {
-                          setAnnualReturnWarning(null);
+                          setAnnualReturnWarningMax(warningMax);
+} else {
+                          setAnnualReturnWarningMax(null);
                         }
                       } else {
-                        setAnnualReturnWarning(null);
+                        setAnnualReturnWarningMax(null);
                       }
                     }
                   }
@@ -1533,9 +1520,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               <div className="h-full rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
                 {inputStep === 1 ? (
                   <>
-                    {annualReturnWarning ? (
+                    {annualReturnWarningText ? (
                       <div className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
-                        {annualReturnWarning}
+                        {annualReturnWarningText}
                       </div>
                     ) : null}
                     {showResidencyWarning ? (

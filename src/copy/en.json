@@ -63,9 +63,14 @@
       "amortization": "Amortization",
       "disclosures": "Disclosures"
     },
-    "fscIntro": "Answer these questions to estimate eligibility."
+    "fscIntro": "Answer these questions to estimate eligibility.",
+    "highReturnWarning": "That return assumption is unusually high. Consider ≤ {{max}}%.",
+    "residencyNotAllowed": "The beneficiary is not eligible to open a {{plan}} account because the {{plan}} plan requires the beneficiary to be a resident of {{state}}.",
+    "residencyGeneralAdvice": "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits."
   },
-  "messages": {},
+  "messages": {
+    "balanceCapWarning": "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated to keep the balance at {{cap}} by withdrawing the projected monthly earnings."
+  },
   "buttons": {
     "welcomeContinue": "I Understand — Continue",
     "yes": "Yes",
@@ -74,11 +79,13 @@
     "eligibleToEvaluate": "Eligible to evaluate",
     "evaluate": "Evaluate",
     "notEligibleBasedOnAgi": "Not eligible based on AGI",
-    "eligibleRetest": "Eligible — Retest",
+    "eligibleRetest": "Eligible — Try Again",
     "notEligibleRetest": "Not eligible — Retest",
     "back": "Back",
     "next": "Next",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "changeResidencyProceed": "Change my residency and proceed to the calculator",
+    "understandProceed": "I understand and would like to proceed"
   },
   "disclosures": {},
   "blocks": {

@@ -10,7 +10,7 @@
   },
   "labels": {
     "inputs": {
-      "demographicsTitle": "INFORMACIÓN DEMOGRÁFICA",
+      "demographicsTitle": "Información demográfica",
       "checkEligibility": "Verificar elegibilidad",
       "selectState": "Seleccione un estado",
       "filing": {
@@ -59,9 +59,14 @@
       "amortization": "Amortización",
       "disclosures": "Divulgaciones"
     },
-    "fscIntro": "Responda estas preguntas para estimar la elegibilidad."
+    "fscIntro": "Responda estas preguntas para estimar la elegibilidad.",
+    "highReturnWarning": "Esa suposición de rendimiento es inusualmente alta. Considere ≤ {{max}}%.",
+    "residencyNotAllowed": "El beneficiario no es elegible para abrir una cuenta {{plan}} porque el plan {{plan}} requiere que el beneficiario sea residente de {{state}}.",
+    "residencyGeneralAdvice": "Debe verificar si su estado de residencia ofrece un plan ABLE, que puede proporcionar ciertos beneficios fiscales estatales."
   },
-  "messages": {},
+  "messages": {
+    "balanceCapWarning": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}. También se inician retiros recurrentes para mantener el saldo en {{cap}} retirando las ganancias mensuales proyectadas."
+  },
   "buttons": {
     "welcomeContinue": "Entiendo — Continuar",
     "yes": "Sí",
@@ -74,7 +79,9 @@
     "notEligibleRetest": "No elegible — Reintentar",
     "back": "Atrás",
     "next": "Siguiente",
-    "refresh": "Actualizar"
+    "refresh": "Actualizar",
+    "changeResidencyProceed": "Cambiar mi residencia y continuar al calculador",
+    "understandProceed": "Entiendo y deseo continuar"
   },
   "disclosures": {},
   "metadata": {
