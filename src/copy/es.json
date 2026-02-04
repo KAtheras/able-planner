@@ -86,7 +86,7 @@
   "messages": {
     "balanceCapWarning": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}. También se inician retiros recurrentes en {{withdrawStart}} para mantener el saldo en {{cap}} retirando las ganancias mensuales proyectadas.",
     "planMaxReached": "En esta herramienta de planificación, las contribuciones se detienen en {{month}} porque el saldo proyectado alcanza el máximo del plan de {{cap}}.",
-    "workToAblePrompt": "Sus contribuciones planificadas superan el límite anual de ABLE de {{cap}}. Si está trabajando, puede calificar para contribuir más (la disposición “trabajar para ABLE”). ¿Le gustaría saber si califica?",
+    "workToAblePrompt": "Sus contribuciones planificadas exceden el límite anual de ABLE de {{cap}}. Si está trabajando, podría calificar para contribuir más (la disposición “work to ABLE”). ¿Le gustaría saber si califica?",
     "wtaEarnedIncomeQuestion": "¿El beneficiario tiene ingresos del trabajo?",
     "wtaEarnedIncomeInput": "Por favor ingrese el ingreso estimado del trabajo:",
     "wtaRetirementPlanQuestion": "¿El beneficiario está cubierto por un plan de jubilación?",
