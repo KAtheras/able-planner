@@ -275,13 +275,13 @@ const [timeHorizonYears, setTimeHorizonYears] = useState("");
     (planLevelInfo as Record<string, any>)?.default?.maxAccountBalance ??
     null;
   const monthlyContributionNum =
-    Number((monthlyContribution ?? "").replace(/[^0-9.]/g, "")) || 0;
+    Number((monthlyContribution ?? "").replace(".00","")) || 0;
   const annualContributionLimit =
     wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
 
   const sanitizeAgiInput = (value: string) => {
     if (value === "") return "";
-    const next = value.replace(/-/g, "");
+    const next = value.replace(".00","");
     if (next === "") return "";
     const numeric = Number(next);
     if (Number.isNaN(numeric)) return next;
@@ -307,7 +307,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
   const sanitizeAmountInput = (value: string) => {
     if (value === "") return "";
-    const clean = value.replace(/-/g, "");
+    const clean = value.replace(".00","");
     const parts = clean.split(".");
     if (parts.length <= 2) {
       return clean;
@@ -1093,14 +1093,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               {copy?.messages?.wtaAmountOverTitle ?? "AMOUNT OVER THE ANNUAL LIMIT:"}
             </p>
             <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-              {formatCurrency(baseLimitOverage)}
+              {formatCurrency(baseLimitOverage).replace(".00","")}
             </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {copy?.messages?.wtaSetToMaxQuestion ?? "Would you like to set contributions to the maximum allowed amount?"}
             </p>
-            <p className="text-xs leading-relaxed text-zinc-500">
-              
-{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
+            <p className="text-xs leading-relaxed text-zinc-500">{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
             </p>
             <button
               type="button"
@@ -1132,14 +1130,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               {copy?.messages?.wtaAmountOverCombinedTitle ?? "AMOUNT OVER THE COMBINED LIMIT:"}
             </p>
             <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-              {formatCurrency(combinedLimitOverage)}
+              {formatCurrency(combinedLimitOverage).replace(".00","")}
             </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {copy?.messages?.wtaSetToMaxQuestion ?? "Would you like to set contributions to the maximum allowed amount?"}
             </p>
-            <p className="text-xs leading-relaxed text-zinc-500">
-              
-{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
+            <p className="text-xs leading-relaxed text-zinc-500">{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
             </p>
             <button
               type="button"
@@ -1459,7 +1455,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               withdrawalYearOptions={horizonYearOptions}
               onChange={(updates) => {
                 if ("timeHorizonYears" in updates) {
-                  const raw = (updates.timeHorizonYears ?? "").replace(/\D/g, "");
+                  const raw = (updates.timeHorizonYears ?? "").replace(".00","");
                   setTimeHorizonYears(raw);
                 }
                 if ("startingBalance" in updates)
