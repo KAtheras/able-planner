@@ -147,7 +147,7 @@ const computeStateTaxBenefitAmount = (
 
 export default function Home() {
   const [language, setLanguage] = useState<SupportedLanguage>("en");
-  const [active, setActive] = useState<NavKey>("inputs");
+const [active, setActive] = useState<NavKey>("inputs");
   const [plannerStateCode, setPlannerStateCode] = useState<PlannerState>("default");
   const [inputStep, setInputStep] = useState<1 | 2>(1);
   const [plannerAgi, setPlannerAgi] = useState("");
@@ -381,32 +381,13 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       startIndex,
       horizonEndIndex: Math.max(startIndex, horizonEndIndex),
     };
-  }, [getTimeHorizonLimits, timeHorizonYears]);
-
-  useEffect(() => {
-    const storedLanguage = window.localStorage.getItem("language");
-    if (storedLanguage === "en" || storedLanguage === "es") {
-      setLanguage(storedLanguage);
-    }
-  }, []);
-
-  useEffect(() => {
+  }, [getTimeHorizonLimits, timeHorizonYears]);useEffect(() => {
     if (messagesMode !== "intro") {
       return;
     }
     setScreen1Messages([...screen1DefaultMessages]);
     setScreen2Messages([...screen2DefaultMessages]);
-  }, [language, messagesMode, screen1DefaultMessages, screen2DefaultMessages]);
-
-  useEffect(() => {
-    setShowWelcome(sessionStorage.getItem(WELCOME_KEY) !== "true");
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem("language", language);
-  }, [language]);
-
-  useEffect(() => {
+  }, [language, messagesMode, screen1DefaultMessages, screen2DefaultMessages]);useEffect(() => {
     const agiValue = Number(plannerAgi);
     if (!plannerAgi || Number.isNaN(agiValue) || agiValue < 0 || !plannerFilingStatus) {
       setAgiGateEligible(null);
@@ -900,7 +881,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="space-y-3">
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {(copy?.labels?.residencyNotAllowed ?? "The beneficiary is not eligible to open a {{plan}} account because the {{plan}} plan requires the beneficiary to be a resident of {{state}}.").replace("{{plan}}", planLabel).replace("{{state}}", planName) + " " + (copy?.labels?.residencyGeneralAdvice ?? "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits.")}
+              {(copy?.labels?.residencyNotAllowed ?? "The beneficiary is not eligible to open a {{plan}} account because the {{plan}} plan requires the beneficiary to be a resident of {{state}}.").split("{{plan}}").join(planLabel).replace("{{state}}", planName) + " " + (copy?.labels?.residencyGeneralAdvice ?? "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits.")}
             </p>
             <div className={buttonContainerClass}>
               <button
@@ -941,8 +922,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         ssiMessages.find((message) => message.code === "SSI_FORCED_WITHDRAWALS_APPLIED") ?? null;
       const exceedLabel =
         forcedMsg?.data?.monthLabel ||
-        stopMsg?.data?.monthLabel ||
-        "Month Unknown";
+        stopMsg?.data?.monthLabel;
       const stopLabel =
         stopMsg?.data?.monthLabel ||
         forcedMsg?.data?.monthLabel ||
@@ -953,17 +933,26 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           {planMessages.length > 0 && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
               <p className="text-sm leading-relaxed">
-                In this planning tool, contributions stop in {planMessages[0].data.monthLabel} because
-                the projected balance reaches the plan maximum of {formatCurrency(planMessages[0].data.planMax)}.
+                
+{(copy?.messages?.planMaxReached ?? "In this planning tool, contributions stop in {{month}} because the projected balance reaches the plan maximum of {{cap}}.")
+  .replace("{{month}}", planMessages[0].data.monthLabel)
+  
+.replace("{{cap}}", formatCurrency(planMessages[0].data.planMax).replace(".00", ""))}
+
               </p>
             </div>
           )}
           {ssiMessages.length > 0 && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
-              <div className="mb-2 whitespace-pre-line text-sm leading-relaxed">{(copy?.messages?.balanceCapWarning ?? "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated to keep the balance at {{cap}} by withdrawing the projected monthly earnings.")
-.split("{{cap}}").join("$100,000.00")
+              <div className="mb-2 whitespace-pre-line text-sm leading-relaxed">{
+(copy?.messages?.balanceCapWarning ?? "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated in {{withdrawStart}} to keep the balance at {{cap}} by withdrawing the projected monthly earnings.")
+  .split("{{cap}}").join("$100,000")
+  
 .replace("{{breach}}", (ssiMessages[0]?.data?.breachLabel ?? ssiMessages[0]?.data?.monthLabel ?? "Month Unknown"))
-.replace("{{stop}}", (ssiMessages[0]?.data?.stopLabel ?? planMessages[0]?.data?.monthLabel ?? "Month Unknown"))}</div>
+  
+.replace("{{stop}}", (ssiMessages[0]?.data?.stopLabel ?? planMessages[0]?.data?.monthLabel ?? "Month Unknown"))
+  .replace("{{withdrawStart}}", (forcedMsg?.data?.monthLabel ?? "Month Unknown"))
+}</div>
             </div>
           )}
           {screen2Messages.map((message, index) => (
@@ -986,7 +975,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Your planned contributions exceed the annual ABLE limit of $20,000.00. If you are working, you may qualify to contribute more (the “work to ABLE” provision). Would you like to find out if you qualify?
+              
+{(copy?.messages?.workToAblePrompt ?? "Your planned contributions exceed the annual ABLE limit of {{cap}}. If you are working, you may qualify to contribute more (the “work to ABLE” provision). Would you like to find out if you qualify?")
+  .replace("{{cap}}", "$20,000")}
             </p>
             <div className="flex gap-2">
               <button
@@ -1018,7 +1009,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             <div className="space-y-3">
               <div className="space-y-1">
                 <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                  Does the Beneficiary have Earned Income?
+                  {copy?.labels?.inputs?.wtaEarnedIncomeQuestion ?? "Does the beneficiary have earned income?"}
                 </label>
                 <div className="flex gap-2 mt-1">
                   <button
@@ -1045,9 +1036,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               </div>
               {wtaHasEarnedIncome === true && (
                 <div className="space-y-1">
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                    Please input estimated earned income:
-                  </label>
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{copy?.labels?.inputs?.wtaEarnedIncomeInput ?? "Please input estimated earned income:"}</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -1059,9 +1048,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               )}
               {showStep3 && (
                 <div className="space-y-1">
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                    Is the beneficiary covered by a retirement plan?
-                  </label>
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{copy?.labels?.inputs?.wtaRetirementPlanQuestion ?? "Is the beneficiary covered by a retirement plan?"}</label>
                   <div className="flex gap-2 mt-1">
                     <button
                       type="button"
@@ -1100,19 +1087,20 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of $20,000.00.
+              {(copy?.messages?.wtaNotEligible ?? "You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of {{limit}}.").replace("{{limit}}", "$20,000")}
             </p>
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-              AMOUNT OVER THE ANNUAL LIMIT:
+              {copy?.messages?.wtaAmountOverTitle ?? "AMOUNT OVER THE ANNUAL LIMIT:"}
             </p>
             <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
               {formatCurrency(baseLimitOverage)}
             </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Would you like to set contributions to the maximum allowed amount?
+              {copy?.messages?.wtaSetToMaxQuestion ?? "Would you like to set contributions to the maximum allowed amount?"}
             </p>
             <p className="text-xs leading-relaxed text-zinc-500">
-              We&apos;ll reduce the recurring contribution to keep a rolling 12-month total within the limit.
+              
+{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
             </p>
             <button
               type="button"
@@ -1131,24 +1119,27 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              You qualify for additional contributions of {formatCurrency(wtaAdditionalAllowed)}, but your total contributions exceed the combined limit of {formatCurrency(
-                wtaCombinedLimit,
-              )}.
+              
+{(copy?.messages?.wtaEligibleOverCombinedLine1 ?? "You qualify for additional contributions of {{additional}}, but your total contributions exceed the combined limit of {{combined}}.")
+  .replace("{{additional}}", formatCurrency(wtaAdditionalAllowed))
+  .replace("{{combined}}", formatCurrency(wtaCombinedLimit))}
             </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Please revise your contribution amounts to bring total contributions below the combined limit.
+              
+{copy?.messages?.wtaEligibleOverCombinedLine2 ?? "Please revise your contribution amounts to bring total contributions below the combined limit."}
             </p>
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-              AMOUNT OVER THE COMBINED LIMIT:
+              {copy?.messages?.wtaAmountOverCombinedTitle ?? "AMOUNT OVER THE COMBINED LIMIT:"}
             </p>
             <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
               {formatCurrency(combinedLimitOverage)}
             </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Would you like to set contributions to the maximum allowed amount?
+              {copy?.messages?.wtaSetToMaxQuestion ?? "Would you like to set contributions to the maximum allowed amount?"}
             </p>
             <p className="text-xs leading-relaxed text-zinc-500">
-              We&apos;ll reduce the recurring contribution to keep a rolling 12-month total within the limit.
+              
+{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
             </p>
             <button
               type="button"

@@ -43,7 +43,10 @@
       "contributionEndLabel": "Fin de contribución",
       "withdrawalStartLabel": "Inicio del retiro",
       "contributionIncreaseLabel": "Aumento anual de contribución (%)",
-      "withdrawalIncreaseLabel": "Aumento anual de retiro (%)"
+      "withdrawalIncreaseLabel": "Aumento anual de retiro (%)",
+      "wtaEarnedIncomeQuestion": "¿Tiene el beneficiario ingresos del trabajo?",
+      "wtaEarnedIncomeInput": "Por favor ingrese el ingreso del trabajo estimado:",
+      "wtaRetirementPlanQuestion": "¿Está el beneficiario cubierto por un plan de jubilación?"
     },
     "fsc": {
       "intro": "Responda estas preguntas para estimar la elegibilidad.",
@@ -75,10 +78,25 @@
       "stateTaxes": "Impuestos estatales",
       "scheduleTitle": "Cronograma",
       "amortizationTitle": "Amortización"
-    }
+    },
+    "wtaEarnedIncomeQuestion": "¿Tiene el beneficiario ingresos del trabajo?",
+    "wtaEarnedIncomeInput": "Por favor ingrese el ingreso del trabajo estimado:",
+    "wtaRetirementPlanQuestion": "¿Está el beneficiario cubierto por un plan de jubilación?"
   },
   "messages": {
-    "balanceCapWarning": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}. También se inician retiros recurrentes para mantener el saldo en {{cap}} retirando las ganancias mensuales proyectadas."
+    "balanceCapWarning": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}. También se inician retiros recurrentes en {{withdrawStart}} para mantener el saldo en {{cap}} retirando las ganancias mensuales proyectadas.",
+    "planMaxReached": "En esta herramienta de planificación, las contribuciones se detienen en {{month}} porque el saldo proyectado alcanza el máximo del plan de {{cap}}.",
+    "workToAblePrompt": "Sus contribuciones planificadas superan el límite anual de ABLE de {{cap}}. Si está trabajando, puede calificar para contribuir más (la disposición “trabajar para ABLE”). ¿Le gustaría saber si califica?",
+    "wtaEarnedIncomeQuestion": "¿El beneficiario tiene ingresos del trabajo?",
+    "wtaEarnedIncomeInput": "Por favor ingrese el ingreso estimado del trabajo:",
+    "wtaRetirementPlanQuestion": "¿El beneficiario está cubierto por un plan de jubilación?",
+    "wtaNotEligible": "No es elegible para contribuciones adicionales a ABLE bajo la disposición Work-to-ABLE. Revise sus montos de contribución para mantenerse dentro del límite anual de {{limit}}.",
+    "wtaAmountOverTitle": "MONTO POR ENCIMA DEL LÍMITE ANUAL:",
+    "wtaSetToMaxQuestion": "¿Le gustaría ajustar las contribuciones al monto máximo permitido?",
+    "wtaSetToMaxNote": "Reduciremos la contribución recurrente para mantener un total móvil de 12 meses dentro del límite.",
+    "wtaEligibleOverCombinedLine1": "Califica para contribuciones adicionales de {{additional}}, pero sus contribuciones totales exceden el límite combinado de {{combined}}.",
+    "wtaEligibleOverCombinedLine2": "Revise sus montos de contribución para que las contribuciones totales queden por debajo del límite combinado.",
+    "wtaAmountOverCombinedTitle": "MONTO POR ENCIMA DEL LÍMITE COMBINADO:"
   },
   "buttons": {
     "welcomeContinue": "Entiendo — Continuar",

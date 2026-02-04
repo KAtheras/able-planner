@@ -47,7 +47,10 @@
       "contributionEndLabel": "Contribution End",
       "withdrawalStartLabel": "Withdrawal Start",
       "contributionIncreaseLabel": "Annual contribution increase (%)",
-      "withdrawalIncreaseLabel": "Annual withdrawal increase (%)"
+      "withdrawalIncreaseLabel": "Annual withdrawal increase (%)",
+      "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
+      "wtaEarnedIncomeInput": "Please input estimated earned income:",
+      "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?"
     },
     "fsc": {
       "intro": "Answer these questions to estimate eligibility.",
@@ -79,10 +82,25 @@
       "stateTaxes": "State Taxes",
       "scheduleTitle": "Schedule",
       "amortizationTitle": "Amortization"
-    }
+    },
+    "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
+    "wtaEarnedIncomeInput": "Please input estimated earned income:",
+    "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?"
   },
   "messages": {
-    "balanceCapWarning": "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated to keep the balance at {{cap}} by withdrawing the projected monthly earnings."
+    "balanceCapWarning": "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated in {{withdrawStart}} to keep the balance at {{cap}} by withdrawing the projected monthly earnings.",
+    "planMaxReached": "In this planning tool, contributions stop in {{month}} because the projected balance reaches the plan maximum of {{cap}}.",
+    "workToAblePrompt": "Your planned contributions exceed the annual ABLE limit of {{cap}}. If you are working, you may qualify to contribute more (the “work to ABLE” provision). Would you like to find out if you qualify?",
+    "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
+    "wtaEarnedIncomeInput": "Please input estimated earned income:",
+    "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?",
+    "wtaNotEligible": "You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of {{limit}}.",
+    "wtaAmountOverTitle": "AMOUNT OVER THE ANNUAL LIMIT:",
+    "wtaSetToMaxQuestion": "Would you like to set contributions to the maximum allowed amount?",
+    "wtaSetToMaxNote": "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit.",
+    "wtaEligibleOverCombinedLine1": "You qualify for additional contributions of {{additional}}, but your total contributions exceed the combined limit of {{combined}}.",
+    "wtaEligibleOverCombinedLine2": "Please revise your contribution amounts to bring total contributions below the combined limit.",
+    "wtaAmountOverCombinedTitle": "AMOUNT OVER THE COMBINED LIMIT:"
   },
   "buttons": {
     "welcomeContinue": "I Understand — Continue",
