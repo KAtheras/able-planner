@@ -1098,7 +1098,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {copy?.messages?.wtaSetToMaxQuestion ?? "Would you like to set contributions to the maximum allowed amount?"}
             </p>
-            <p className="text-xs leading-relaxed text-zinc-500">{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
             </p>
             <button
               type="button"
@@ -1119,8 +1119,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               
 {(copy?.messages?.wtaEligibleOverCombinedLine1 ?? "You qualify for additional contributions of {{additional}}, but your total contributions exceed the combined limit of {{combined}}.")
-  .replace("{{additional}}", formatCurrency(wtaAdditionalAllowed))
-  .replace("{{combined}}", formatCurrency(wtaCombinedLimit))}
+  .replace("{{additional}}", formatCurrency(wtaAdditionalAllowed).replace(".00",""))
+  .replace("{{combined}}", formatCurrency(wtaCombinedLimit).replace(".00",""))}
             </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               
@@ -1135,7 +1135,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {copy?.messages?.wtaSetToMaxQuestion ?? "Would you like to set contributions to the maximum allowed amount?"}
             </p>
-            <p className="text-xs leading-relaxed text-zinc-500">{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
             </p>
             <button
               type="button"
