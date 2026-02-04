@@ -1229,7 +1229,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         Number.isFinite(fscCreditPercent) &&
         fscCreditPercent > 0 &&
         fscContributionLimit > 0;
-      const stateBenefitConfig = getStateTaxBenefitConfig(planState, plannerFilingStatus);
+      const benefitStateCode = (beneficiaryStateOfResidence || planState || "").toUpperCase();
+      const stateBenefitConfig = getStateTaxBenefitConfig(benefitStateCode, plannerFilingStatus);
       const scheduleRowsWithBenefits = scheduleRows.map((yearRow) => {
         const contributionsForYear = Math.max(0, yearRow.contribution);
         const federalCredit = showFederalSaverCredit

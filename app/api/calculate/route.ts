@@ -131,12 +131,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const planStateCodeRaw = parsed.planStateCode ?? parsed.stateCode ?? "UT";
-  const normalizedState = planStateCodeRaw.toUpperCase();
-  const planState = (planLevelInfo as Record<string, StateInfo>)[normalizedState];
-  const stateRate = (stateTaxRates as Record<string, unknown>)[normalizedState] ?? null;
+  const planStateCodeRaw = parsed.planStateCode ?? "UT";
+  const planStateCode = planStateCodeRaw.toUpperCase();
+  const planState = (planLevelInfo as Record<string, StateInfo>)[planStateCode];
+
+  const residencyStateCodeRaw = parsed.stateCode ?? "UT";
+  const residencyStateCode = residencyStateCodeRaw.toUpperCase();
+  const stateRate =
+    (stateTaxRates as Record<string, unknown>)[residencyStateCode] ?? null;
   const stateDeduction =
-    (stateTaxDeductions as Record<string, unknown>)[normalizedState] ?? null;
+    (stateTaxDeductions as Record<string, unknown>)[residencyStateCode] ?? null;
 
   const meta: Record<string, unknown> & { rulesLoaded: Record<string, number> } = {
     rulesLoaded: {
@@ -159,13 +163,13 @@ export async function POST(request: Request) {
 
   const statePayload = planState
     ? {
-        code: normalizedState,
+        code: planStateCode,
         name: planState.name ?? null,
         maxAccountBalance: planState.maxAccountBalance ?? null,
         residencyRequired: planState.residencyRequired ?? null,
       }
     : {
-        code: normalizedState,
+        code: planStateCode,
         name: null,
         maxAccountBalance: null,
         residencyRequired: null,
@@ -227,7 +231,7 @@ export async function POST(request: Request) {
   };
   const echo = {
     clientId: resolvedClientId,
-    planStateCode: normalizedState,
+    planStateCode: planStateCode,
     beneficiaryStateCode: beneficiaryStateCodeNormalized,
     isSsiBeneficiary:
       typeof parsed.isSsiBeneficiary === "boolean"
