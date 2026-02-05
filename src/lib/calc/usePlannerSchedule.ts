@@ -153,15 +153,23 @@ export function buildPlannerSchedule({
   const federalTaxRateDecimal = getFederalMarginalRateDecimal(agiNumber, resolvedFiling);
   const stateTaxRateDecimal = getStateMarginalRateDecimal(agiNumber, resolvedState, resolvedFiling);
 
+  const safeAnnualReturnDecimal = Number.isFinite(annualReturnDecimal) ? annualReturnDecimal : 0;
+  const safeFederalTaxRateDecimal = Number.isFinite(federalTaxRateDecimal)
+    ? Math.max(0, federalTaxRateDecimal)
+    : 0;
+  const safeStateTaxRateDecimal = Number.isFinite(stateTaxRateDecimal)
+    ? Math.max(0, stateTaxRateDecimal)
+    : 0;
+
   return {
     scheduleRows,
     ssiMessages: extractSsiMessages(scheduleRows),
     planMessages: extractPlanMessages(scheduleRows, planMaxBalance),
     taxableRows: buildTaxableInvestmentScheduleFromAbleSchedule({
       ableRows: scheduleRows,
-      annualReturnDecimal,
-      federalTaxRateDecimal,
-      stateTaxRateDecimal,
+      annualReturnDecimal: safeAnnualReturnDecimal,
+      federalTaxRateDecimal: safeFederalTaxRateDecimal,
+      stateTaxRateDecimal: safeStateTaxRateDecimal,
     }),
   };
 }

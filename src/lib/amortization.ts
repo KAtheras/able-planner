@@ -149,8 +149,16 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
     return [];
   }
 
-  const monthlyRate =
-    Math.pow(1 + inputs.annualReturnDecimal, 1 / 12) - 1;
+    const monthlyRate =
+      Math.pow(1 + inputs.annualReturnDecimal, 1 / 12) - 1;
+    const computeEarnings = (basis: number) => {
+      const normalizedBasis = Number.isFinite(basis) ? Math.max(0, basis) : 0;
+      const result = normalizedBasis * monthlyRate;
+      if (!Number.isFinite(result) || result < 0) {
+        return 0;
+      }
+      return result;
+    };
   // Example: annual 0.06 => monthly ≈ 0.00486755 (not 0.005)
   const contributionIncreaseFactor = 1 + Math.max(0, inputs.contributionIncreasePct) / 100;
   const withdrawalIncreaseFactor = 1 + Math.max(0, inputs.withdrawalIncreasePct) / 100;
@@ -179,6 +187,7 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
     ? inputs.planMaxBalance ?? 0
     : null;
   let ssiCapMode = false;
+  let withdrawalsStopped = false;
   for (let offset = 0; offset < monthsToBuild; offset += 1) {
     const monthIndex = inputs.startMonthIndex + offset;
     if (monthIndex > inputs.horizonEndIndex) {
@@ -230,7 +239,7 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
     let contributionValue = contributionActive ? currentContribution : 0;
     let withdrawalValue = withdrawalActive ? currentWithdrawal : 0;
     let balanceAfterCashflow = currentBalance + contributionValue - withdrawalValue;
-    let earnings = balanceAfterCashflow * monthlyRate;
+    let earnings = computeEarnings(balanceAfterCashflow);
     let endingBalance = balanceAfterCashflow + earnings;
 
     const monthSsiCodes: string[] = [];
@@ -257,7 +266,7 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
     }
 
     balanceAfterCashflow = currentBalance + contributionValue - withdrawalValue;
-    earnings = balanceAfterCashflow * monthlyRate;
+    earnings = computeEarnings(balanceAfterCashflow);
     endingBalance = balanceAfterCashflow + earnings;
 
     const projectedBase = currentBalance + earnings + contributionValue - withdrawalValue;
@@ -295,6 +304,38 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
         endingBalance = SSI_LIMIT;
       }
     }
+
+    // Guard withdrawals so we never drive balances negative.
+    const safeContribution = Number.isFinite(contributionValue) ? contributionValue : 0;
+    const safeEarnings = Number.isFinite(earnings) ? earnings : 0;
+    const startingBalanceForMonth = Number.isFinite(currentBalance) ? currentBalance : 0;
+    const availableFunds = Math.max(0, startingBalanceForMonth + safeContribution + safeEarnings);
+    const plannedWithdrawal = Number.isFinite(withdrawalValue) ? Math.max(0, withdrawalValue) : 0;
+    let actualWithdrawal = plannedWithdrawal;
+    let adjustedEndingBalance = availableFunds;
+
+    if (withdrawalsStopped) {
+      actualWithdrawal = 0;
+    } else if (availableFunds <= 0) {
+      actualWithdrawal = 0;
+      adjustedEndingBalance = 0;
+    } else if (plannedWithdrawal <= availableFunds) {
+      adjustedEndingBalance = availableFunds - plannedWithdrawal;
+    } else if (safeContribution > 0) {
+      // cap withdrawals to contributions + earnings when contributions still arrive
+      actualWithdrawal = Math.min(plannedWithdrawal, Math.max(0, safeContribution + safeEarnings));
+      adjustedEndingBalance = Math.max(0, availableFunds - actualWithdrawal);
+    } else {
+      // final bucket-empty withdrawal then stop future draws
+      actualWithdrawal = Math.min(plannedWithdrawal, availableFunds);
+      adjustedEndingBalance = Math.max(0, availableFunds - actualWithdrawal);
+      if (adjustedEndingBalance === 0) {
+        withdrawalsStopped = true;
+      }
+    }
+
+    withdrawalValue = actualWithdrawal;
+    endingBalance = adjustedEndingBalance;
 
     const monthRow: MonthlyRow = {
       monthLabel,
@@ -354,8 +395,11 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
   stateTaxRateDecimal: number;
   startingBalance: number;
 }): TaxableYearRow[] {
-  const monthlyReturnDecimal = Math.pow(1 + annualReturnDecimal, 1 / 12) - 1;
-  let prevBalance = Math.max(0, startingBalance);
+  const safeAnnualReturnDecimal = Number.isFinite(annualReturnDecimal) ? annualReturnDecimal : 0;
+  const safeFederalTaxRateDecimal = Number.isFinite(federalTaxRateDecimal) ? Math.max(0, federalTaxRateDecimal) : 0;
+  const safeStateTaxRateDecimal = Number.isFinite(stateTaxRateDecimal) ? Math.max(0, stateTaxRateDecimal) : 0;
+  const monthlyReturnDecimal = Math.pow(1 + safeAnnualReturnDecimal, 1 / 12) - 1;
+  let prevBalance = Number.isFinite(startingBalance) ? Math.max(0, startingBalance) : 0;
   const taxableYears: TaxableYearRow[] = [];
 
   for (const ableYear of ableRows) {
@@ -369,10 +413,14 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
     const taxableMonths: TaxableMonthRow[] = [];
 
     for (const ableMonth of ableYear.months) {
-      const contribution = Math.max(0, ableMonth.contribution);
-      const withdrawal = Math.max(0, ableMonth.withdrawal);
+      const contribution = Number.isFinite(ableMonth.contribution) ? Math.max(0, ableMonth.contribution) : 0;
+      const withdrawal = Number.isFinite(ableMonth.withdrawal) ? Math.max(0, ableMonth.withdrawal) : 0;
       const balanceBeforeEarnings = prevBalance + contribution;
-      const earnings = balanceBeforeEarnings * monthlyReturnDecimal;
+      const normalizedBasis = Math.max(0, Number.isFinite(balanceBeforeEarnings) ? balanceBeforeEarnings : 0);
+      let earnings = normalizedBasis * monthlyReturnDecimal;
+      if (!Number.isFinite(earnings) || earnings < 0) {
+        earnings = 0;
+      }
      yearContribution += contribution;
      yearWithdrawal += withdrawal;
      yearInvestmentReturn += earnings;
@@ -385,8 +433,8 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
       let monthEndingBalance = balanceBeforeEarnings + earnings - withdrawal;
       if (isDecember) {
         const taxableEarnings = Math.max(0, yearEarnings);
-        federalTaxOnEarnings = taxableEarnings * federalTaxRateDecimal;
-        stateTaxOnEarnings = taxableEarnings * stateTaxRateDecimal;
+        federalTaxOnEarnings = taxableEarnings * safeFederalTaxRateDecimal;
+        stateTaxOnEarnings = taxableEarnings * safeStateTaxRateDecimal;
         monthEndingBalance = balanceBeforeEarnings + earnings - withdrawal - federalTaxOnEarnings - stateTaxOnEarnings;
         yearFederalTax += federalTaxOnEarnings;
         yearStateTax += stateTaxOnEarnings;
@@ -410,9 +458,9 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
     }
 
     if (taxableMonths.length > 0 && yearEarnings > 0) {
-      const taxableEarnings = Math.max(0, yearEarnings);
-      const extraFederal = taxableEarnings * federalTaxRateDecimal;
-      const extraState = taxableEarnings * stateTaxRateDecimal;
+        const taxableEarnings = Math.max(0, yearEarnings);
+        const extraFederal = taxableEarnings * safeFederalTaxRateDecimal;
+        const extraState = taxableEarnings * safeStateTaxRateDecimal;
       const lastIdx = taxableMonths.length - 1;
       taxableMonths[lastIdx].federalTaxOnEarnings += extraFederal;
       taxableMonths[lastIdx].stateTaxOnEarnings += extraState;
