@@ -164,7 +164,8 @@ const [active, setActive] = useState<NavKey>("inputs");
   const [annualReturn, setAnnualReturn] = useState("");
   const [annualReturnEdited, setAnnualReturnEdited] = useState(false);
   const [annualReturnWarningMax, setAnnualReturnWarningMax] = useState<number | null>(null);
-const [timeHorizonYears, setTimeHorizonYears] = useState("");
+  const [timeHorizonYears, setTimeHorizonYears] = useState("");
+  const [timeHorizonEdited, setTimeHorizonEdited] = useState(false);
   const copy = getCopy(language);
   const annualReturnWarningText =
     annualReturnWarningMax === null
@@ -181,6 +182,7 @@ const [timeHorizonYears, setTimeHorizonYears] = useState("");
   const [startingBalance, setStartingBalance] = useState("");
   const [monthlyContribution, setMonthlyContribution] = useState("");
   const [monthlyContributionFuture, setMonthlyContributionFuture] = useState("");
+  const [showContributionLimitPanel, setShowContributionLimitPanel] = useState(false);
   const [contributionEndYear, setContributionEndYear] = useState("");
   const [contributionEndMonth, setContributionEndMonth] = useState("");
   const [monthlyWithdrawal, setMonthlyWithdrawal] = useState("");
@@ -668,6 +670,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setStopContributionIncreasesAfterYear(limitBreachYear > 0 ? limitBreachYear - 1 : null);
 
     if (limitBreachYear === 0) {
+      setContributionIncreasePct("0");
+      setStopContributionIncreasesAfterYear(null);
       setContributionIncreaseHelperText(
         "Base contributions already meet the annual limit; increases are disabled.",
       );
@@ -770,6 +774,33 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   }, [plannerStateCode, beneficiaryStateOfResidence]);
 
   useEffect(() => {
+    if (timeHorizonEdited) return;
+    const client = getClientConfig(plannerStateCode);
+    const candidate =
+      client?.defaults?.timeHorizonYears ??
+      client?.defaults?.timeHorizon ??
+      client?.defaults?.defaultTimeHorizonYears ??
+      null;
+    const fallback = typeof candidate === "number" && Number.isFinite(candidate)
+      ? String(Math.round(candidate))
+      : "40";
+    setTimeHorizonYears(fallback);
+  }, [plannerStateCode, timeHorizonEdited]);
+
+  useEffect(() => {
+    setShowContributionLimitPanel(false);
+  }, [
+    timeHorizonYears,
+    contributionIncreasePct,
+    monthlyWithdrawal,
+    withdrawalIncreasePct,
+    contributionEndMonth,
+    contributionEndYear,
+    withdrawalStartMonth,
+    withdrawalStartYear,
+  ]);
+
+  useEffect(() => {
     if (!beneficiaryStateOfResidence || beneficiaryStateOfResidence === planState) {
       setNonResidentProceedAck(false);
     }
@@ -829,12 +860,62 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setWtaAutoPromptedForIncrease(false);
     setScreen2Messages([...screen2DefaultMessages]);
     setTimeHorizonYears("");
+    setTimeHorizonEdited(false);
     setContributionEndTouched(false);
     setWithdrawalStartTouched(false);
     setWtaAutoApplied(false);
     setWtaDismissed(false);
+    setShowContributionLimitPanel(false);
   };
-const contributionIncreaseDisabled = contributionBreachYear === 0;
+  useEffect(() => {
+    const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
+    if (!Number.isFinite(numeric) || numeric <= 0) {
+      const input = document.getElementById("activity-contribution-increase");
+      if (input) {
+        input.removeAttribute("readOnly");
+        input.removeAttribute("aria-disabled");
+        input.setAttribute("tabindex", "0");
+        input.classList.remove("pointer-events-none");
+      }
+      return;
+    }
+    const { startIndex } = getHorizonConfig();
+    const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(startIndex);
+    const limit = wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
+    if (!Number.isFinite(limit) || limit <= 0) {
+      const input = document.getElementById("activity-contribution-increase");
+      if (input) {
+        input.removeAttribute("readOnly");
+        input.removeAttribute("aria-disabled");
+        input.setAttribute("tabindex", "0");
+        input.classList.remove("pointer-events-none");
+      }
+      return;
+    }
+    const currentSliceTotal = numeric * monthsRemaining;
+    const futureYearTotal = numeric * 12;
+    const meetsLimit = currentSliceTotal >= limit || futureYearTotal >= limit;
+    const input = document.getElementById("activity-contribution-increase");
+    if (meetsLimit) {
+      setContributionIncreasePct("0");
+      setStopContributionIncreasesAfterYear(null);
+      setContributionIncreaseHelperText(
+        "Base contributions already meet the annual limit; increases are disabled.",
+      );
+      if (input) {
+        input.setAttribute("readOnly", "true");
+        input.setAttribute("aria-disabled", "true");
+        input.setAttribute("tabindex", "-1");
+        input.classList.add("pointer-events-none");
+      }
+    } else if (input) {
+      input.removeAttribute("readOnly");
+      input.removeAttribute("aria-disabled");
+      input.setAttribute("tabindex", "0");
+      input.classList.remove("pointer-events-none");
+    }
+    void contributionBreachYear;
+  }, [monthlyContribution, wtaStatus, wtaCombinedLimit, getHorizonConfig, contributionBreachYear]);
 
   const content = (() => {
     const agiValue = Number(plannerAgi);
@@ -866,6 +947,14 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
       wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
     const breachNow = plannedCurrentYearContribution > allowedAnnualLimit;
     const breachFuture = plannedAnnualContribution > allowedAnnualLimit;
+    const baseMeetsOrExceedsLimitNow = (() => {
+      if (!Number.isFinite(monthlyContributionNumber) || monthlyContributionNumber <= 0) return false;
+      if (!Number.isFinite(allowedAnnualLimit) || allowedAnnualLimit <= 0) return false;
+      const currentSliceTotal = monthlyContributionNumber * monthsRemainingInCurrentCalendarYear;
+      const futureYearTotal = monthlyContributionNumber * 12;
+      return currentSliceTotal >= allowedAnnualLimit || futureYearTotal >= allowedAnnualLimit;
+    })();
+    const contributionIncreaseDisabledNow = baseMeetsOrExceedsLimitNow;
     const hasContributionIssue =
       inputStep === 2 && (breachNow || breachFuture);
     const residencyMismatch =
@@ -892,16 +981,6 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
       setMonthlyContributionFuture(String(futureYearMaxMonthly));
     };
 
-    const currentMonthlyNum = monthlyContribution === "" ? NaN : Number(monthlyContribution);
-    const futureMonthlyNum = monthlyContributionFuture === "" ? NaN : Number(monthlyContributionFuture);
-    const showMonthlyContributionHelper =
-      monthlyContributionFuture !== "" &&
-      Number.isFinite(currentMonthlyNum) &&
-      Number.isFinite(futureMonthlyNum) &&
-      currentMonthlyNum >= 0 &&
-      futureMonthlyNum >= 0 &&
-      currentMonthlyNum !== futureMonthlyNum;
-    const formatMonthlyHelper = (value: number) => formatCurrency(value).replace(".00", "");
     const horizonLimits = getTimeHorizonLimits();
     const monthOptions = Array.from({ length: 12 }, (_, i) => {
   const date = new Date(2020, i, 1);
@@ -1250,7 +1329,11 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
         );
       }
 
-      const showWtaPanel = !wtaDismissed && (wtaMode === "noPath" || wtaMode === "combinedLimit");
+      const showWtaPanel =
+        showContributionLimitPanel &&
+        monthlyContributionNumber > 0 &&
+        !wtaDismissed &&
+        (wtaMode === "noPath" || wtaMode === "combinedLimit");
 
       if (!showWtaPanel) {
         return renderScreen2Messages();
@@ -1550,11 +1633,6 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                 {copy?.buttons?.back ?? "Back"}
               </button>
             )}
-            {showMonthlyContributionHelper && (
-              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
-                This year: {formatMonthlyHelper(currentMonthlyNum)}/mo through Dec; starting Jan: {formatMonthlyHelper(futureMonthlyNum)}/mo.
-              </p>
-            )}
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -1656,7 +1734,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
               monthlyWithdrawal={monthlyWithdrawal}
               withdrawalStartYear={withdrawalStartYear}
               withdrawalStartMonth={withdrawalStartMonth}
-              contributionIncreaseDisabled={contributionIncreaseDisabled}
+              contributionIncreaseDisabled={contributionIncreaseDisabledNow}
               contributionIncreaseHelperText={contributionIncreaseHelperText}
               contributionIncreasePct={contributionIncreasePct}
               withdrawalIncreasePct={withdrawalIncreasePct}
@@ -1668,12 +1746,18 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                 if ("timeHorizonYears" in updates) {
                   const raw = (updates.timeHorizonYears ?? "").replace(".00","");
                   setTimeHorizonYears(raw);
+                  setTimeHorizonEdited(true);
                 }
                 if ("startingBalance" in updates)
                   setStartingBalance(sanitizeAmountInput(updates.startingBalance ?? ""));
                 if ("monthlyContribution" in updates) {
-                  setMonthlyContribution(sanitizeAmountInput(updates.monthlyContribution ?? ""));
+                  const sanitized = sanitizeAmountInput(updates.monthlyContribution ?? "");
+                  setMonthlyContribution(sanitized);
                   setMonthlyContributionFuture("");
+                  const numeric = sanitized === "" ? 0 : Number(sanitized);
+                  const showPanel =
+                    sanitized !== "" && Number.isFinite(numeric) && numeric > 0;
+                  setShowContributionLimitPanel(showPanel);
                 }
                 if ("contributionEndYear" in updates) {
                   setContributionEndTouched(true);
