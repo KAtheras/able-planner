@@ -81,6 +81,7 @@ export type UsePlannerScheduleArgs = {
   monthlyContribution: number;
   monthlyWithdrawal: number;
   contributionIncreasePct: number;
+  stopContributionIncreasesAfterYear?: number | null;
   withdrawalIncreasePct: number;
   contributionEndIndex: number;
   withdrawalStartIndex: number;
@@ -108,6 +109,7 @@ export function usePlannerSchedule({
   monthlyContribution,
   monthlyWithdrawal,
   contributionIncreasePct,
+  stopContributionIncreasesAfterYear,
   withdrawalIncreasePct,
   contributionEndIndex,
   withdrawalStartIndex,
@@ -132,6 +134,7 @@ export function usePlannerSchedule({
       monthlyContribution,
       monthlyWithdrawal,
       contributionIncreasePct,
+      stopContributionIncreasesAfterYear,
       withdrawalIncreasePct,
       contributionEndIndex,
       withdrawalStartIndex,

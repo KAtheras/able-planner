@@ -58,6 +58,7 @@ export type AmortizationInputs = {
   monthlyContribution: number;
   monthlyWithdrawal: number;
   contributionIncreasePct: number;
+  stopContributionIncreasesAfterYear?: number | null;
   withdrawalIncreasePct: number;
   contributionEndIndex: number;
   withdrawalStartIndex: number;
@@ -184,7 +185,12 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
       monthsSinceContributionStart > 0 &&
       monthsSinceContributionStart % 12 === 0
     ) {
-      currentContribution *= contributionIncreaseFactor;
+      const completedYears = Math.floor(monthsSinceContributionStart / 12);
+      const stopAfterYear = inputs.stopContributionIncreasesAfterYear ?? null;
+      // Example: stopAfterYear=5 => do NOT apply the increase at the start of year 6 (completedYears === 5).
+      if (stopAfterYear === null || !Number.isFinite(stopAfterYear) || completedYears < stopAfterYear) {
+        currentContribution *= contributionIncreaseFactor;
+      }
     }
 
     const withdrawalActive = monthIndex >= inputs.withdrawalStartIndex;

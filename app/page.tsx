@@ -469,15 +469,20 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const baseAnnual = monthlyContributionNum * 12;
     const pctDecimal = pctRaw / 100;
     const horizonInput = Number(timeHorizonYears);
-    const maxYearsToCheck =
-      Number.isFinite(horizonInput) && horizonInput > 0 ? Math.floor(horizonInput) : 75;
+    if (!Number.isFinite(horizonInput) || horizonInput <= 0) {
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+    const maxYearsToCheck = Math.floor(horizonInput);
 
     const computeBreachYear = (limit: number): number | null => {
       if (baseAnnual >= limit) {
         return 0;
       }
       for (let year = 1; year <= maxYearsToCheck; year += 1) {
-        const projectedAnnual = baseAnnual * Math.pow(1 + pctDecimal, year);
+        const projectedAnnual = baseAnnual * Math.pow(1 + pctDecimal, year - 1);
         if (projectedAnnual > limit) {
           return year;
         }
@@ -487,6 +492,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
     const baseBreachYear = computeBreachYear(WTA_BASE_ANNUAL_LIMIT);
     const projectionBreachesBaseLimit = baseBreachYear !== null && baseBreachYear > 0;
+
+    // If inputs change and we no longer breach the base limit, allow auto-prompting again later.
+    if (wtaStatus === "unknown" && !projectionBreachesBaseLimit && wtaAutoPromptedForIncrease) {
+      setWtaAutoPromptedForIncrease(false);
+    }
 
     const shouldPromptWtaFromIncrease =
       wtaStatus === "unknown" &&
@@ -1176,8 +1186,36 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         : startIndex;
     const contributionIncreaseValue = Number(contributionIncreasePct);
     const withdrawalIncreaseValue = Number(withdrawalIncreasePct);
+    
 
-    const { scheduleRows, ssiMessages, planMessages, taxableRows } = usePlannerSchedule({
+    // Compute stop year synchronously so the schedule matches the helper message (no useEffect timing lag).
+    const computedStopContributionIncreasesAfterYear = (() => {
+      const pctRaw = Number(contributionIncreasePct);
+      if (monthlyContributionNum <= 0 || !Number.isFinite(pctRaw) || pctRaw <= 0) return null;
+
+      const horizonInput = Number(timeHorizonYears);
+      if (!Number.isFinite(horizonInput) || horizonInput <= 0) return null;
+
+      // Only enforce once WTA status is known (matches helper gating logic).
+      const limit = annualContributionLimit;
+      if (!Number.isFinite(limit) || limit <= 0) return null;
+
+      const baseAnnual = monthlyContributionNum * 12;
+      if (baseAnnual >= limit) return 0;
+
+      const pctDecimal = pctRaw / 100;
+      const maxYearsToCheck = Math.floor(horizonInput);
+
+      for (let year = 1; year <= maxYearsToCheck; year += 1) {
+        const projectedAnnual = baseAnnual * Math.pow(1 + pctDecimal, year - 1);
+        if (projectedAnnual > limit) {
+          return year - 1; // stop increases after the prior year
+        }
+      }
+      return null;
+    })();
+
+const { scheduleRows, ssiMessages, planMessages, taxableRows } = usePlannerSchedule({
         startMonthIndex: startIndex,
         totalMonths,
         horizonEndIndex,
@@ -1187,6 +1225,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         contributionIncreasePct: Number.isFinite(contributionIncreaseValue)
           ? Math.max(0, contributionIncreaseValue)
           : 0,
+        stopContributionIncreasesAfterYear: computedStopContributionIncreasesAfterYear,
         withdrawalIncreasePct: Number.isFinite(withdrawalIncreaseValue)
           ? Math.max(0, withdrawalIncreaseValue)
           : 0,
@@ -1199,7 +1238,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         stateOfResidence: beneficiaryStateOfResidence || null,
         enabled: hasTimeHorizon,
         planMaxBalance,
-      });
+      });     
 
     if (active === "schedule") {
       if (!hasTimeHorizon) {
