@@ -12,8 +12,8 @@ export type BlockCopyEntry = {
 
 export function getClientBlockText(args: {
   slot: BlockSlot;
-  copy: any;
-  clientConfig: any;
+  copy: unknown;
+  clientConfig: unknown;
   planState: string;
 }): string {
   const lang =

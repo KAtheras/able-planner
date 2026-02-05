@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
@@ -15,7 +15,7 @@ import federalSaversContributionLimits from "@/config/rules/federalSaversContrib
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
 import wtaPovertyLevel from "@/config/rules/wtaPovertyLevel.json";
-import { usePlannerSchedule } from "@/lib/calc/usePlannerSchedule";
+import { buildPlannerSchedule } from "@/lib/calc/usePlannerSchedule";
 
 const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
 
@@ -233,9 +233,6 @@ const [timeHorizonYears, setTimeHorizonYears] = useState("");
       planState,
     }),
   };
-  const rightCardTextBlocks = [blockCopies.rightCardPrimary, blockCopies.rightCardSecondary].filter(
-    (text) => Boolean(text?.trim()),
-  );
   const languageToggle = (
     <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-black">
       <button
@@ -266,14 +263,15 @@ const [timeHorizonYears, setTimeHorizonYears] = useState("");
       </button>
     </div>
   );
-  const planInfoEntry = (planLevelInfo as Record<string, { name?: string; residencyRequired?: boolean } & { maxAccountBalance?: number }>)[planState];
+  const planInfoMap = planLevelInfo as Record<
+    string,
+    { name?: string; residencyRequired?: boolean; maxAccountBalance?: number }
+  >;
+  const planInfoEntry = planInfoMap[planState];
   const planName = planInfoEntry?.name ?? planState;
   const planLabel = `${planName} Able`;
   const planResidencyRequired = Boolean(planInfoEntry?.residencyRequired);
-  const planMaxBalance =
-    (planLevelInfo as Record<string, any>)[planState]?.maxAccountBalance ??
-    (planLevelInfo as Record<string, any>)?.default?.maxAccountBalance ??
-    null;
+  const planMaxBalance = planInfoMap[planState]?.maxAccountBalance ?? planInfoMap.default?.maxAccountBalance ?? null;
   const monthlyContributionNum =
     Number((monthlyContribution ?? "").replace(".00","")) || 0;
   const annualContributionLimit =
@@ -440,10 +438,21 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const plannedAnnual = Number.isFinite(numeric) ? numeric * 12 : 0;
 
     if (wtaStatus === "unknown") {
+      // If the current annualized contribution exceeds the base limit, ALWAYS prompt WTA,
+      // even if we previously auto-prompted due to a future-year projection.
+      if (plannedAnnual > WTA_BASE_ANNUAL_LIMIT) {
+        if (wtaAutoPromptedForIncrease) {
+          setWtaAutoPromptedForIncrease(false);
+        }
+        setWtaMode("initialPrompt");
+        return;
+      }
+
       if (wtaAutoPromptedForIncrease) {
         return;
       }
-      setWtaMode(plannedAnnual > WTA_BASE_ANNUAL_LIMIT ? "initialPrompt" : "idle");
+
+      setWtaMode("idle");
       return;
     }
 
@@ -670,7 +679,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       </select>
   );
 
-  const resetInputs = useCallback(() => {
+  const resetInputs = () => {
     setInputStep(1);
     setBeneficiaryName("");
     setBeneficiaryStateOfResidence("");
@@ -703,9 +712,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setTimeHorizonYears("");
     setContributionEndTouched(false);
     setWithdrawalStartTouched(false);
-  }, [resetWtaFlow]);
-
-  const contributionIncreaseDisabled = contributionBreachYear === 0;
+  };
+const contributionIncreaseDisabled = contributionBreachYear === 0;
 
   const content = (() => {
     const agiValue = Number(plannerAgi);
@@ -926,18 +934,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     };
 
     const renderScreen2Messages = () => {
-      const stopMsg =
-        ssiMessages.find((message) => message.code === "SSI_CONTRIBUTIONS_STOPPED") ?? null;
       const forcedMsg =
         ssiMessages.find((message) => message.code === "SSI_FORCED_WITHDRAWALS_APPLIED") ?? null;
-      const exceedLabel =
-        forcedMsg?.data?.monthLabel ||
-        stopMsg?.data?.monthLabel;
-      const stopLabel =
-        stopMsg?.data?.monthLabel ||
-        forcedMsg?.data?.monthLabel ||
-        exceedLabel;
-
       return (
         <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
           {planMessages.length > 0 && (
@@ -1215,7 +1213,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return null;
     })();
 
-const { scheduleRows, ssiMessages, planMessages, taxableRows } = usePlannerSchedule({
+const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSchedule({
         startMonthIndex: startIndex,
         totalMonths,
         horizonEndIndex,

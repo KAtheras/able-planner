@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 import {
   buildAmortizationSchedule,
   buildTaxableInvestmentScheduleFromAbleSchedule,
@@ -101,7 +99,7 @@ export type PlannerScheduleResult = {
   taxableRows: TaxableYearRow[];
 };
 
-export function usePlannerSchedule({
+export function buildPlannerSchedule({
   startMonthIndex,
   totalMonths,
   horizonEndIndex,
@@ -121,47 +119,11 @@ export function usePlannerSchedule({
   enabled,
   planMaxBalance,
 }: UsePlannerScheduleArgs): PlannerScheduleResult {
-  return useMemo(() => {
-    if (!enabled) {
-      return { scheduleRows: [], ssiMessages: [], planMessages: [], taxableRows: [] };
-    }
+  if (!enabled) {
+    return { scheduleRows: [], ssiMessages: [], planMessages: [], taxableRows: [] };
+  }
 
-    const scheduleRows = buildAmortizationSchedule({
-      startMonthIndex,
-      totalMonths,
-      horizonEndIndex,
-      startingBalance,
-      monthlyContribution,
-      monthlyWithdrawal,
-      contributionIncreasePct,
-      stopContributionIncreasesAfterYear,
-      withdrawalIncreasePct,
-      contributionEndIndex,
-      withdrawalStartIndex,
-      annualReturnDecimal,
-      isSsiEligible,
-      planMaxBalance,
-    });
-
-    const agiNumber = Number.isFinite(agi ?? NaN) ? Math.max(0, agi ?? 0) : 0;
-    const resolvedFiling = (filingStatus ?? "single") as FilingStatusKey;
-    const resolvedState = stateOfResidence ?? "";
-    const federalTaxRateDecimal = getFederalMarginalRateDecimal(agiNumber, resolvedFiling);
-    const stateTaxRateDecimal = getStateMarginalRateDecimal(agiNumber, resolvedState, resolvedFiling);
-
-    return {
-      scheduleRows,
-      ssiMessages: extractSsiMessages(scheduleRows),
-      planMessages: extractPlanMessages(scheduleRows, planMaxBalance),
-      taxableRows: buildTaxableInvestmentScheduleFromAbleSchedule({
-        ableRows: scheduleRows,
-        annualReturnDecimal,
-        federalTaxRateDecimal,
-        stateTaxRateDecimal,
-        startingBalance,
-      }),
-    };
-  }, [
+  const scheduleRows = buildAmortizationSchedule({
     startMonthIndex,
     totalMonths,
     horizonEndIndex,
@@ -169,15 +131,31 @@ export function usePlannerSchedule({
     monthlyContribution,
     monthlyWithdrawal,
     contributionIncreasePct,
+    stopContributionIncreasesAfterYear,
     withdrawalIncreasePct,
     contributionEndIndex,
     withdrawalStartIndex,
     annualReturnDecimal,
     isSsiEligible,
-    agi,
-    filingStatus,
-    stateOfResidence,
     planMaxBalance,
-    enabled,
-  ]);
+  });
+
+  const agiNumber = Number.isFinite(agi ?? NaN) ? Math.max(0, agi ?? 0) : 0;
+  const resolvedFiling = (filingStatus ?? "single") as FilingStatusKey;
+  const resolvedState = stateOfResidence ?? "";
+  const federalTaxRateDecimal = getFederalMarginalRateDecimal(agiNumber, resolvedFiling);
+  const stateTaxRateDecimal = getStateMarginalRateDecimal(agiNumber, resolvedState, resolvedFiling);
+
+  return {
+    scheduleRows,
+    ssiMessages: extractSsiMessages(scheduleRows),
+    planMessages: extractPlanMessages(scheduleRows, planMaxBalance),
+    taxableRows: buildTaxableInvestmentScheduleFromAbleSchedule({
+      ableRows: scheduleRows,
+      annualReturnDecimal,
+      federalTaxRateDecimal,
+      stateTaxRateDecimal,
+    }),
+  };
 }
+
