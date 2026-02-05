@@ -1,6 +1,5 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect */
-
 import { useCallback, useEffect, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
@@ -210,6 +209,20 @@ const [timeHorizonYears, setTimeHorizonYears] = useState("");
   const [fscQ, setFscQ] = useState<FscAnswers>(() => ({ ...EMPTY_FSC }));
   const [messagesMode, setMessagesMode] = useState<"intro" | "fsc">("intro");
   const [agiGateEligible, setAgiGateEligible] = useState<boolean | null>(null);
+  const [wtaAutoApplied, setWtaAutoApplied] = useState(false);
+  const [wtaDismissed, setWtaDismissed] = useState(false);
+  useEffect(() => {
+    setWtaAutoApplied(false);
+    setWtaDismissed(false);
+  }, [
+    monthlyContribution,
+    monthlyContributionFuture,
+    timeHorizonYears,
+    contributionIncreasePct,
+    wtaStatus,
+    setWtaAutoApplied,
+    setWtaDismissed,
+  ]);
   const [showWelcome, setShowWelcome] = useState(true);
   const [amortizationView, setAmortizationView] = useState<"able" | "taxable">("able");
   const currentClientConfig = getClientConfig(plannerStateCode);
@@ -440,9 +453,32 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setWtaAdditionalAllowed(0);
     setWtaCombinedLimit(WTA_BASE_ANNUAL_LIMIT);
     setWtaAutoPromptedForIncrease(false);
-  }, []);
+    setWtaAutoApplied(false);
+    setWtaDismissed(false);
+  }, [setWtaAutoApplied, setWtaDismissed]);
+
+  const applySetToMax = useCallback(
+    (limit: number) => {
+      const { startIndex } = getHorizonConfig();
+      const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(startIndex);
+      const currentYearMaxMonthly = Math.floor(limit / monthsRemaining);
+      const futureYearMaxMonthly = Math.floor(limit / 12);
+      setMonthlyContribution(String(currentYearMaxMonthly));
+      setMonthlyContributionFuture(String(futureYearMaxMonthly));
+    },
+    [getHorizonConfig],
+  );
 
   useEffect(() => {
+    if (!wtaDismissed && (wtaMode === "noPath" || wtaMode === "combinedLimit")) {
+      return;
+    }
+    if (
+      !wtaDismissed &&
+      (wtaMode === "initialPrompt" || wtaMode === "wtaQuestion")
+    ) {
+      return;
+    }
     const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
     const plannedAnnual = Number.isFinite(numeric) ? numeric * 12 : 0;
     const { startIndex, safeYears } = getHorizonConfig();
@@ -491,7 +527,62 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         ? "noPath"
         : "idle",
     );
-  }, [monthlyContribution, getHorizonConfig, wtaCombinedLimit, wtaStatus, wtaAutoPromptedForIncrease]);
+  }, [
+    monthlyContribution,
+    getHorizonConfig,
+    wtaCombinedLimit,
+    wtaStatus,
+    wtaAutoPromptedForIncrease,
+    wtaMode,
+    wtaDismissed,
+  ]);
+
+  useEffect(() => {
+    if (wtaDismissed || wtaAutoApplied) {
+      return;
+    }
+    const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
+    const futureNumeric =
+      typeof monthlyContributionFuture === "string" && monthlyContributionFuture !== ""
+        ? Number(monthlyContributionFuture)
+        : NaN;
+    const { startIndex } = getHorizonConfig();
+    const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(startIndex);
+    const plannedCurrentYear = Number.isFinite(numeric) ? numeric * monthsRemaining : 0;
+    const annualBasis =
+      Number.isFinite(futureNumeric) && futureNumeric >= 0 ? futureNumeric : numeric;
+    const plannedAnnual = Number.isFinite(annualBasis) ? annualBasis * 12 : 0;
+    const breachNow = plannedCurrentYear > WTA_BASE_ANNUAL_LIMIT;
+    const breachFuture = plannedAnnual > WTA_BASE_ANNUAL_LIMIT;
+    const ineligibleBreach = wtaStatus === "ineligible" && (breachNow || breachFuture);
+    const eligibleCombinedBreach =
+      wtaStatus === "eligible" && plannedAnnual > wtaCombinedLimit;
+
+    if (ineligibleBreach) {
+      applySetToMax(WTA_BASE_ANNUAL_LIMIT);
+      setWtaAutoApplied(true);
+      setWtaMode("noPath");
+      return;
+    }
+
+    if (eligibleCombinedBreach) {
+      applySetToMax(wtaCombinedLimit);
+      setWtaAutoApplied(true);
+      setWtaMode("combinedLimit");
+    }
+  }, [
+    monthlyContribution,
+    monthlyContributionFuture,
+    timeHorizonYears,
+    contributionIncreasePct,
+    wtaStatus,
+    wtaCombinedLimit,
+    wtaDismissed,
+    wtaAutoApplied,
+    getHorizonConfig,
+    setWtaMode,
+    setWtaAutoApplied,
+  ]);
 
   useEffect(() => {
     const pctRaw = Number(contributionIncreasePct);
@@ -740,6 +831,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setTimeHorizonYears("");
     setContributionEndTouched(false);
     setWithdrawalStartTouched(false);
+    setWtaAutoApplied(false);
+    setWtaDismissed(false);
   };
 const contributionIncreaseDisabled = contributionBreachYear === 0;
 
@@ -1157,83 +1250,68 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
         );
       }
 
-      if (!(breachNow || breachFuture)) {
+      const showWtaPanel = !wtaDismissed && (wtaMode === "noPath" || wtaMode === "combinedLimit");
+
+      if (!showWtaPanel) {
         return renderScreen2Messages();
       }
 
       const overageReference = breachNow ? plannedCurrentYearContribution : plannedAnnualContribution;
       const baseLimitOverage = Math.max(0, overageReference - WTA_BASE_ANNUAL_LIMIT);
-      if (wtaStatus === "ineligible") {
+      if (wtaStatus === "ineligible" && !wtaDismissed) {
         const baseLimitCaps = deriveMonthlyCaps(WTA_BASE_ANNUAL_LIMIT);
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {(copy?.messages?.wtaNotEligible ?? "You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of {{limit}}.").replace("{{limit}}", "$20,000")}
-            </p>
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-              {copy?.messages?.wtaAmountOverTitle ?? "AMOUNT OVER THE ANNUAL LIMIT:"}
-            </p>
-            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-              {formatCurrency(baseLimitOverage).replace(".00","")}
+              {(copy?.messages?.wtaNotEligible ?? "You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of {{limit}}.")
+                .replace("{{limit}}", "$20,000")}
             </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {copy?.messages?.wtaSetToMaxQuestion ?? "Would you like to set contributions to the maximum allowed amount?"}
+              We adjusted your planned contributions in an amount that keeps you below the annual contribution limit.
             </p>
             <p className="text-xs leading-relaxed text-zinc-500">
               (This year: {formatMonthlyLabel(baseLimitCaps.currentYearMaxMonthly)}/mo through Dec; starting Jan: {formatMonthlyLabel(baseLimitCaps.futureYearMaxMonthly)}/mo.)
-            </p>
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
             </p>
             <button
               type="button"
               className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
               onClick={() => {
-                applySetToMax(WTA_BASE_ANNUAL_LIMIT);
+                setWtaDismissed(true);
                 setWtaMode("idle");
               }}
-            >{copy?.buttons?.yes ?? "Yes"}</button>
+            >
+              OK
+            </button>
           </div>
         );
       }
 
-      if (wtaStatus === "eligible") {
-        const combinedLimitOverage = Math.max(0, plannedAnnualContribution - wtaCombinedLimit);
-        if (combinedLimitOverage <= 0) {
-          return renderScreen2Messages();
-        }
+      if (wtaStatus === "eligible" && !wtaDismissed) {
         const combinedLimitCaps = deriveMonthlyCaps(wtaCombinedLimit);
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-             
+              
 {(copy?.messages?.wtaEligibleOverCombinedLine1 ?? "You qualify for additional contributions of {{additional}}, but your total contributions exceed the combined limit of {{combined}}.")
   .replace("{{additional}}", formatCurrency(wtaAdditionalAllowed).replace(".00",""))
   .replace("{{combined}}", formatCurrency(wtaCombinedLimit).replace(".00",""))}
             </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              
-{copy?.messages?.wtaEligibleOverCombinedLine2 ?? "Please revise your contribution amounts to bring total contributions below the combined limit."}
-            </p>
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-              {copy?.messages?.wtaAmountOverCombinedTitle ?? "AMOUNT OVER THE COMBINED LIMIT:"}
-            </p>
-            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-              {formatCurrency(combinedLimitOverage).replace(".00","")}
-            </p>
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {copy?.messages?.wtaSetToMaxQuestion ?? "Would you like to set contributions to the maximum allowed amount?"}
+              We adjusted your planned contributions in an amount that keeps you below the annual contribution limit.
             </p>
             <p className="text-xs leading-relaxed text-zinc-500">
               (This year: {formatMonthlyLabel(combinedLimitCaps.currentYearMaxMonthly)}/mo through Dec; starting Jan: {formatMonthlyLabel(combinedLimitCaps.futureYearMaxMonthly)}/mo.)
             </p>
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
-            </p>
             <button
               type="button"
               className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
-              onClick={resolveCombinedLimitWithAutoContribution}
-            >{copy?.buttons?.yes ?? "Yes"}</button>
+              onClick={() => {
+                setWtaDismissed(true);
+                setWtaMode("idle");
+              }}
+            >
+              OK
+            </button>
           </div>
         );
       }
