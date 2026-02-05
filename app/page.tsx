@@ -51,6 +51,14 @@ const SCREEN2_DEFAULT_MESSAGES: string[] = [
 ];
 
 const WTA_BASE_ANNUAL_LIMIT = 20000;
+const getMonthsRemainingInCurrentCalendarYear = (startIndex: number) => {
+  if (!Number.isFinite(startIndex)) {
+    return 12;
+  }
+  const monthOfYearIndex = ((startIndex % 12) + 12) % 12;
+  const remaining = 12 - monthOfYearIndex;
+  return remaining > 0 ? remaining : 12;
+};
 type WtaMode = "idle" | "initialPrompt" | "wtaQuestion" | "noPath" | "combinedLimit";
 type WtaStatus = "unknown" | "ineligible" | "eligible";
 
@@ -173,6 +181,7 @@ const [timeHorizonYears, setTimeHorizonYears] = useState("");
   const [isSsiEligible, setIsSsiEligible] = useState(false);
   const [startingBalance, setStartingBalance] = useState("");
   const [monthlyContribution, setMonthlyContribution] = useState("");
+  const [monthlyContributionFuture, setMonthlyContributionFuture] = useState("");
   const [contributionEndYear, setContributionEndYear] = useState("");
   const [contributionEndMonth, setContributionEndMonth] = useState("");
   const [monthlyWithdrawal, setMonthlyWithdrawal] = useState("");
@@ -436,11 +445,25 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   useEffect(() => {
     const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
     const plannedAnnual = Number.isFinite(numeric) ? numeric * 12 : 0;
+    const { startIndex, safeYears } = getHorizonConfig();
+    const totalMonthsInHorizon = safeYears * 12;
+    const monthsRemainingInCurrentCalendarYear = getMonthsRemainingInCurrentCalendarYear(startIndex);
+    const plannedCurrentYear = Number.isFinite(numeric)
+      ? numeric * monthsRemainingInCurrentCalendarYear
+      : 0;
+    const monthsBeyondThisYear = Math.max(0, totalMonthsInHorizon - monthsRemainingInCurrentCalendarYear);
+    const monthsInNextCalendarYearWithinHorizon = Math.min(12, monthsBeyondThisYear);
+    const plannedNextCalendarYear = Number.isFinite(numeric)
+      ? numeric * monthsInNextCalendarYearWithinHorizon
+      : 0;
 
     if (wtaStatus === "unknown") {
       // If the current annualized contribution exceeds the base limit, ALWAYS prompt WTA,
       // even if we previously auto-prompted due to a future-year projection.
-      if (plannedAnnual > WTA_BASE_ANNUAL_LIMIT) {
+      if (
+        plannedCurrentYear > WTA_BASE_ANNUAL_LIMIT ||
+        plannedNextCalendarYear > WTA_BASE_ANNUAL_LIMIT
+      ) {
         if (wtaAutoPromptedForIncrease) {
           setWtaAutoPromptedForIncrease(false);
         }
@@ -463,8 +486,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return;
     }
 
-    setWtaMode(plannedAnnual > WTA_BASE_ANNUAL_LIMIT ? "noPath" : "idle");
-  }, [monthlyContribution, wtaCombinedLimit, wtaStatus, wtaAutoPromptedForIncrease]);
+    setWtaMode(
+      plannedCurrentYear > WTA_BASE_ANNUAL_LIMIT || plannedAnnual > WTA_BASE_ANNUAL_LIMIT
+        ? "noPath"
+        : "idle",
+    );
+  }, [monthlyContribution, getHorizonConfig, wtaCombinedLimit, wtaStatus, wtaAutoPromptedForIncrease]);
 
   useEffect(() => {
     const pctRaw = Number(contributionIncreasePct);
@@ -690,6 +717,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setIsSsiEligible(false);
     setStartingBalance("");
     setMonthlyContribution("");
+    setMonthlyContributionFuture("");
     setContributionEndYear("");
     setContributionEndMonth("");
     setMonthlyWithdrawal("");
@@ -721,13 +749,32 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
       plannerAgi !== "" && !Number.isNaN(agiValue) && (agiValue > 0 || agiValue === 0);
 
     const monthlyContributionNumber = monthlyContribution === "" ? 0 : Number(monthlyContribution);
-    const plannedAnnualContribution = Number.isFinite(monthlyContributionNumber)
-      ? monthlyContributionNumber * 12
+
+    // If we have a future-monthly override (used for full future calendar years),
+    // use that for 12-month annual calculations and breach logic.
+    const monthlyContributionFutureNumber =
+      typeof monthlyContributionFuture === "string" && monthlyContributionFuture !== ""
+        ? Number(monthlyContributionFuture)
+        : NaN;
+
+    const annualMonthlyBasis = Number.isFinite(monthlyContributionFutureNumber)
+      ? monthlyContributionFutureNumber
+      : monthlyContributionNumber;
+
+    const plannedAnnualContribution = Number.isFinite(annualMonthlyBasis)
+      ? annualMonthlyBasis * 12
       : 0;
+    const horizonConfig = getHorizonConfig();
+    const monthsRemainingInCurrentCalendarYear = getMonthsRemainingInCurrentCalendarYear(
+      horizonConfig.startIndex,
+    );
+    const plannedCurrentYearContribution = monthlyContributionNumber * monthsRemainingInCurrentCalendarYear;
     const allowedAnnualLimit =
       wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
+    const breachNow = plannedCurrentYearContribution > allowedAnnualLimit;
+    const breachFuture = plannedAnnualContribution > allowedAnnualLimit;
     const hasContributionIssue =
-      inputStep === 2 && plannedAnnualContribution > allowedAnnualLimit;
+      inputStep === 2 && (breachNow || breachFuture);
     const residencyMismatch =
       beneficiaryStateOfResidence &&
       planState &&
@@ -739,6 +786,29 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
       (inputStep === 1 && (!agiValid || residencyBlocking)) ||
       (inputStep === 2 && hasContributionIssue);
 
+    const deriveMonthlyCaps = (limit: number) => {
+      const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(horizonConfig.startIndex);
+      const currentYearMaxMonthly = Math.floor(limit / monthsRemaining);
+      const futureYearMaxMonthly = Math.floor(limit / 12);
+      return { currentYearMaxMonthly, futureYearMaxMonthly };
+    };
+    const formatMonthlyLabel = (value: number) => formatCurrency(value).replace(".00", "");
+    const applySetToMax = (limit: number) => {
+      const { currentYearMaxMonthly, futureYearMaxMonthly } = deriveMonthlyCaps(limit);
+      setMonthlyContribution(String(currentYearMaxMonthly));
+      setMonthlyContributionFuture(String(futureYearMaxMonthly));
+    };
+
+    const currentMonthlyNum = monthlyContribution === "" ? NaN : Number(monthlyContribution);
+    const futureMonthlyNum = monthlyContributionFuture === "" ? NaN : Number(monthlyContributionFuture);
+    const showMonthlyContributionHelper =
+      monthlyContributionFuture !== "" &&
+      Number.isFinite(currentMonthlyNum) &&
+      Number.isFinite(futureMonthlyNum) &&
+      currentMonthlyNum >= 0 &&
+      futureMonthlyNum >= 0 &&
+      currentMonthlyNum !== futureMonthlyNum;
+    const formatMonthlyHelper = (value: number) => formatCurrency(value).replace(".00", "");
     const horizonLimits = getTimeHorizonLimits();
     const monthOptions = Array.from({ length: 12 }, (_, i) => {
   const date = new Date(2020, i, 1);
@@ -809,8 +879,6 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
       return copy?.buttons?.eligibleToEvaluate ?? "Eligible to evaluate";
     };
 
-    const horizonConfig = getHorizonConfig();
-
     const horizonYearOptions = getYearOptions(
       horizonConfig.startIndex,
       horizonConfig.horizonEndIndex,
@@ -823,23 +891,26 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
       setWtaRetirementPlan(null);
     };
 
-    const resolveBaseLimitWithAutoContribution = () => {
-      const monthly = Math.floor(WTA_BASE_ANNUAL_LIMIT / 12);
-      setMonthlyContribution(String(monthly));
-    };
-
     const resolveCombinedLimitWithAutoContribution = () => {
-      const monthly = Math.floor(wtaCombinedLimit / 12);
-      setMonthlyContribution(String(monthly));
+      applySetToMax(wtaCombinedLimit);
     };
 
     const handleOverLimitNo = () => {
-      setWtaMode("noPath");
-      setWtaHasEarnedIncome(false);
-      setWtaRetirementPlan(null);
+      const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
+      const { startIndex } = getHorizonConfig();
+      const monthsRemainingInCurrentCalendarYear = getMonthsRemainingInCurrentCalendarYear(startIndex);
+      const plannedCurrentYear = Number.isFinite(numeric)
+        ? numeric * monthsRemainingInCurrentCalendarYear
+        : 0;
+      const plannedAnnual = Number.isFinite(numeric) ? numeric * 12 : 0;
+      const breachNow = plannedCurrentYear > WTA_BASE_ANNUAL_LIMIT;
+      const breachFuture = plannedAnnual > WTA_BASE_ANNUAL_LIMIT;
+      setWtaStatus("ineligible");
       setWtaAdditionalAllowed(0);
       setWtaCombinedLimit(WTA_BASE_ANNUAL_LIMIT);
-      setWtaStatus("ineligible");
+      setWtaHasEarnedIncome(false);
+      setWtaRetirementPlan(null);
+      setWtaMode(breachNow || breachFuture ? "noPath" : "idle");
     };
 
     const handleEarnedIncomeAnswer = (hasIncome: boolean) => {
@@ -1086,12 +1157,14 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
         );
       }
 
-      if (plannedAnnualContribution <= WTA_BASE_ANNUAL_LIMIT) {
+      if (!(breachNow || breachFuture)) {
         return renderScreen2Messages();
       }
 
-      const baseLimitOverage = Math.max(0, plannedAnnualContribution - WTA_BASE_ANNUAL_LIMIT);
+      const overageReference = breachNow ? plannedCurrentYearContribution : plannedAnnualContribution;
+      const baseLimitOverage = Math.max(0, overageReference - WTA_BASE_ANNUAL_LIMIT);
       if (wtaStatus === "ineligible") {
+        const baseLimitCaps = deriveMonthlyCaps(WTA_BASE_ANNUAL_LIMIT);
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
@@ -1106,12 +1179,18 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {copy?.messages?.wtaSetToMaxQuestion ?? "Would you like to set contributions to the maximum allowed amount?"}
             </p>
+            <p className="text-xs leading-relaxed text-zinc-500">
+              (This year: {formatMonthlyLabel(baseLimitCaps.currentYearMaxMonthly)}/mo through Dec; starting Jan: {formatMonthlyLabel(baseLimitCaps.futureYearMaxMonthly)}/mo.)
+            </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
             </p>
             <button
               type="button"
               className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
-              onClick={resolveBaseLimitWithAutoContribution}
+              onClick={() => {
+                applySetToMax(WTA_BASE_ANNUAL_LIMIT);
+                setWtaMode("idle");
+              }}
             >{copy?.buttons?.yes ?? "Yes"}</button>
           </div>
         );
@@ -1122,10 +1201,11 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
         if (combinedLimitOverage <= 0) {
           return renderScreen2Messages();
         }
+        const combinedLimitCaps = deriveMonthlyCaps(wtaCombinedLimit);
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              
+             
 {(copy?.messages?.wtaEligibleOverCombinedLine1 ?? "You qualify for additional contributions of {{additional}}, but your total contributions exceed the combined limit of {{combined}}.")
   .replace("{{additional}}", formatCurrency(wtaAdditionalAllowed).replace(".00",""))
   .replace("{{combined}}", formatCurrency(wtaCombinedLimit).replace(".00",""))}
@@ -1143,7 +1223,11 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {copy?.messages?.wtaSetToMaxQuestion ?? "Would you like to set contributions to the maximum allowed amount?"}
             </p>
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
+            <p className="text-xs leading-relaxed text-zinc-500">
+              (This year: {formatMonthlyLabel(combinedLimitCaps.currentYearMaxMonthly)}/mo through Dec; starting Jan: {formatMonthlyLabel(combinedLimitCaps.futureYearMaxMonthly)}/mo.)
+            </p>
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              {copy?.messages?.wtaSetToMaxNote ?? "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit."}
             </p>
             <button
               type="button"
@@ -1171,6 +1255,10 @@ const contributionIncreaseDisabled = contributionBreachYear === 0;
     };
     const startingBalanceValue = parseAmount(startingBalance);
     const monthlyContributionValue = parseAmount(monthlyContribution);
+    const monthlyContributionFutureValue =
+      monthlyContributionFuture !== ""
+        ? parseAmount(monthlyContributionFuture)
+        : monthlyContributionValue;
     const monthlyWithdrawalValue = parseAmount(monthlyWithdrawal);
     const contributionEndRaw = parseMonthYearToIndex(contributionEndYear, contributionEndMonth);
     const contributionEndIndexValue =
@@ -1218,7 +1306,9 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         totalMonths,
         horizonEndIndex,
         startingBalance: startingBalanceValue,
-        monthlyContribution: monthlyContributionValue,
+      monthlyContribution: monthlyContributionValue,
+      monthlyContributionCurrentYear: monthlyContributionValue,
+      monthlyContributionFutureYears: monthlyContributionFutureValue,
         monthlyWithdrawal: monthlyWithdrawalValue,
         contributionIncreasePct: Number.isFinite(contributionIncreaseValue)
           ? Math.max(0, contributionIncreaseValue)
@@ -1382,6 +1472,11 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                 {copy?.buttons?.back ?? "Back"}
               </button>
             )}
+            {showMonthlyContributionHelper && (
+              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                This year: {formatMonthlyHelper(currentMonthlyNum)}/mo through Dec; starting Jan: {formatMonthlyHelper(futureMonthlyNum)}/mo.
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -1500,6 +1595,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                   setStartingBalance(sanitizeAmountInput(updates.startingBalance ?? ""));
                 if ("monthlyContribution" in updates) {
                   setMonthlyContribution(sanitizeAmountInput(updates.monthlyContribution ?? ""));
+                  setMonthlyContributionFuture("");
                 }
                 if ("contributionEndYear" in updates) {
                   setContributionEndTouched(true);

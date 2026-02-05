@@ -77,6 +77,8 @@ export type UsePlannerScheduleArgs = {
   horizonEndIndex: number;
   startingBalance: number;
   monthlyContribution: number;
+  monthlyContributionCurrentYear?: number;
+  monthlyContributionFutureYears?: number;
   monthlyWithdrawal: number;
   contributionIncreasePct: number;
   stopContributionIncreasesAfterYear?: number | null;
@@ -105,6 +107,9 @@ export function buildPlannerSchedule({
   horizonEndIndex,
   startingBalance,
   monthlyContribution,
+  // Default to the single monthlyContribution when per-period overrides are not provided.
+  monthlyContributionCurrentYear = monthlyContribution,
+  monthlyContributionFutureYears = monthlyContribution,
   monthlyWithdrawal,
   contributionIncreasePct,
   stopContributionIncreasesAfterYear,
@@ -129,6 +134,8 @@ export function buildPlannerSchedule({
     horizonEndIndex,
     startingBalance,
     monthlyContribution,
+    monthlyContributionCurrentYear,
+    monthlyContributionFutureYears,
     monthlyWithdrawal,
     contributionIncreasePct,
     stopContributionIncreasesAfterYear,
@@ -158,4 +165,3 @@ export function buildPlannerSchedule({
     }),
   };
 }
-

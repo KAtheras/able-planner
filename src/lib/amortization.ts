@@ -56,6 +56,8 @@ export type AmortizationInputs = {
   horizonEndIndex: number;
   startingBalance: number;
   monthlyContribution: number;
+  monthlyContributionCurrentYear?: number;
+  monthlyContributionFutureYears?: number;
   monthlyWithdrawal: number;
   contributionIncreasePct: number;
   stopContributionIncreasesAfterYear?: number | null;
@@ -153,7 +155,18 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
   const contributionIncreaseFactor = 1 + Math.max(0, inputs.contributionIncreasePct) / 100;
   const withdrawalIncreaseFactor = 1 + Math.max(0, inputs.withdrawalIncreasePct) / 100;
   let currentBalance = Math.max(0, inputs.startingBalance);
-  let currentContribution = Math.max(0, inputs.monthlyContribution);
+  const baseCurrentYearContribution = Math.max(
+    0,
+    inputs.monthlyContributionCurrentYear ?? inputs.monthlyContribution,
+  );
+  const baseFutureYearContribution = Math.max(
+    0,
+    inputs.monthlyContributionFutureYears ?? inputs.monthlyContribution,
+  );
+  const startCalendarYear = Math.floor(inputs.startMonthIndex / 12);
+  let currentBaseForPeriod = baseCurrentYearContribution;
+  let contributionMultiplier = 1;
+  let currentContribution = currentBaseForPeriod * contributionMultiplier;
   let currentWithdrawal = Math.max(0, inputs.monthlyWithdrawal);
 
   const rows: YearRow[] = [];
@@ -175,6 +188,15 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
     const year = Math.floor(monthIndex / 12);
     const monthNumber = (monthIndex % 12) + 1;
     const monthLabel = `– ${MONTH_NAMES[monthNumber - 1]} ${year}`;
+    const currentMonthCalendarYear = Math.floor(monthIndex / 12);
+    const relevantBase =
+      currentMonthCalendarYear === startCalendarYear
+        ? baseCurrentYearContribution
+        : baseFutureYearContribution;
+    if (relevantBase !== currentBaseForPeriod) {
+      currentBaseForPeriod = relevantBase;
+      currentContribution = currentBaseForPeriod * contributionMultiplier;
+    }
 
     const contributionActive =
       monthIndex >= inputs.startMonthIndex && monthIndex <= inputs.contributionEndIndex;
@@ -189,7 +211,8 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
       const stopAfterYear = inputs.stopContributionIncreasesAfterYear ?? null;
       // Example: stopAfterYear=5 => do NOT apply the increase at the start of year 6 (completedYears === 5).
       if (stopAfterYear === null || !Number.isFinite(stopAfterYear) || completedYears < stopAfterYear) {
-        currentContribution *= contributionIncreaseFactor;
+        contributionMultiplier *= contributionIncreaseFactor;
+        currentContribution = currentBaseForPeriod * contributionMultiplier;
       }
     }
 
