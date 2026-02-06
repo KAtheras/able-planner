@@ -100,7 +100,9 @@
     "wtaSetToMaxNote": "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit.",
     "wtaEligibleOverCombinedLine1": "You qualify for additional contributions of {{additional}}, but your total contributions exceed the combined limit of {{combined}}.",
     "wtaEligibleOverCombinedLine2": "Please revise your contribution amounts to bring total contributions below the combined limit.",
-    "wtaAmountOverCombinedTitle": "AMOUNT OVER THE COMBINED LIMIT:"
+    "wtaAmountOverCombinedTitle": "AMOUNT OVER THE COMBINED LIMIT:",
+    "accountEndingValueLabel": "ACCOUNT ENDING VALUE",
+    "ableDepletionNotice": "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}."
   },
   "buttons": {
     "welcomeContinue": "I Understand — Continue",

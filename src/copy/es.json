@@ -96,7 +96,9 @@
     "wtaSetToMaxNote": "Reduciremos la contribución recurrente para mantener un total móvil de 12 meses dentro del límite.",
     "wtaEligibleOverCombinedLine1": "Califica para contribuciones adicionales de {{additional}}, pero sus contribuciones totales exceden el límite combinado de {{combined}}.",
     "wtaEligibleOverCombinedLine2": "Revise sus montos de contribución para que las contribuciones totales queden por debajo del límite combinado.",
-    "wtaAmountOverCombinedTitle": "MONTO POR ENCIMA DEL LÍMITE COMBINADO:"
+    "wtaAmountOverCombinedTitle": "MONTO POR ENCIMA DEL LÍMITE COMBINADO:",
+    "accountEndingValueLabel": "VALOR FINAL DE LA CUENTA",
+    "ableDepletionNotice": "Según sus supuestos, el saldo de la cuenta ABLE llega a cero en {{reachMonthYear}}. En consecuencia, los retiros se detienen en este planificador después de {{stopMonthYear}}."
   },
   "buttons": {
     "welcomeContinue": "Entiendo — Continuar",
