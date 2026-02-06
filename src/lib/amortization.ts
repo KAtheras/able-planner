@@ -379,6 +379,29 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
     currentYearRow.endingBalance = endingBalance;
   }
 
+  const totalableRow = rows.reduce(
+    (acc, row) => {
+      acc.contribution += row.contribution;
+      acc.withdrawal += row.withdrawal;
+      acc.earnings += row.earnings;
+      acc.endingBalance = Number.isFinite(row.endingBalance) ? row.endingBalance : acc.endingBalance;
+      return acc;
+    },
+    { contribution: 0, withdrawal: 0, earnings: 0, endingBalance: Number.NaN },
+  );
+  rows.unshift({
+    yearLabel: "Account totals",
+    year: -1,
+    contribution: totalableRow.contribution,
+    withdrawal: totalableRow.withdrawal,
+    earnings: totalableRow.earnings,
+    fedTax: 0,
+    stateTax: 0,
+    saversCredit: 0,
+    stateBenefit: 0,
+    endingBalance: Number.NaN,
+    months: [],
+  });
   return rows;
 }
 
@@ -415,8 +438,9 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
     for (const ableMonth of ableYear.months) {
       const contribution = Number.isFinite(ableMonth.contribution) ? Math.max(0, ableMonth.contribution) : 0;
       const withdrawal = Number.isFinite(ableMonth.withdrawal) ? Math.max(0, ableMonth.withdrawal) : 0;
-      const balanceBeforeEarnings = prevBalance + contribution;
-      const normalizedBasis = Math.max(0, Number.isFinite(balanceBeforeEarnings) ? balanceBeforeEarnings : 0);
+      const balanceAfterCashFlow = prevBalance + contribution - withdrawal;
+      // Taxable schedule uses same cashflow timing as ABLE: contributions + withdrawals assumed at start of month.
+      const normalizedBasis = Math.max(0, Number.isFinite(balanceAfterCashFlow) ? balanceAfterCashFlow : 0);
       let earnings = normalizedBasis * monthlyReturnDecimal;
       if (!Number.isFinite(earnings) || earnings < 0) {
         earnings = 0;
@@ -430,12 +454,12 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
       const isDecember = normalizedLabel.startsWith("Dec ");
       let federalTaxOnEarnings = 0;
       let stateTaxOnEarnings = 0;
-      let monthEndingBalance = balanceBeforeEarnings + earnings - withdrawal;
+      let monthEndingBalance = normalizedBasis + earnings;
       if (isDecember) {
         const taxableEarnings = Math.max(0, yearEarnings);
         federalTaxOnEarnings = taxableEarnings * safeFederalTaxRateDecimal;
         stateTaxOnEarnings = taxableEarnings * safeStateTaxRateDecimal;
-        monthEndingBalance = balanceBeforeEarnings + earnings - withdrawal - federalTaxOnEarnings - stateTaxOnEarnings;
+        monthEndingBalance = normalizedBasis + earnings - federalTaxOnEarnings - stateTaxOnEarnings;
         yearFederalTax += federalTaxOnEarnings;
         yearStateTax += stateTaxOnEarnings;
         yearEarnings = 0;
@@ -484,5 +508,24 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
     });
   }
 
+  const taxableTotals = taxableYears.reduce(
+    (acc, row) => {
+      acc.contribution += row.contribution;
+      acc.withdrawal += row.withdrawal;
+      acc.investmentReturn += row.investmentReturn;
+      return acc;
+    },
+    { contribution: 0, withdrawal: 0, investmentReturn: 0 },
+  );
+  taxableYears.unshift({
+    year: -1,
+    months: [],
+    contribution: taxableTotals.contribution,
+    withdrawal: taxableTotals.withdrawal,
+    investmentReturn: taxableTotals.investmentReturn,
+    federalTaxOnEarnings: 0,
+    stateTaxOnEarnings: 0,
+    endingBalance: Number.NaN,
+  });
   return taxableYears;
 }
