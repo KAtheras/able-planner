@@ -685,13 +685,13 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const setContributionFromIndex = (index: number) => {
       const { year, month } = monthIndexToParts(index);
       setContributionEndYear(String(year));
-      setContributionEndMonth(String(month));
+      setContributionEndMonth(String(month).padStart(2, "0"));
     };
 
     const setWithdrawalFromIndex = (index: number) => {
       const { year, month } = monthIndexToParts(index);
       setWithdrawalStartYear(String(year));
-      setWithdrawalStartMonth(String(month));
+      setWithdrawalStartMonth(String(month).padStart(2, "0"));
     };
 
     const contributionIndex = parseMonthYearToIndex(contributionEndYear, contributionEndMonth);
