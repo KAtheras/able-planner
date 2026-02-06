@@ -182,7 +182,6 @@ const [active, setActive] = useState<NavKey>("inputs");
   const [startingBalance, setStartingBalance] = useState("");
   const [monthlyContribution, setMonthlyContribution] = useState("");
   const [monthlyContributionFuture, setMonthlyContributionFuture] = useState("");
-  const [showContributionLimitPanel, setShowContributionLimitPanel] = useState(false);
   const [contributionEndYear, setContributionEndYear] = useState("");
   const [contributionEndMonth, setContributionEndMonth] = useState("");
   const [monthlyWithdrawal, setMonthlyWithdrawal] = useState("");
@@ -216,15 +215,8 @@ const [active, setActive] = useState<NavKey>("inputs");
   useEffect(() => {
     setWtaAutoApplied(false);
     setWtaDismissed(false);
-  }, [
-    monthlyContribution,
-    monthlyContributionFuture,
-    timeHorizonYears,
-    contributionIncreasePct,
-    wtaStatus,
-    setWtaAutoApplied,
-    setWtaDismissed,
-  ]);
+  }, [monthlyContribution, monthlyContributionFuture]);
+
   const [showWelcome, setShowWelcome] = useState(true);
   const [amortizationView, setAmortizationView] = useState<"able" | "taxable">("able");
   const currentClientConfig = getClientConfig(plannerStateCode);
@@ -354,6 +346,15 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     year: Math.floor(index / 12),
     month: (index % 12) + 1,
   });
+
+  const formatMonthYearLabel = (index: number) => {
+    const { year, month } = monthIndexToParts(index);
+    const date = new Date(year, month - 1, 1);
+    return new Intl.DateTimeFormat(language === "es" ? "es" : "en", {
+      month: "short",
+      year: "numeric",
+    }).format(date);
+  };
 
   const parseMonthYearToIndex = (yearStr: string, monthStr: string): number | null => {
     const year = Number(yearStr);
@@ -788,7 +789,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   }, [plannerStateCode, timeHorizonEdited]);
 
   useEffect(() => {
-    setShowContributionLimitPanel(false);
   }, [
     timeHorizonYears,
     contributionIncreasePct,
@@ -834,8 +834,15 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setBeneficiaryStateOfResidence("");
     setPlannerFilingStatus("single");
     setPlannerAgi("");
-    setAnnualReturn("");
+    const client = getClientConfig(plannerStateCode);
+    const candidateAnnualReturn = client?.defaults?.annualReturn;
+    const defaultAnnualReturn =
+      typeof candidateAnnualReturn === "number" && Number.isFinite(candidateAnnualReturn)
+        ? formatDecimalToPercentString(candidateAnnualReturn)
+        : "";
+    setAnnualReturn(defaultAnnualReturn);
     setAnnualReturnEdited(false);
+    setAnnualReturnWarningMax(null);
     setIsSsiEligible(false);
     setStartingBalance("");
     setMonthlyContribution("");
@@ -865,7 +872,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setWithdrawalStartTouched(false);
     setWtaAutoApplied(false);
     setWtaDismissed(false);
-    setShowContributionLimitPanel(false);
   };
   useEffect(() => {
     const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
@@ -1181,6 +1187,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         ssiMessages.find((message) => message.code === "SSI_FORCED_WITHDRAWALS_APPLIED") ?? null;
       return (
         <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+          {renderAccountEndingBlock()}
           {planMessages.length > 0 && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
               <p className="text-sm leading-relaxed">
@@ -1196,7 +1203,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           {ssiMessages.length > 0 && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
               <div className="mb-2 whitespace-pre-line text-sm leading-relaxed">{
-(copy?.messages?.balanceCapWarning ?? "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated in {{withdrawStart}} to keep the balance at {{cap}} by withdrawing the projected monthly earnings.")
+              (copy?.messages?.balanceCapWarning ?? "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated in {{withdrawStart}} to keep the balance at {{cap}} by withdrawing the projected monthly earnings.")
   .split("{{cap}}").join("$100,000")
   
 .replace("{{breach}}", (ssiMessages[0]?.data?.breachLabel ?? ssiMessages[0]?.data?.monthLabel ?? "Month Unknown"))
@@ -1225,6 +1232,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       if (wtaMode === "initialPrompt") {
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+            {renderAccountEndingBlock()}
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               
 {(copy?.messages?.workToAblePrompt ?? "Your planned contributions exceed the annual ABLE limit of {{cap}}. If you are working, you may qualify to contribute more (the “work to ABLE” provision). Would you like to find out if you qualify?")
@@ -1257,6 +1265,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         const showStep3 = earnedIncomeValue > 0;
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+            {renderAccountEndingBlock()}
             <div className="space-y-3">
               <div className="space-y-1">
                 <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
@@ -1330,10 +1339,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       }
 
       const showWtaPanel =
-        showContributionLimitPanel &&
-        monthlyContributionNumber > 0 &&
-        !wtaDismissed &&
-        (wtaMode === "noPath" || wtaMode === "combinedLimit");
+        !wtaDismissed && (wtaMode === "noPath" || wtaMode === "combinedLimit");
 
       if (!showWtaPanel) {
         return renderScreen2Messages();
@@ -1345,6 +1351,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         const baseLimitCaps = deriveMonthlyCaps(WTA_BASE_ANNUAL_LIMIT);
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+            {renderAccountEndingBlock()}
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {(copy?.messages?.wtaNotEligible ?? "You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of {{limit}}.")
                 .replace("{{limit}}", "$20,000")}
@@ -1373,6 +1380,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         const combinedLimitCaps = deriveMonthlyCaps(wtaCombinedLimit);
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+            {renderAccountEndingBlock()}
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               
 {(copy?.messages?.wtaEligibleOverCombinedLine1 ?? "You qualify for additional contributions of {{additional}}, but your total contributions exceed the combined limit of {{combined}}.")
@@ -1486,8 +1494,81 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         filingStatus: plannerFilingStatus,
         stateOfResidence: beneficiaryStateOfResidence || null,
         enabled: hasTimeHorizon,
-        planMaxBalance,
+      planMaxBalance,
       });     
+
+    const endingValueInfo = (() => {
+      if (!scheduleRows.length) {
+        return {
+          endingLabel: "—",
+          depletionEligible: false,
+          reachLabel: "",
+          stopLabel: "",
+        };
+      }
+      const lastRow = scheduleRows[scheduleRows.length - 1];
+      const endingValue = Number.isFinite(lastRow?.endingBalance) ? lastRow.endingBalance : NaN;
+      const endingLabel = Number.isFinite(endingValue)
+        ? formatCurrency(endingValue).replace(".00", "")
+        : "—";
+      const scheduleHasWithdrawals = scheduleRows.some((row) =>
+        row.months.some(
+          (monthRow) =>
+            Number.isFinite(monthRow.withdrawal) && monthRow.withdrawal > 0,
+        ),
+      );
+      let depletionMonthIndex: number | null = null;
+      for (const row of scheduleRows) {
+        for (const monthRow of row.months) {
+          if (!Number.isFinite(monthRow.endingBalance)) continue;
+          if (monthRow.endingBalance <= 0.01) {
+            depletionMonthIndex = monthRow.monthIndex;
+            break;
+          }
+        }
+        if (depletionMonthIndex !== null) break;
+      }
+      const depletionEligible =
+        scheduleHasWithdrawals &&
+        depletionMonthIndex !== null &&
+        depletionMonthIndex < horizonEndIndex;
+      const reachLabel =
+        depletionMonthIndex !== null ? formatMonthYearLabel(depletionMonthIndex) : "";
+      const stopLabel = reachLabel;
+      return {
+        endingLabel,
+        depletionEligible,
+        reachLabel,
+        stopLabel,
+      };
+    })();
+    const renderAccountEndingBlock = () => {
+      if (endingValueInfo.depletionEligible) {
+        return (
+          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-100">
+            <p className="text-xs leading-relaxed">
+              {(copy?.messages?.ableDepletionNotice ??
+                "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.")
+                .replace("{{reachMonthYear}}", endingValueInfo.reachLabel || "Month Unknown")
+                .replace("{{stopMonthYear}}", endingValueInfo.stopLabel || "Month Unknown")}
+            </p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              {copy?.messages?.accountEndingValueLabel ?? "ACCOUNT ENDING VALUE"}
+            </div>
+            <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 tabular-nums">
+              {endingValueInfo.endingLabel}
+            </div>
+          </div>
+        </div>
+      );
+    };
 
     if (active === "schedule") {
       if (!hasTimeHorizon) {
@@ -1754,10 +1835,6 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                   const sanitized = sanitizeAmountInput(updates.monthlyContribution ?? "");
                   setMonthlyContribution(sanitized);
                   setMonthlyContributionFuture("");
-                  const numeric = sanitized === "" ? 0 : Number(sanitized);
-                  const showPanel =
-                    sanitized !== "" && Number.isFinite(numeric) && numeric > 0;
-                  setShowContributionLimitPanel(showPanel);
                 }
                 if ("contributionEndYear" in updates) {
                   setContributionEndTouched(true);
