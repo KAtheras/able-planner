@@ -15,6 +15,10 @@ type DemographicsCopy = {
     };
     demographicsTitle?: string;
   };
+  buttons?: {
+    eligibleRetest?: string;
+    notEligibleRetest?: string;
+  };
 };
 
 type DemographicsFormProps = {
@@ -50,8 +54,8 @@ export default function DemographicsForm({
     fscStatus === "idle"
       ? copy?.labels?.checkEligibility ?? "Check eligibility"
       : fscStatus === "eligible"
-      ? "Eligible — Retest"
-      : "Not eligible — Retest";
+      ? copy?.buttons?.eligibleRetest ?? ""
+      : copy?.buttons?.notEligibleRetest ?? "";
 
   return (
     <section className="space-y-6">

@@ -35,7 +35,7 @@
       "fscHeading": "Elegibilidad para el Crédito Federal del Ahorrista",
       "fscEligibleLabel": "Elegible para evaluar",
       "ssiEligibleLabel": "El beneficiario es elegible para SSI",
-      "fscEligibilityTitle": "Elegibilidad para el Crédito del Ahorrador Federal",
+      "fscEligibilityTitle": "Elegibilidad para el Crédito del Ahorrista Federal",
       "eligibleToEvaluate": "Elegible para evaluar",
       "fscIntro": "Responda estas preguntas para estimar su elegibilidad.",
       "fscTaxLiability": "¿Tiene obligación de pagar impuestos federales sobre la renta?",
@@ -44,9 +44,9 @@
       "withdrawalStartLabel": "Inicio del retiro",
       "contributionIncreaseLabel": "Aumento anual de contribución (%)",
       "withdrawalIncreaseLabel": "Aumento anual de retiro (%)",
-      "wtaEarnedIncomeQuestion": "¿Tiene el beneficiario ingresos del trabajo?",
-      "wtaEarnedIncomeInput": "Por favor ingrese el ingreso del trabajo estimado:",
-      "wtaRetirementPlanQuestion": "¿Está el beneficiario cubierto por un plan de jubilación?"
+      "wtaEarnedIncomeQuestion": "¿El beneficiario tiene ingresos del trabajo?",
+      "wtaEarnedIncomeInput": "Por favor ingrese el ingreso estimado del trabajo:",
+      "wtaRetirementPlanQuestion": "¿El beneficiario está cubierto por un plan de jubilación?"
     },
     "fsc": {
       "intro": "Responda estas preguntas para estimar la elegibilidad.",
@@ -65,7 +65,7 @@
     "fscIntro": "Responda estas preguntas para estimar la elegibilidad.",
     "highReturnWarning": "Esa suposición de rendimiento es inusualmente alta. Considere ≤ {{max}}%.",
     "residencyNotAllowed": "El beneficiario no es elegible para abrir una cuenta {{plan}} porque el plan {{plan}} requiere que el beneficiario sea residente de {{state}}.",
-    "residencyGeneralAdvice": "Debe verificar si su estado de residencia ofrece un plan ABLE, que puede proporcionar ciertos beneficios fiscales estatales.",
+    "residencyGeneralAdvice": "Debe verificar si su estado de residencia ofrece un plan ABLE, lo cual puede proporcionar ciertos beneficios fiscales estatales.",
     "schedule": {
       "monthYear": "Mes/Año",
       "contributions": "Contribuciones",
@@ -90,7 +90,7 @@
     "wtaEarnedIncomeQuestion": "¿El beneficiario tiene ingresos del trabajo?",
     "wtaEarnedIncomeInput": "Por favor ingrese el ingreso estimado del trabajo:",
     "wtaRetirementPlanQuestion": "¿El beneficiario está cubierto por un plan de jubilación?",
-    "wtaNotEligible": "No es elegible para contribuciones adicionales a ABLE bajo la disposición Work-to-ABLE. Revise sus montos de contribución para mantenerse dentro del límite anual de {{limit}}.",
+    "wtaNotEligible": "No es elegible para contribuciones adicionales a ABLE bajo la disposición Work-to-ABLE.",
     "wtaAmountOverTitle": "MONTO POR ENCIMA DEL LÍMITE ANUAL:",
     "wtaSetToMaxQuestion": "¿Le gustaría ajustar las contribuciones al monto máximo permitido?",
     "wtaSetToMaxNote": "Reduciremos la contribución recurrente para mantener un total móvil de 12 meses dentro del límite.",
@@ -98,7 +98,10 @@
     "wtaEligibleOverCombinedLine2": "Revise sus montos de contribución para que las contribuciones totales queden por debajo del límite combinado.",
     "wtaAmountOverCombinedTitle": "MONTO POR ENCIMA DEL LÍMITE COMBINADO:",
     "accountEndingValueLabel": "VALOR FINAL DE LA CUENTA",
-    "ableDepletionNotice": "Según sus supuestos, el saldo de la cuenta ABLE llega a cero en {{reachMonthYear}}. En consecuencia, los retiros se detienen en este planificador después de {{stopMonthYear}}."
+    "ableDepletionNotice": "Según sus supuestos, el saldo de la cuenta ABLE llega a cero en {{reachMonthYear}}. En consecuencia, los retiros se detienen en este planificador después de {{stopMonthYear}}.",
+    "wtaAutoAppliedAdjustedLine": "Ajustamos sus contribuciones planificadas para mantenerlas por debajo del límite anual de contribución.",
+    "wtaAutoAppliedMonthlyCapHint": "(Este año: {{current}}/mes hasta dic.; a partir de ene.: {{future}}/mes.)",
+    "intro1": "Bienvenido a nuestra herramienta interactiva de planificación ABLE. Comience proporcionando información demográfica básica en la pantalla de entradas de la izquierda. Podrá navegar a cualquiera de las pantallas de entrada para editar toda esta información."
   },
   "buttons": {
     "welcomeContinue": "Entiendo — Continuar",

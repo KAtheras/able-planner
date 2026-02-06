@@ -34,7 +34,7 @@ const EMPTY_FSC: FscAnswers = {
 };
 
 const INITIAL_MESSAGES: string[] = [
-  "Welcome to our interactive ABLE planning tool. Start by providing basic demographic information on the left input screen. You will be able to navigate to any of the input screens to edit all this information.",
+  copy?.messages?.intro1 ?? "",
   "Your state of residence is used to determine plan eligibility as well as to calculate certain state tax benefits.",
   "Similarly, your tax filing status and Adjusted Gross Income (AGI) will help us determine and project federal and, where applicable, state tax benefits of investing in an ABLE account. Remember that your AGI is not the same as your salary. It may be more than your earned income due to other sources of income. Conversely, for most taxpayers, it often is less than your earned income due to deductions or exemptions. You can find your AGI in your most recent tax return if you filed one. If you are not sure what your current AGI is, simply put your salary and wages.",
   "Finally, we proposed a default investment return assumption. Feel free to change the investment return assumption to try out different scenarios.",
@@ -1008,10 +1008,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     };
 
     const questions: Array<{ key: keyof FscAnswers; label: string }> = [
-      { key: "hasTaxLiability", label: (copy.labels?.fsc?.taxLiability ?? "Do you have federal income tax liability?")},
-      { key: "isOver18", label: (copy.labels?.fsc?.age18 ?? "Are you age 18 or older?")},
-      { key: "isStudent", label: (copy.labels?.fsc?.student ?? "Are you a full-time student?")},
-      { key: "isDependent", label: (copy.labels?.fsc?.dependent ?? "Can someone claim you as a dependent?")},
+      { key: "hasTaxLiability", label: (copy.labels?.fsc?.taxLiability ?? "")},
+      { key: "isOver18", label: (copy.labels?.fsc?.age18 ?? "")},
+      { key: "isStudent", label: (copy.labels?.fsc?.student ?? "")},
+      { key: "isDependent", label: (copy.labels?.fsc?.dependent ?? "")},
     ];
 
     const allAnswered = Object.values(fscQ).every((value) => value !== null);
@@ -1034,11 +1034,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const showQuestionnaire = messagesMode === "fsc" && agiGateEligible === true;
 
     const getFscButtonLabel = () => {
-      if (agiGateEligible === null) return copy?.buttons?.enterAgiToTestEligibility ?? "Enter AGI to test eligibility";
-      if (agiGateEligible === false) return copy?.buttons?.notEligibleBasedOnAgi ?? "Not eligible based on AGI";
-      if (fscStatus === "eligible") return copy?.buttons?.eligibleRetest ?? "Eligible — Retest";
-      if (fscStatus === "ineligible") return copy?.buttons?.notEligibleRetest ?? "Not eligible — Retest";
-      return copy?.buttons?.eligibleToEvaluate ?? "Eligible to evaluate";
+      if (agiGateEligible === null) return copy?.buttons?.enterAgiToTestEligibility ?? "";
+      if (agiGateEligible === false) return copy?.buttons?.notEligibleBasedOnAgi ?? "";
+      if (fscStatus === "eligible") return copy?.buttons?.eligibleRetest ?? "";
+      if (fscStatus === "ineligible") return copy?.buttons?.notEligibleRetest ?? "";
+      return copy?.buttons?.eligibleToEvaluate ?? "";
     };
 
     const horizonYearOptions = getYearOptions(
@@ -1132,7 +1132,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="space-y-3">
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {(copy?.labels?.residencyNotAllowed ?? "The beneficiary is not eligible to open a {{plan}} account because the {{plan}} plan requires the beneficiary to be a resident of {{state}}.").split("{{plan}}").join(planLabel).replace("{{state}}", planName) + " " + (copy?.labels?.residencyGeneralAdvice ?? "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits.")}
+              {(copy?.labels?.residencyNotAllowed ?? "").split("{{plan}}").join(planLabel).replace("{{state}}", planName) + " " + (copy?.labels?.residencyGeneralAdvice ?? "")}
             </p>
             <div className={buttonContainerClass}>
               <button
@@ -1148,7 +1148,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return (
         <div className="space-y-3">
           <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-            {copy?.labels?.residencyGeneralAdvice ?? "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits."}
+            {copy?.labels?.residencyGeneralAdvice ?? ""}
           </p>
           <div className={buttonContainerClass}>
             <button
@@ -1219,7 +1219,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             {renderAccountEndingBlock()}
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               
-{(copy?.messages?.workToAblePrompt ?? "Your planned contributions exceed the annual ABLE limit of {{cap}}. If you are working, you may qualify to contribute more (the “work to ABLE” provision). Would you like to find out if you qualify?")
+              {(copy?.messages?.workToAblePrompt ?? "")
   .replace("{{cap}}", "$20,000")}
             </p>
             <div className="flex gap-2">
@@ -1253,7 +1253,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             <div className="space-y-3">
               <div className="space-y-1">
                 <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                  {copy?.labels?.inputs?.wtaEarnedIncomeQuestion ?? "Does the beneficiary have earned income?"}
+                  {copy?.labels?.inputs?.wtaEarnedIncomeQuestion ?? ""}
                 </label>
                 <div className="flex gap-2 mt-1">
                   <button
@@ -1280,7 +1280,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               </div>
               {wtaHasEarnedIncome === true && (
                 <div className="space-y-1">
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{copy?.labels?.inputs?.wtaEarnedIncomeInput ?? "Please input estimated earned income:"}</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{copy?.labels?.inputs?.wtaEarnedIncomeInput ?? ""}</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -1292,7 +1292,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               )}
               {showStep3 && (
                 <div className="space-y-1">
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{copy?.labels?.inputs?.wtaRetirementPlanQuestion ?? "Is the beneficiary covered by a retirement plan?"}</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{copy?.labels?.inputs?.wtaRetirementPlanQuestion ?? ""}</label>
                   <div className="flex gap-2 mt-1">
                     <button
                       type="button"
@@ -1336,15 +1336,18 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             {renderAccountEndingBlock()}
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {(copy?.messages?.wtaNotEligible ?? "You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of {{limit}}.")
-                .replace("{{limit}}", "$20,000")}
-            </p>
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              We adjusted your planned contributions in an amount that keeps you below the annual contribution limit.
-            </p>
-            <p className="text-xs leading-relaxed text-zinc-500">
-              (This year: {formatMonthlyLabel(baseLimitCaps.currentYearMaxMonthly)}/mo through Dec; starting Jan: {formatMonthlyLabel(baseLimitCaps.futureYearMaxMonthly)}/mo.)
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-line">
+              {(() => {
+                const part1 = (copy?.messages?.wtaNotEligible ?? "").trim();
+                const part2 = copy?.messages?.wtaAutoAppliedAdjustedLine ?? "";
+                const template = copy?.messages?.wtaAutoAppliedMonthlyCapHint ?? "";
+                const current = formatMonthlyLabel(baseLimitCaps.currentYearMaxMonthly);
+                const future = formatMonthlyLabel(baseLimitCaps.futureYearMaxMonthly);
+                const part3 = template
+                  ? template.replace("{{current}}", current).replace("{{future}}", future)
+                  : "";
+                return [part1, part2, part3].filter(Boolean).join("\n\n");
+              })()}
             </p>
             <button
               type="button"
@@ -1365,17 +1368,20 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             {renderAccountEndingBlock()}
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              
-{(copy?.messages?.wtaEligibleOverCombinedLine1 ?? "You qualify for additional contributions of {{additional}}, but your total contributions exceed the combined limit of {{combined}}.")
-  .replace("{{additional}}", formatCurrency(wtaAdditionalAllowed).replace(".00",""))
-  .replace("{{combined}}", formatCurrency(wtaCombinedLimit).replace(".00",""))}
-            </p>
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              We adjusted your planned contributions in an amount that keeps you below the annual contribution limit.
-            </p>
-            <p className="text-xs leading-relaxed text-zinc-500">
-              (This year: {formatMonthlyLabel(combinedLimitCaps.currentYearMaxMonthly)}/mo through Dec; starting Jan: {formatMonthlyLabel(combinedLimitCaps.futureYearMaxMonthly)}/mo.)
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-line">
+              {(() => {
+                const firstPart = (copy?.messages?.wtaEligibleOverCombinedLine1 ?? "")
+                  .replace("{{additional}}", formatCurrency(wtaAdditionalAllowed).replace(".00",""))
+                  .replace("{{combined}}", formatCurrency(wtaCombinedLimit).replace(".00",""));
+                const secondPart = copy?.messages?.wtaAutoAppliedAdjustedLine ?? "";
+                const template = copy?.messages?.wtaAutoAppliedMonthlyCapHint ?? "";
+                const current = formatMonthlyLabel(combinedLimitCaps.currentYearMaxMonthly);
+                const future = formatMonthlyLabel(combinedLimitCaps.futureYearMaxMonthly);
+                const thirdPart = template
+                  ? template.replace("{{current}}", current).replace("{{future}}", future)
+                  : "";
+                return [firstPart, secondPart, thirdPart].filter(Boolean).join("\n\n");
+              })()}
             </p>
             <button
               type="button"
@@ -1876,9 +1882,9 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                     ) : showQuestionnaire ? (
                       <div className="space-y-4">
                         <div>
-                          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">{copy?.labels?.inputs?.fscEligibilityTitle ?? "Federal Saver’s Credit Eligibility"}</h2>
+                          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">{copy?.labels?.inputs?.fscEligibilityTitle ?? ""}</h2>
                           <p className="text-xs text-zinc-500">
-                            {copy?.labels?.fscIntro ?? "Answer these questions to estimate eligibility."}
+                            {copy?.labels?.fscIntro ?? ""}
                           </p>
                         </div>
                         <div className="space-y-3">

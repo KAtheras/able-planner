@@ -104,7 +104,8 @@
     "accountEndingValueLabel": "ACCOUNT ENDING VALUE",
     "ableDepletionNotice": "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.",
     "wtaAutoAppliedAdjustedLine": "We adjusted your planned contributions in an amount that keeps you below the annual contribution limit.",
-    "wtaAutoAppliedMonthlyCapHint": "(This year: {{current}}/mo through Dec; starting Jan: {{future}}/mo.)"
+    "wtaAutoAppliedMonthlyCapHint": "(This year: {{current}}/mo through Dec; starting Jan: {{future}}/mo.)",
+    "intro1": "Welcome to our interactive ABLE planning tool. Start by providing basic demographic information on the left input screen. You will be able to navigate to any of the input screens to edit all this information."
   },
   "buttons": {
     "welcomeContinue": "I Understand — Continue",
@@ -114,8 +115,8 @@
     "eligibleToEvaluate": "Eligible to evaluate",
     "evaluate": "Evaluate",
     "notEligibleBasedOnAgi": "Not eligible based on AGI",
-    "eligibleRetest": "Eligible — Try Again",
-    "notEligibleRetest": "Not eligible — Retest",
+    "eligibleRetest": "Eligible — Retest",
+    "notEligibleRetest": "Not eligible — Try Again",
     "back": "Back",
     "next": "Next",
     "refresh": "Refresh",
