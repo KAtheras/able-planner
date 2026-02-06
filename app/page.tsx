@@ -33,12 +33,7 @@ const EMPTY_FSC: FscAnswers = {
   isDependent: null,
 };
 
-const INITIAL_MESSAGES: string[] = [
-  copy?.messages?.intro1 ?? "",
-  "Your state of residence is used to determine plan eligibility as well as to calculate certain state tax benefits.",
-  "Similarly, your tax filing status and Adjusted Gross Income (AGI) will help us determine and project federal and, where applicable, state tax benefits of investing in an ABLE account. Remember that your AGI is not the same as your salary. It may be more than your earned income due to other sources of income. Conversely, for most taxpayers, it often is less than your earned income due to deductions or exemptions. You can find your AGI in your most recent tax return if you filed one. If you are not sure what your current AGI is, simply put your salary and wages.",
-  "Finally, we proposed a default investment return assumption. Feel free to change the investment return assumption to try out different scenarios.",
-];
+const INITIAL_MESSAGES: string[] = ["", "", "", ""];
 
 const SCREEN2_DEFAULT_MESSAGES: string[] = [
   "Please use the input fields on the left to plan for account activity.",
