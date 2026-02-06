@@ -94,7 +94,7 @@
     "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
     "wtaEarnedIncomeInput": "Please input estimated earned income:",
     "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?",
-    "wtaNotEligible": "You are not eligible for additional ABLE contributions under the Work-to-ABLE provision. Please revise your contribution amounts to stay within the annual limit of {{limit}}.",
+    "wtaNotEligible": "You are not eligible for additional ABLE contributions under the Work-to-ABLE provision.",
     "wtaAmountOverTitle": "AMOUNT OVER THE ANNUAL LIMIT:",
     "wtaSetToMaxQuestion": "Would you like to set contributions to the maximum allowed amount?",
     "wtaSetToMaxNote": "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit.",
@@ -102,7 +102,9 @@
     "wtaEligibleOverCombinedLine2": "Please revise your contribution amounts to bring total contributions below the combined limit.",
     "wtaAmountOverCombinedTitle": "AMOUNT OVER THE COMBINED LIMIT:",
     "accountEndingValueLabel": "ACCOUNT ENDING VALUE",
-    "ableDepletionNotice": "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}."
+    "ableDepletionNotice": "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.",
+    "wtaAutoAppliedAdjustedLine": "We adjusted your planned contributions in an amount that keeps you below the annual contribution limit.",
+    "wtaAutoAppliedMonthlyCapHint": "(This year: {{current}}/mo through Dec; starting Jan: {{future}}/mo.)"
   },
   "buttons": {
     "welcomeContinue": "I Understand — Continue",
