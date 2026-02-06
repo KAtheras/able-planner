@@ -116,18 +116,25 @@
     "changeResidencyProceed": "Cambiar mi residencia y continuar al calculador",
     "understandProceed": "Entiendo y deseo continuar"
   },
-  "disclosures": {},
+  "landing": {
+    "heroTitle": "Bienvenido al Planificador ABLE",
+    "heroSubtitle": "Explore cómo las contribuciones, los retiros, el crecimiento de las inversiones y los límites del programa pueden interactuar con el tiempo.",
+    "heroBody": "Una cuenta ABLE puede ser una herramienta potente para ahorrar, invertir y pagar gastos relacionados con la discapacidad sin poner en riesgo beneficios públicos esenciales. Esta herramienta de planificación le ayuda a explorar distintos escenarios, comparar resultados y comprender mejor cómo las decisiones de hoy pueden afectar los saldos del futuro. Explore cómo las contribuciones, los retiros, el crecimiento de las inversiones y los límites del programa pueden interactuar con el tiempo.",
+    "heroBullets": [
+      "Explorar el crecimiento a largo plazo de ABLE con distintos supuestos",
+      "Entender límites de contribución y reglas de elegibilidad",
+      "Modelar retiros junto con contribuciones",
+      "Revisar saldos proyectados, resúmenes y gráficos en el tiempo"
+    ],
+    "disclosuresTitle": "Divulgaciones y limitaciones importantes",
+    "disclosuresIntro": "Por favor, lea las siguientes divulgaciones y limitaciones importantes antes de usar esta herramienta.",
+    "disclosuresBody": "Esta herramienta tiene fines únicamente informativos y educativos.\nEsta herramienta de planificación ABLE se ofrece exclusivamente con fines informativos y educativos generales. No está diseñada para brindar asesoramiento legal, fiscal, financiero o de inversión, y no debe tomarse como un sustituto del consejo de profesionales calificados.\n\nSin garantía de resultados\nTodas las proyecciones, gráficos e informes generados por esta herramienta son hipotéticos y se basan en supuestos proporcionados por el usuario. Los resultados reales pueden diferir materialmente. No se garantiza que se alcancen los saldos proyectados, los rendimientos de inversión, la elegibilidad para contribuciones o los beneficios fiscales.\n\nPuede perder parte o la totalidad del dinero invertido en una cuenta ABLE.\n\nRiesgo de inversión\nLas cuentas ABLE están sujetas al riesgo de mercado, incluida la posible pérdida del capital. Los rendimientos de la inversión no están garantizados, y el desempeño pasado no indica resultados futuros. Los cambios en las condiciones del mercado, tarifas, gastos y selecciones de inversión pueden afectar significativamente los resultados.\n\nSupuestos y simplificaciones\nEsta herramienta depende de supuestos simplificados, que pueden incluir tasas de retorno constantes o estimadas, cronogramas regulares de contribuciones y retiros, y un tratamiento simplificado de impuestos y beneficios fiscales. Las reglas reales del programa ABLE, el desempeño de las inversiones y el tratamiento fiscal varían según el estado y pueden cambiar con el tiempo.\n\nLímites de contribución y elegibilidad\nLos límites de contribución anual, la elegibilidad para Work-to-ABLE, los beneficios federales, los beneficios estatales y el tratamiento fiscal están gobernados por las leyes federales y estatales y las reglas individuales de cada programa ABLE. Esta herramienta no determina elegibilidad ni cumplimiento, y no debe usarse para tomar decisiones finales sobre contribuciones o retiros.\n\nRetiros y gastos calificados\nLos retiros de una cuenta ABLE deben usarse generalmente para gastos calificados relacionados con la discapacidad para evitar consecuencias fiscales adversas. Esta herramienta no evalúa si los retiros planificados cumplen con las reglas aplicables.\n\nNo constituye una oferta ni una recomendación\nNada de lo contenido en esta herramienta constituye una oferta para vender, una solicitud para comprar o una recomendación sobre ningún producto financiero, inversión o valor.\n\nÚselo bajo su propio criterio\nAl utilizar esta herramienta, reconoce que usted es el único responsable de cómo interpreta y usa la información proporcionada. Para obtener orientación específica a su situación, considere consultar a un profesional calificado en finanzas, impuestos o derecho, o al administrador del programa ABLE de su estado."
+  },
   "metadata": {
     "language": "es",
     "direction": "ltr"
   },
   "blocks": {
-    "landingWelcome": {
-      "default": "Bienvenido al Planificador ABLE. Use las entradas para experimentar con contribuciones, retiros y planificación fiscal."
-    },
-    "disclosuresAssumptions": {
-      "default": "Las suposiciones y divulgaciones aparecerán aquí."
-    },
     "rightCardPrimary": {
       "default": "TESTOS PAGOS"
     },

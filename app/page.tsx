@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
-import { getClientBlockText } from "@/lib/copy/clientBlocks";
 import { getClientConfig } from "@/config/clients";
 import AccountActivityForm from "@/components/inputs/AccountActivityForm";
 import AmortizationScheduleTable from "@/components/schedule/AmortizationScheduleTable";
@@ -223,32 +222,6 @@ const [active, setActive] = useState<NavKey>("inputs");
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
   const planState = planStateOverride ?? planStateFallback ?? "UT";
-  const blockCopies = {
-    landingWelcome: getClientBlockText({
-      slot: "landingWelcome",
-      copy,
-      clientConfig: currentClientConfig,
-      planState,
-    }),
-    disclosuresAssumptions: getClientBlockText({
-      slot: "disclosuresAssumptions",
-      copy,
-      clientConfig: currentClientConfig,
-      planState,
-    }),
-    rightCardPrimary: getClientBlockText({
-      slot: "rightCardPrimary",
-      copy,
-      clientConfig: currentClientConfig,
-      planState,
-    }),
-    rightCardSecondary: getClientBlockText({
-      slot: "rightCardSecondary",
-      copy,
-      clientConfig: currentClientConfig,
-      planState,
-    }),
-  };
   const languageToggle = (
     <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-black">
       <button
@@ -292,6 +265,17 @@ const [active, setActive] = useState<NavKey>("inputs");
     Number((monthlyContribution ?? "").replace(".00","")) || 0;
   const annualContributionLimit =
     wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
+
+  const landingCopy = {
+    heroTitle: copy.landing?.heroTitle ?? "",
+    heroBody: copy.landing?.heroBody ?? "",
+    heroBullets: copy.landing?.heroBullets ?? [],
+    disclosuresTitle: copy.landing?.disclosuresTitle ?? "",
+    disclosuresIntro: copy.landing?.disclosuresIntro ?? "",
+    disclosuresBody: copy.landing?.disclosuresBody ?? "",
+  };
+
+  const disclosuresBodyParagraphs = (landingCopy.disclosuresBody || "").split("\n\n").filter(Boolean);
 
   const sanitizeAgiInput = (value: string) => {
     if (value === "") return "";
@@ -1983,26 +1967,66 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           }
         />
 
-        <main className="mx-auto flex h-[calc(100vh-6rem)] w-full max-w-6xl items-center justify-center px-4">
-        <div className="text-center">
-          <h1 className="text-3xl font-semibold">Welcome to ABLE Planner</h1>
-          {languageToggle}
+        <main className="mx-auto w-full max-w-6xl px-4 pt-6">
+          <div className="flex justify-center">{languageToggle}</div>
+          <div className="mt-6" />
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold">
+              {landingCopy.heroTitle}
+            </h1>
 
-          <p className="mt-4 max-w-xl text-sm text-zinc-600 dark:text-zinc-400">
-            {blockCopies.landingWelcome}
-          </p>
-          <p className="mt-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-            DISCLOSURES/ASSUMPTIONS (TEST)
-          </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            {blockCopies.disclosuresAssumptions}
-          </p>
+            <p className="mt-4 max-w-6xl mx-auto text-left text-base text-zinc-600 dark:text-zinc-400">
+              {landingCopy.heroBody}
+            </p>
 
-          <button
-            type="button"
-            onClick={handleWelcomeContinue}
-              className="mt-6 rounded-full bg-[var(--brand-primary)] px-6 py-2 text-xs font-semibold text-white"
-            >{copy?.buttons?.welcomeContinue ?? "I Understand — Continue"}</button>
+            {landingCopy.heroBullets.length > 0 && (
+              <ul className="mt-4 flex flex-col items-center gap-2 text-base text-zinc-600 dark:text-zinc-400">
+                {landingCopy.heroBullets.map((bullet, index) => (
+                  <li
+                    key={`hero-bullet-${index}`}
+                    className="w-full max-w-xl list-disc pl-5 text-left"
+                  >
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <section className="mt-6 space-y-2 text-left text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                {landingCopy.disclosuresTitle}
+              </p>
+              {landingCopy.disclosuresIntro && (
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  {landingCopy.disclosuresIntro}
+                </p>
+              )}
+              {disclosuresBodyParagraphs.map((paragraph, index) => {
+                const [leadIn, ...restParts] = paragraph.split("\n");
+                const rest = restParts.join("\n").trim();
+                return (
+                  <p key={`disclosure-${index}`} className="text-sm text-zinc-600 dark:text-zinc-400">
+                    {restParts.length > 0 ? (
+                      <>
+                        <strong>{leadIn.trim()}</strong>
+                        {rest ? ` ${rest}` : null}
+                      </>
+                    ) : (
+                      paragraph
+                    )}
+                  </p>
+                );
+              })}
+            </section>
+
+            <button
+              type="button"
+              onClick={handleWelcomeContinue}
+              className="mt-6 mb-6 rounded-full bg-[var(--brand-primary)] px-6 py-2 text-xs font-semibold text-white"
+            >
+              {copy?.buttons?.welcomeContinue}
+            </button>
+            <div className="mt-4" />
           </div>
         </main>
       </div>
@@ -2022,7 +2046,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       />
       <div className="mx-auto flex w-full max-w-6xl">
         <Sidebar active={active} onChange={setActive} labels={copy.ui?.sidebar} />
-        <main className="w-full px-6 py-8">{content}</main>
+        <main className="mx-auto w-full max-w-6xl px-4 pt-6">{content}</main>
       </div>
     </div>
   );
