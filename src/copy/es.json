@@ -1,168 +1,157 @@
 {
-  "app": {
-    "title": "Planificador ABLE (andamiaje)",
-    "tagline": "Primero móvil • Accesible • Bilingüe"
+  "metadata": {
+    "direction": "ltr",
+    "language": "es"
   },
-  "home": {
-    "heading": "Bienvenido",
-    "intro": "Esta es la base limpia para el Planificador ABLE. La interfaz, el texto y la lógica se incorporarán gradualmente.",
-    "languageLoaded": "Idioma cargado: {{lang}}"
+  "app": {
+    "tagline": "Primero móvil • Accesible • Bilingüe",
+    "title": "Planificador ABLE (andamiaje)"
+  },
+  "ui": {
+    "sidebar": {
+      "account_growth": "Crecimiento de la cuenta",
+      "disclosures": "Divulgaciones",
+      "inputs": "Entradas",
+      "schedule": "Amortización",
+      "tax_benefits": "Beneficios fiscales"
+    },
+    "inputs": {
+      "accountActivity": {
+        "startingBalanceLabel": "Saldo inicial",
+        "title": "Actividad de la cuenta"
+      },
+      "demographics": {
+        "title": "INFORMACIÓN DEMOGRÁFICA"
+      }
+    }
+  },
+  "buttons": {
+    "back": "Atrás",
+    "changeResidencyProceed": "Cambiar mi residencia y continuar al calculador",
+    "eligibleRetest": "Elegible — Reintentar",
+    "eligibleToEvaluate": "Elegible para evaluar",
+    "enterAgiToTestEligibility": "Ingrese el AGI para probar la elegibilidad",
+    "evaluate": "Evaluar",
+    "next": "Siguiente",
+    "no": "No",
+    "notEligibleBasedOnAgi": "No elegible según AGI",
+    "notEligibleRetest": "No elegible — Reintentar",
+    "refresh": "Actualizar",
+    "understandProceed": "Entiendo y deseo continuar",
+    "welcomeContinue": "Entiendo — Continuar",
+    "yes": "Sí"
   },
   "labels": {
     "inputs": {
-      "demographicsTitle": "Información demográfica",
+      "accountActivityTitle": "Actividad de la cuenta",
+      "agiLabel": "Ingreso bruto ajustado (AGI)",
+      "annualReturnLabel": "Suposición de rendimiento anual de la inversión (%)",
       "checkEligibility": "Verificar elegibilidad",
-      "selectState": "Seleccione un estado",
+      "contributionEndLabel": "Fin de contribución",
+      "contributionIncreaseLabel": "Aumento anual de contribución (%)",
+      "demographicsTitle": "Información demográfica",
+      "eligibleToEvaluate": "Elegible para evaluar",
       "filing": {
-        "single": "Soltero",
+        "head_of_household": "Cabeza de familia",
         "married_joint": "Casado presentando en conjunto",
         "married_separate": "Casado declarando por separado",
-        "head_of_household": "Cabeza de familia"
+        "single": "Soltero"
       },
-      "nameLabel": "Nombre del beneficiario",
-      "stateOfResidenceLabel": "Estado de residencia",
       "filingStatusLabel": "Estado civil para impuestos",
-      "agiLabel": "Ingreso bruto ajustado (AGI)",
-      "accountActivityTitle": "Actividad de la cuenta",
-      "timeHorizonYearsFallback": "Horizonte de tiempo (años)",
-      "monthPlaceholder": "Mes",
-      "yearPlaceholder": "Año",
-      "startingBalanceLabel": "Saldo inicial",
-      "monthlyContributionLabel": "Contribución mensual",
-      "monthlyWithdrawalLabel": "Retiro mensual",
-      "annualReturnLabel": "Suposición de rendimiento anual de la inversión (%)",
-      "ssiEligibilityLabel": "El beneficiario es elegible para SSI",
-      "fscHeading": "Elegibilidad para el Crédito Federal del Ahorrista",
-      "fscEligibleLabel": "Elegible para evaluar",
-      "ssiEligibleLabel": "El beneficiario es elegible para SSI",
+      "fscAge18": "¿Tiene 18 años o más?",
       "fscEligibilityTitle": "Elegibilidad para el Crédito del Ahorrista Federal",
-      "eligibleToEvaluate": "Elegible para evaluar",
+      "fscEligibleLabel": "Elegible para evaluar",
+      "fscHeading": "Elegibilidad para el Crédito Federal del Ahorrista",
       "fscIntro": "Responda estas preguntas para estimar su elegibilidad.",
       "fscTaxLiability": "¿Tiene obligación de pagar impuestos federales sobre la renta?",
-      "fscAge18": "¿Tiene 18 años o más?",
-      "contributionEndLabel": "Fin de contribución",
-      "withdrawalStartLabel": "Inicio del retiro",
-      "contributionIncreaseLabel": "Aumento anual de contribución (%)",
+      "monthlyContributionLabel": "Contribución mensual",
+      "monthlyWithdrawalLabel": "Retiro mensual",
+      "monthPlaceholder": "Mes",
+      "nameLabel": "Nombre del beneficiario",
+      "selectState": "Seleccione un estado",
+      "ssiEligibilityLabel": "El beneficiario es elegible para SSI",
+      "ssiEligibleLabel": "El beneficiario es elegible para SSI",
+      "startingBalanceLabel": "Saldo inicial",
+      "stateOfResidenceLabel": "Estado de residencia",
+      "timeHorizonYearsFallback": "Horizonte de tiempo (años)",
       "withdrawalIncreaseLabel": "Aumento anual de retiro (%)",
-      "wtaEarnedIncomeQuestion": "¿El beneficiario tiene ingresos del trabajo?",
+      "withdrawalStartLabel": "Inicio del retiro",
       "wtaEarnedIncomeInput": "Por favor ingrese el ingreso estimado del trabajo:",
-      "wtaRetirementPlanQuestion": "¿El beneficiario está cubierto por un plan de jubilación?"
+      "wtaEarnedIncomeQuestion": "¿El beneficiario tiene ingresos del trabajo?",
+      "wtaRetirementPlanQuestion": "¿El beneficiario está cubierto por un plan de jubilación?",
+      "yearPlaceholder": "Año"
+    },
+    "schedule": {
+      "ableAccountToggle": "Cuenta ABLE",
+      "accountBalance": "Saldo",
+      "accountTotals": "Totales de la cuenta",
+      "amortizationTitle": "Cronograma de amortización",
+      "contributions": "Contribuciones",
+      "enterTimeHorizonPrompt": "Ingrese un horizonte temporal para ver el cronograma.",
+      "federalSaversCredit": "Crédito federal del ahorrador",
+      "federalTaxes": "Impuestos federales",
+      "investmentReturns": "Rendimientos",
+      "monthYear": "Mes/Año",
+      "scheduleTitle": "Cronograma",
+      "stateTaxBenefit": "Beneficio fiscal estatal",
+      "stateTaxes": "Impuestos estatales",
+      "taxableAccountToggle": "Cuenta imponible",
+      "withdrawals": "Retiros"
     },
     "fsc": {
-      "intro": "Responda estas preguntas para estimar la elegibilidad.",
-      "taxLiability": "¿Tiene obligación de pagar impuestos federales sobre la renta?",
       "age18": "¿Tiene 18 años o más?",
+      "dependent": "¿Alguien puede declararle como dependiente?",
+      "intro": "Responda estas preguntas para estimar la elegibilidad.",
       "student": "¿Es estudiante de tiempo completo?",
-      "dependent": "¿Alguien puede declararle como dependiente?"
+      "taxLiability": "¿Tiene obligación de pagar impuestos federales sobre la renta?"
     },
+    "disclosures": "Divulgaciones",
     "nav": {
-      "inputs": "Entradas",
-      "growth": "Crecimiento de la cuenta",
-      "taxBenefits": "Beneficios fiscales",
       "amortization": "Amortización",
-      "disclosures": "Divulgaciones"
+      "disclosures": "Divulgaciones",
+      "growth": "Crecimiento de la cuenta",
+      "inputs": "Entradas",
+      "taxBenefits": "Beneficios fiscales"
+    },
+    "ui": {
+      "placeholderComingSoon": "El contenido de marcador de posición estará disponible pronto.",
+      "shellSuffix": " (Borrador)"
     },
     "highReturnWarning": "Esa suposición de rendimiento es inusualmente alta. Considere ≤ {{max}}%.",
-    "residencyNotAllowed": "El beneficiario no es elegible para abrir una cuenta {{plan}} porque el plan {{plan}} requiere que el beneficiario sea residente de {{state}}.",
     "residencyGeneralAdvice": "Debe verificar si su estado de residencia ofrece un plan ABLE, lo cual puede proporcionar ciertos beneficios fiscales estatales.",
-    "schedule": {
-      "monthYear": "Mes/Año",
-      "contributions": "Contribuciones",
-      "withdrawals": "Retiros",
-      "investmentReturns": "Rendimientos",
-      "accountBalance": "Saldo",
-      "federalSaversCredit": "Crédito federal del ahorrador",
-      "stateTaxBenefit": "Beneficio fiscal estatal",
-      "federalTaxes": "Impuestos federales",
-      "stateTaxes": "Impuestos estatales",
-      "scheduleTitle": "Cronograma",
-      "amortizationTitle": "Cronograma de amortización",
-      "ableAccountToggle": "Cuenta ABLE",
-      "taxableAccountToggle": "Cuenta imponible",
-      "accountTotals": "Totales de la cuenta",
-      "enterTimeHorizonPrompt": "Ingrese un horizonte temporal para ver el cronograma."
-    },
-    "wtaEarnedIncomeQuestion": "¿Tiene el beneficiario ingresos del trabajo?",
+    "residencyNotAllowed": "El beneficiario no es elegible para abrir una cuenta {{plan}} porque el plan {{plan}} requiere que el beneficiario sea residente de {{state}}.",
     "wtaEarnedIncomeInput": "Por favor ingrese el ingreso del trabajo estimado:",
-    "wtaRetirementPlanQuestion": "¿Está el beneficiario cubierto por un plan de jubilación?",
-    "disclosures": "Divulgaciones",
-    "ui": {
-      "shellSuffix": " (Borrador)",
-      "placeholderComingSoon": "El contenido de marcador de posición estará disponible pronto."
-    }
+    "wtaEarnedIncomeQuestion": "¿Tiene el beneficiario ingresos del trabajo?",
+    "wtaRetirementPlanQuestion": "¿Está el beneficiario cubierto por un plan de jubilación?"
   },
   "messages": {
+    "ableDepletionNotice": "Según sus supuestos, el saldo de la cuenta ABLE llega a cero en {{reachMonthYear}}. En consecuencia, los retiros se detienen en este planificador después de {{stopMonthYear}}.",
+    "accountEndingValueLabel": "VALOR FINAL DE LA CUENTA",
     "balanceCapWarning": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}. También se inician retiros recurrentes en {{withdrawStart}} para mantener el saldo en {{cap}} retirando las ganancias mensuales proyectadas.",
     "planMaxReached": "En esta herramienta de planificación, las contribuciones se detienen en {{month}} porque el saldo proyectado alcanza el máximo del plan de {{cap}}.",
     "workToAblePrompt": "Sus contribuciones planificadas exceden el límite anual de ABLE de {{cap}}. Si está trabajando, podría calificar para contribuir más (la disposición “work to ABLE”). ¿Le gustaría saber si califica?",
-    "wtaEarnedIncomeQuestion": "¿El beneficiario tiene ingresos del trabajo?",
-    "wtaEarnedIncomeInput": "Por favor ingrese el ingreso estimado del trabajo:",
-    "wtaRetirementPlanQuestion": "¿El beneficiario está cubierto por un plan de jubilación?",
-    "wtaNotEligible": "No es elegible para contribuciones adicionales a ABLE bajo la disposición Work-to-ABLE.",
+    "wtaAmountOverCombinedTitle": "MONTO POR ENCIMA DEL LÍMITE COMBINADO:",
     "wtaAmountOverTitle": "MONTO POR ENCIMA DEL LÍMITE ANUAL:",
-    "wtaSetToMaxQuestion": "¿Le gustaría ajustar las contribuciones al monto máximo permitido?",
-    "wtaSetToMaxNote": "Reduciremos la contribución recurrente para mantener un total móvil de 12 meses dentro del límite.",
+    "wtaAutoAppliedAdjustedLine": "Ajustamos sus contribuciones planificadas para mantenerlas por debajo del límite anual de contribución.",
+    "wtaAutoAppliedMonthlyCapHint": "(Este año: {{current}}/mes hasta dic.; a partir de ene.: {{future}}/mes.)",
+    "wtaEarnedIncomeInput": "Por favor ingrese el ingreso estimado del trabajo:",
+    "wtaEarnedIncomeQuestion": "¿El beneficiario tiene ingresos del trabajo?",
     "wtaEligibleOverCombinedLine1": "Califica para contribuciones adicionales de {{additional}}, pero sus contribuciones totales exceden el límite combinado de {{combined}}.",
     "wtaEligibleOverCombinedLine2": "Revise sus montos de contribución para que las contribuciones totales queden por debajo del límite combinado.",
-    "wtaAmountOverCombinedTitle": "MONTO POR ENCIMA DEL LÍMITE COMBINADO:",
-    "accountEndingValueLabel": "VALOR FINAL DE LA CUENTA",
-    "ableDepletionNotice": "Según sus supuestos, el saldo de la cuenta ABLE llega a cero en {{reachMonthYear}}. En consecuencia, los retiros se detienen en este planificador después de {{stopMonthYear}}.",
-    "wtaAutoAppliedAdjustedLine": "Ajustamos sus contribuciones planificadas para mantenerlas por debajo del límite anual de contribución.",
-    "wtaAutoAppliedMonthlyCapHint": "(Este año: {{current}}/mes hasta dic.; a partir de ene.: {{future}}/mes.)"
-  },
-  "buttons": {
-    "welcomeContinue": "Entiendo — Continuar",
-    "yes": "Sí",
-    "no": "No",
-    "enterAgiToTestEligibility": "Ingrese el AGI para probar la elegibilidad",
-    "eligibleToEvaluate": "Elegible para evaluar",
-    "evaluate": "Evaluar",
-    "notEligibleBasedOnAgi": "No elegible según AGI",
-    "eligibleRetest": "Elegible — Reintentar",
-    "notEligibleRetest": "No elegible — Reintentar",
-    "back": "Atrás",
-    "next": "Siguiente",
-    "refresh": "Actualizar",
-    "changeResidencyProceed": "Cambiar mi residencia y continuar al calculador",
-    "understandProceed": "Entiendo y deseo continuar"
-  },
-  "landing": {
-    "heroTitle": "Bienvenido al Planificador ABLE",
-    "heroSubtitle": "Explore cómo las contribuciones, los retiros, el crecimiento de las inversiones y los límites del programa pueden interactuar con el tiempo.",
-    "heroBody": "Una cuenta ABLE puede ser una herramienta potente para ahorrar, invertir y pagar gastos relacionados con la discapacidad sin poner en riesgo beneficios públicos esenciales. Esta herramienta de planificación le ayuda a explorar distintos escenarios, comparar resultados y comprender mejor cómo las decisiones de hoy pueden afectar los saldos del futuro. Explore cómo las contribuciones, los retiros, el crecimiento de las inversiones y los límites del programa pueden interactuar con el tiempo.",
-    "heroBullets": [
-      "Explorar el crecimiento a largo plazo de ABLE con distintos supuestos",
-      "Entender límites de contribución y reglas de elegibilidad",
-      "Modelar retiros junto con contribuciones",
-      "Revisar saldos proyectados, resúmenes y gráficos en el tiempo"
-    ],
-    "disclosuresTitle": "Divulgaciones y limitaciones importantes",
-    "disclosuresIntro": "Por favor, lea las siguientes divulgaciones y limitaciones importantes antes de usar esta herramienta.",
-    "disclosuresBody": "Esta herramienta tiene fines únicamente informativos y educativos.\nEsta herramienta de planificación ABLE se ofrece exclusivamente con fines informativos y educativos generales. No está diseñada para brindar asesoramiento legal, fiscal, financiero o de inversión, y no debe tomarse como un sustituto del consejo de profesionales calificados.\n\nSin garantía de resultados\nTodas las proyecciones, gráficos e informes generados por esta herramienta son hipotéticos y se basan en supuestos proporcionados por el usuario. Los resultados reales pueden diferir materialmente. No se garantiza que se alcancen los saldos proyectados, los rendimientos de inversión, la elegibilidad para contribuciones o los beneficios fiscales.\n\nPuede perder parte o la totalidad del dinero invertido en una cuenta ABLE.\n\nRiesgo de inversión\nLas cuentas ABLE están sujetas al riesgo de mercado, incluida la posible pérdida del capital. Los rendimientos de la inversión no están garantizados, y el desempeño pasado no indica resultados futuros. Los cambios en las condiciones del mercado, tarifas, gastos y selecciones de inversión pueden afectar significativamente los resultados.\n\nSupuestos y simplificaciones\nEsta herramienta depende de supuestos simplificados, que pueden incluir tasas de retorno constantes o estimadas, cronogramas regulares de contribuciones y retiros, y un tratamiento simplificado de impuestos y beneficios fiscales. Las reglas reales del programa ABLE, el desempeño de las inversiones y el tratamiento fiscal varían según el estado y pueden cambiar con el tiempo.\n\nLímites de contribución y elegibilidad\nLos límites de contribución anual, la elegibilidad para Work-to-ABLE, los beneficios federales, los beneficios estatales y el tratamiento fiscal están gobernados por las leyes federales y estatales y las reglas individuales de cada programa ABLE. Esta herramienta no determina elegibilidad ni cumplimiento, y no debe usarse para tomar decisiones finales sobre contribuciones o retiros.\n\nRetiros y gastos calificados\nLos retiros de una cuenta ABLE deben usarse generalmente para gastos calificados relacionados con la discapacidad para evitar consecuencias fiscales adversas. Esta herramienta no evalúa si los retiros planificados cumplen con las reglas aplicables.\n\nNo constituye una oferta ni una recomendación\nNada de lo contenido en esta herramienta constituye una oferta para vender, una solicitud para comprar o una recomendación sobre ningún producto financiero, inversión o valor.\n\nÚselo bajo su propio criterio\nAl utilizar esta herramienta, reconoce que usted es el único responsable de cómo interpreta y usa la información proporcionada. Para obtener orientación específica a su situación, considere consultar a un profesional calificado en finanzas, impuestos o derecho, o al administrador del programa ABLE de su estado."
-  },
-  "metadata": {
-    "language": "es",
-    "direction": "ltr"
-  },
-  "ui": {
-    "inputs": {
-      "demographics": {
-        "title": "INFORMACIÓN DEMOGRÁFICA"
-      },
-      "accountActivity": {
-        "title": "Actividad de la cuenta",
-        "startingBalanceLabel": "Saldo inicial"
-      }
-    },
-    "sidebar": {
-      "inputs": "Entradas",
-      "account_growth": "Crecimiento de la cuenta",
-      "tax_benefits": "Beneficios fiscales",
-      "schedule": "Amortización",
-      "disclosures": "Divulgaciones"
-    }
+    "wtaNotEligible": "No es elegible para contribuciones adicionales a ABLE bajo la disposición Work-to-ABLE.",
+    "wtaRetirementPlanQuestion": "¿El beneficiario está cubierto por un plan de jubilación?",
+    "wtaSetToMaxNote": "Reduciremos la contribución recurrente para mantener un total móvil de 12 meses dentro del límite.",
+    "wtaSetToMaxQuestion": "¿Le gustaría ajustar las contribuciones al monto máximo permitido?"
   },
   "flows": {
+    "screen1": {
+      "defaultMessages": [
+        "Bienvenido a nuestra herramienta interactiva de planificación ABLE. Comience proporcionando información demográfica básica en la pantalla de entradas de la izquierda. Podrá navegar a cualquiera de las pantallas de entrada para editar toda esta información.",
+        "Su estado de residencia se utiliza para determinar la elegibilidad del plan y también para calcular ciertos beneficios fiscales estatales.",
+        "De manera similar, su estado civil para impuestos y su Ingreso Bruto Ajustado (AGI) nos ayudarán a determinar y proyectar beneficios fiscales federales y, cuando corresponda, estatales de invertir en una cuenta ABLE. Recuerde que su AGI no es lo mismo que su salario. Puede ser mayor que su ingreso del trabajo debido a otras fuentes de ingresos. Por el contrario, para la mayoría de los contribuyentes, a menudo es menor que su ingreso del trabajo debido a deducciones o exenciones. Puede encontrar su AGI en su declaración de impuestos más reciente si presentó una. Si no está seguro de cuál es su AGI actual, simplemente ingrese su salario y sueldos.",
+        "Finalmente, propusimos una suposición predeterminada de rendimiento de inversión. Siéntase libre de cambiar la suposición de rendimiento de inversión para probar diferentes escenarios."
+      ]
+    },
     "screen2": {
       "defaultMessages": [
         "Utilice los campos de entrada de la izquierda para planificar la actividad de la cuenta.",
@@ -171,14 +160,25 @@
         "Esta herramienta le permite planificar contribuciones y retiros recurrentes mensuales. Se supone que las contribuciones recurrentes comienzan el día 1 del mes siguiente. También puede seleccionar un mes y año de finalización para las contribuciones. Se supone que los retiros recurrentes continúan hasta el final del horizonte de tiempo seleccionado. Puede elegir el mes y el año en que comenzarán esos retiros.",
         "A medida que ingrese su información, aparecerán mensajes en esta ventana que le ayudarán a navegar ciertos límites de contribución y saldo de la cuenta y a realizar cambios sugeridos en sus entradas de contribución y retiro."
       ]
-    },
-    "screen1": {
-      "defaultMessages": [
-        "Bienvenido a nuestra herramienta interactiva de planificación ABLE. Comience proporcionando información demográfica básica en la pantalla de entradas de la izquierda. Podrá navegar a cualquiera de las pantallas de entrada para editar toda esta información.",
-        "Su estado de residencia se utiliza para determinar la elegibilidad del plan y también para calcular ciertos beneficios fiscales estatales.",
-        "De manera similar, su estado civil para impuestos y su Ingreso Bruto Ajustado (AGI) nos ayudarán a determinar y proyectar beneficios fiscales federales y, cuando corresponda, estatales de invertir en una cuenta ABLE. Recuerde que su AGI no es lo mismo que su salario. Puede ser mayor que su ingreso del trabajo debido a otras fuentes de ingresos. Por el contrario, para la mayoría de los contribuyentes, a menudo es menor que su ingreso del trabajo debido a deducciones o exenciones. Puede encontrar su AGI en su declaración de impuestos más reciente si presentó una. Si no está seguro de cuál es su AGI actual, simplemente ingrese su salario y sueldos.",
-        "Finalmente, propusimos una suposición predeterminada de rendimiento de inversión. Siéntase libre de cambiar la suposición de rendimiento de inversión para probar diferentes escenarios."
-      ]
     }
+  },
+  "home": {
+    "heading": "Bienvenido",
+    "intro": "Esta es la base limpia para el Planificador ABLE. La interfaz, el texto y la lógica se incorporarán gradualmente.",
+    "languageLoaded": "Idioma cargado: {{lang}}"
+  },
+  "landing": {
+    "disclosuresBody": "Esta herramienta tiene fines únicamente informativos y educativos.\nEsta herramienta de planificación ABLE se ofrece exclusivamente con fines informativos y educativos generales. No está diseñada para brindar asesoramiento legal, fiscal, financiero o de inversión, y no debe tomarse como un sustituto del consejo de profesionales calificados.\n\nSin garantía de resultados\nTodas las proyecciones, gráficos e informes generados por esta herramienta son hipotéticos y se basan en supuestos proporcionados por el usuario. Los resultados reales pueden diferir materialmente. No se garantiza que se alcancen los saldos proyectados, los rendimientos de inversión, la elegibilidad para contribuciones o los beneficios fiscales.\n\nPuede perder parte o la totalidad del dinero invertido en una cuenta ABLE.\n\nRiesgo de inversión\nLas cuentas ABLE están sujetas al riesgo de mercado, incluida la posible pérdida del capital. Los rendimientos de la inversión no están garantizados, y el desempeño pasado no indica resultados futuros. Los cambios en las condiciones del mercado, tarifas, gastos y selecciones de inversión pueden afectar significativamente los resultados.\n\nSupuestos y simplificaciones\nEsta herramienta depende de supuestos simplificados, que pueden incluir tasas de retorno constantes o estimadas, cronogramas regulares de contribuciones y retiros, y un tratamiento simplificado de impuestos y beneficios fiscales. Las reglas reales del programa ABLE, el desempeño de las inversiones y el tratamiento fiscal varían según el estado y pueden cambiar con el tiempo.\n\nLímites de contribución y elegibilidad\nLos límites de contribución anual, la elegibilidad para Work-to-ABLE, los beneficios federales, los beneficios estatales y el tratamiento fiscal están gobernados por las leyes federales y estatales y las reglas individuales de cada programa ABLE. Esta herramienta no determina elegibilidad ni cumplimiento, y no debe usarse para tomar decisiones finales sobre contribuciones o retiros.\n\nRetiros y gastos calificados\nLos retiros de una cuenta ABLE deben usarse generalmente para gastos calificados relacionados con la discapacidad para evitar consecuencias fiscales adversas. Esta herramienta no evalúa si los retiros planificados cumplen con las reglas aplicables.\n\nNo constituye una oferta ni una recomendación\nNada de lo contenido en esta herramienta constituye una oferta para vender, una solicitud para comprar o una recomendación sobre ningún producto financiero, inversión o valor.\n\nÚselo bajo su propio criterio\nAl utilizar esta herramienta, reconoce que usted es el único responsable de cómo interpreta y usa la información proporcionada. Para obtener orientación específica a su situación, considere consultar a un profesional calificado en finanzas, impuestos o derecho, o al administrador del programa ABLE de su estado.",
+    "disclosuresIntro": "Por favor, lea las siguientes divulgaciones y limitaciones importantes antes de usar esta herramienta.",
+    "disclosuresTitle": "Divulgaciones y limitaciones importantes",
+    "heroBody": "Una cuenta ABLE puede ser una herramienta potente para ahorrar, invertir y pagar gastos relacionados con la discapacidad sin poner en riesgo beneficios públicos esenciales. Esta herramienta de planificación le ayuda a explorar distintos escenarios, comparar resultados y comprender mejor cómo las decisiones de hoy pueden afectar los saldos del futuro. Explore cómo las contribuciones, los retiros, el crecimiento de las inversiones y los límites del programa pueden interactuar con el tiempo.",
+    "heroBullets": [
+      "Explorar el crecimiento a largo plazo de ABLE con distintos supuestos",
+      "Entender límites de contribución y reglas de elegibilidad",
+      "Modelar retiros junto con contribuciones",
+      "Revisar saldos proyectados, resúmenes y gráficos en el tiempo"
+    ],
+    "heroSubtitle": "Explore cómo las contribuciones, los retiros, el crecimiento de las inversiones y los límites del programa pueden interactuar con el tiempo.",
+    "heroTitle": "Bienvenido al Planificador ABLE"
   }
 }

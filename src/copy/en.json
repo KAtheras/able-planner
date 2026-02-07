@@ -1,168 +1,157 @@
 {
   "metadata": {
-    "language": "en",
-    "direction": "ltr"
+    "direction": "ltr",
+    "language": "en"
   },
   "app": {
-    "title": "ABLE Planner",
-    "tagline": "Mobile-first • Accessible • Bilingual"
+    "tagline": "Mobile-first • Accessible • Bilingual",
+    "title": "ABLE Planner"
   },
-  "home": {
-    "heading": "Welcome",
-    "intro": "This is the clean foundation for the ABLE Planner. UI, copy, and logic will be layered in gradually.",
-    "languageLoaded": "Language loaded: {{lang}}"
+  "ui": {
+    "sidebar": {
+      "account_growth": "Account Growth",
+      "disclosures": "Disclosures",
+      "inputs": "Inputs",
+      "schedule": "Amortization",
+      "tax_benefits": "Tax Benefits"
+    },
+    "inputs": {
+      "accountActivity": {
+        "startingBalanceLabel": "Starting Balance",
+        "title": "Account Activity"
+      },
+      "demographics": {
+        "title": "Demographic Information"
+      }
+    }
+  },
+  "buttons": {
+    "back": "Back",
+    "changeResidencyProceed": "Change my residency and proceed to the calculator",
+    "eligibleRetest": "Eligible — Retest",
+    "eligibleToEvaluate": "Eligible to evaluate",
+    "enterAgiToTestEligibility": "Enter AGI to test eligibility",
+    "evaluate": "Evaluate",
+    "next": "Next",
+    "no": "No",
+    "notEligibleBasedOnAgi": "Not eligible based on AGI",
+    "notEligibleRetest": "Not eligible — Try Again",
+    "refresh": "Refresh",
+    "understandProceed": "I understand and would like to proceed",
+    "welcomeContinue": "I Understand — Continue",
+    "yes": "Yes"
   },
   "labels": {
     "inputs": {
-      "demographicsTitle": "Demographic Information",
+      "accountActivityTitle": "Account Activity",
+      "agiLabel": "Adjusted Gross Income (AGI)",
+      "annualReturnLabel": "Annual Investment Return Assumption (%)",
       "checkEligibility": "Check eligibility",
-      "selectState": "Select a state",
+      "contributionEndLabel": "Contribution End",
+      "contributionIncreaseLabel": "Annual contribution increase (%)",
+      "demographicsTitle": "Demographic Information",
+      "eligibleToEvaluate": "Eligible to Evaluate",
       "filing": {
-        "single": "Single",
+        "head_of_household": "Head of Household",
         "married_joint": "Married Filing Jointly",
         "married_separate": "Married Filing Separately",
-        "head_of_household": "Head of Household"
+        "single": "Single"
       },
-      "nameLabel": "Beneficiary Name",
-      "stateOfResidenceLabel": "State of residence",
       "filingStatusLabel": "Filing status",
-      "agiLabel": "Adjusted Gross Income (AGI)",
-      "accountActivityTitle": "Account Activity",
-      "timeHorizonYearsFallback": "Time Horizon (years)",
-      "monthPlaceholder": "Month",
-      "yearPlaceholder": "Year",
-      "startingBalanceLabel": "Starting Balance",
-      "monthlyContributionLabel": "Monthly Contribution",
-      "monthlyWithdrawalLabel": "Monthly Withdrawal",
-      "annualReturnLabel": "Annual Investment Return Assumption (%)",
-      "ssiEligibilityLabel": "Beneficiary is eligible for SSI",
-      "fscHeading": "Federal Saver’s Credit Eligibility",
-      "fscEligibleLabel": "Eligible to evaluate",
-      "ssiEligibleLabel": "Beneficiary is eligible for SSI",
+      "fscAge18": "Are you age 18 or older?",
       "fscEligibilityTitle": "Federal Saver’s Credit Eligibility",
-      "eligibleToEvaluate": "Eligible to Evaluate",
+      "fscEligibleLabel": "Eligible to evaluate",
+      "fscHeading": "Federal Saver’s Credit Eligibility",
       "fscIntro": "Answer these questions to estimate eligibility.",
       "fscTaxLiability": "Do you have federal income tax liability?",
-      "fscAge18": "Are you age 18 or older?",
-      "contributionEndLabel": "Contribution End",
-      "withdrawalStartLabel": "Withdrawal Start",
-      "contributionIncreaseLabel": "Annual contribution increase (%)",
+      "monthlyContributionLabel": "Monthly Contribution",
+      "monthlyWithdrawalLabel": "Monthly Withdrawal",
+      "monthPlaceholder": "Month",
+      "nameLabel": "Beneficiary Name",
+      "selectState": "Select a state",
+      "ssiEligibilityLabel": "Beneficiary is eligible for SSI",
+      "ssiEligibleLabel": "Beneficiary is eligible for SSI",
+      "startingBalanceLabel": "Starting Balance",
+      "stateOfResidenceLabel": "State of residence",
+      "timeHorizonYearsFallback": "Time Horizon (years)",
       "withdrawalIncreaseLabel": "Annual withdrawal increase (%)",
-      "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
+      "withdrawalStartLabel": "Withdrawal Start",
       "wtaEarnedIncomeInput": "Please input estimated earned income:",
-      "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?"
+      "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
+      "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?",
+      "yearPlaceholder": "Year"
+    },
+    "schedule": {
+      "ableAccountToggle": "ABLE Account",
+      "accountBalance": "Account Balance",
+      "accountTotals": "Account totals",
+      "amortizationTitle": "Amortization Schedule",
+      "contributions": "Contributions",
+      "enterTimeHorizonPrompt": "Enter a time horizon to view the schedule.",
+      "federalSaversCredit": "Federal Saver’s Credit",
+      "federalTaxes": "Federal Taxes",
+      "investmentReturns": "Investment Returns",
+      "monthYear": "Month/Year",
+      "scheduleTitle": "Schedule",
+      "stateTaxBenefit": "State Tax Benefit",
+      "stateTaxes": "State Taxes",
+      "taxableAccountToggle": "Taxable Account",
+      "withdrawals": "Withdrawals"
     },
     "fsc": {
-      "intro": "Answer these questions to estimate eligibility.",
-      "taxLiability": "Do you have federal income tax liability?",
       "age18": "Are you age 18 or older?",
+      "dependent": "Can someone claim you as a dependent?",
+      "intro": "Answer these questions to estimate eligibility.",
       "student": "Are you a full-time student?",
-      "dependent": "Can someone claim you as a dependent?"
+      "taxLiability": "Do you have federal income tax liability?"
     },
+    "disclosures": "Disclosures",
     "nav": {
-      "inputs": "Inputs",
-      "growth": "Account Growth",
-      "taxBenefits": "Tax Benefits",
       "amortization": "Amortization",
-      "disclosures": "Disclosures"
+      "disclosures": "Disclosures",
+      "growth": "Account Growth",
+      "inputs": "Inputs",
+      "taxBenefits": "Tax Benefits"
+    },
+    "ui": {
+      "placeholderComingSoon": "Placeholder content is coming soon.",
+      "shellSuffix": " (Shell)"
     },
     "highReturnWarning": "That return assumption is unusually high. Consider ≤ {{max}}%.",
-    "residencyNotAllowed": "The beneficiary is not eligible to open a {{plan}} account because the {{plan}} plan requires the beneficiary to be a resident of {{state}}.",
     "residencyGeneralAdvice": "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits.",
-    "schedule": {
-      "monthYear": "Month/Year",
-      "contributions": "Contributions",
-      "withdrawals": "Withdrawals",
-      "investmentReturns": "Investment Returns",
-      "accountBalance": "Account Balance",
-      "federalSaversCredit": "Federal Saver’s Credit",
-      "stateTaxBenefit": "State Tax Benefit",
-      "federalTaxes": "Federal Taxes",
-      "stateTaxes": "State Taxes",
-      "scheduleTitle": "Schedule",
-      "amortizationTitle": "Amortization Schedule",
-      "ableAccountToggle": "ABLE Account",
-      "taxableAccountToggle": "Taxable Account",
-      "accountTotals": "Account totals",
-      "enterTimeHorizonPrompt": "Enter a time horizon to view the schedule."
-    },
-    "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
+    "residencyNotAllowed": "The beneficiary is not eligible to open a {{plan}} account because the {{plan}} plan requires the beneficiary to be a resident of {{state}}.",
     "wtaEarnedIncomeInput": "Please input estimated earned income:",
-    "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?",
-    "disclosures": "Disclosures",
-    "ui": {
-      "shellSuffix": " (Shell)",
-      "placeholderComingSoon": "Placeholder content is coming soon."
-    }
+    "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
+    "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?"
   },
   "messages": {
+    "ableDepletionNotice": "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.",
+    "accountEndingValueLabel": "ACCOUNT ENDING VALUE",
     "balanceCapWarning": "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated in {{withdrawStart}} to keep the balance at {{cap}} by withdrawing the projected monthly earnings.",
     "planMaxReached": "In this planning tool, contributions stop in {{month}} because the projected balance reaches the plan maximum of {{cap}}.",
     "workToAblePrompt": "Your planned contributions exceed the annual ABLE limit of {{cap}}. If you are working, you may qualify to contribute more (the “work to ABLE” provision). Would you like to find out if you qualify?",
-    "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
-    "wtaEarnedIncomeInput": "Please input estimated earned income:",
-    "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?",
-    "wtaNotEligible": "You are not eligible for additional ABLE contributions under the Work-to-ABLE provision.",
+    "wtaAmountOverCombinedTitle": "AMOUNT OVER THE COMBINED LIMIT:",
     "wtaAmountOverTitle": "AMOUNT OVER THE ANNUAL LIMIT:",
-    "wtaSetToMaxQuestion": "Would you like to set contributions to the maximum allowed amount?",
-    "wtaSetToMaxNote": "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit.",
+    "wtaAutoAppliedAdjustedLine": "We adjusted your planned contributions in an amount that keeps you below the annual contribution limit.",
+    "wtaAutoAppliedMonthlyCapHint": "(This year: {{current}}/mo through Dec; starting Jan: {{future}}/mo.)",
+    "wtaEarnedIncomeInput": "Please input estimated earned income:",
+    "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
     "wtaEligibleOverCombinedLine1": "You qualify for additional contributions of {{additional}}, but your total contributions exceed the combined limit of {{combined}}.",
     "wtaEligibleOverCombinedLine2": "Please revise your contribution amounts to bring total contributions below the combined limit.",
-    "wtaAmountOverCombinedTitle": "AMOUNT OVER THE COMBINED LIMIT:",
-    "accountEndingValueLabel": "ACCOUNT ENDING VALUE",
-    "ableDepletionNotice": "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.",
-    "wtaAutoAppliedAdjustedLine": "We adjusted your planned contributions in an amount that keeps you below the annual contribution limit.",
-    "wtaAutoAppliedMonthlyCapHint": "(This year: {{current}}/mo through Dec; starting Jan: {{future}}/mo.)"
-  },
-  "buttons": {
-    "welcomeContinue": "I Understand — Continue",
-    "yes": "Yes",
-    "no": "No",
-    "enterAgiToTestEligibility": "Enter AGI to test eligibility",
-    "eligibleToEvaluate": "Eligible to evaluate",
-    "evaluate": "Evaluate",
-    "notEligibleBasedOnAgi": "Not eligible based on AGI",
-    "eligibleRetest": "Eligible — Retest",
-    "notEligibleRetest": "Not eligible — Try Again",
-    "back": "Back",
-    "next": "Next",
-    "refresh": "Refresh",
-    "changeResidencyProceed": "Change my residency and proceed to the calculator",
-    "understandProceed": "I understand and would like to proceed"
-  },
-  "landing": {
-    "heroTitle": "Welcome to the ABLE Planner",
-    "heroSubtitle": "Explore how contributions, withdrawals, investment growth, and program limits may interact over time.",
-    "heroBody": "An ABLE account can be a powerful tool for saving, investing, and paying for qualified disability-related expenses—without jeopardizing critical public benefits.\n\nThis planning tool helps you explore different scenarios, compare outcomes, and better understand how today’s decisions may affect future balances.\n\nUse this tool to:",
-    "heroBullets": [
-      "Explore long-term ABLE account growth under different assumptions",
-      "Understand how contribution limits and eligibility rules may apply",
-      "Model withdrawals alongside ongoing contributions",
-      "Review projected balances, summaries, and charts across time"
-    ],
-    "disclosuresTitle": "Important Disclosures and Limitations",
-    "disclosuresIntro": "Please read the following important disclosures and limitations before using this tool.",
-    "disclosuresBody": "This tool is for informational and educational purposes only\nThis ABLE planning tool is provided solely for general informational and educational purposes. It is not intended to provide legal, tax, investment, or financial advice, and should not be relied upon as a substitute for advice from qualified professionals.\n\nNo guarantee of results\nAll projections, charts, and reports generated by this tool are hypothetical and based on user-provided assumptions. Actual results may differ materially. There is no guarantee that projected balances, investment returns, contribution eligibility, or tax benefits will be achieved.\n\nYou may lose some or all of the money invested in an ABLE account.\n\nInvestment risk\nABLE accounts are subject to market risk, including the possible loss of principal. Investment returns are not guaranteed, and past performance is not indicative of future results. Changes in market conditions, fees, expenses, and investment selections may significantly affect outcomes.\n\nAssumptions and simplifications\nThis tool relies on simplifying assumptions, which may include constant or estimated rates of return, regular contribution and withdrawal schedules, and simplified treatment of taxes and tax benefits. Actual ABLE program rules, investment performance, and tax treatment vary by state and may change over time.\n\nContribution limits and eligibility\nAnnual contribution limits, Work-to-ABLE eligibility, federal benefits, state benefits, and tax treatment are governed by federal and state law and individual ABLE program rules. This tool does not determine eligibility or compliance and should not be used to make final contribution or withdrawal decisions.\n\nWithdrawals and qualified expenses\nWithdrawals from an ABLE account must generally be used for qualified disability expenses to avoid adverse tax consequences. This tool does not evaluate whether planned withdrawals qualify under applicable rules.\n\nNot an offer or recommendation\nNothing contained in this tool constitutes an offer to sell, a solicitation of an offer to buy, or a recommendation regarding any investment, security, or financial product.\n\nUse at your own discretion\nBy using this tool, you acknowledge that you are solely responsible for how you interpret and use the information provided. For guidance specific to your situation, consider consulting a qualified financial, tax, or legal professional, or your state’s ABLE program administrator."
-  },
-  "ui": {
-    "inputs": {
-      "demographics": {
-        "title": "Demographic Information"
-      },
-      "accountActivity": {
-        "title": "Account Activity",
-        "startingBalanceLabel": "Starting Balance"
-      }
-    },
-    "sidebar": {
-      "inputs": "Inputs",
-      "account_growth": "Account Growth",
-      "tax_benefits": "Tax Benefits",
-      "schedule": "Amortization",
-      "disclosures": "Disclosures"
-    }
+    "wtaNotEligible": "You are not eligible for additional ABLE contributions under the Work-to-ABLE provision.",
+    "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?",
+    "wtaSetToMaxNote": "We'll reduce the recurring contribution to keep a rolling 12-month total within the limit.",
+    "wtaSetToMaxQuestion": "Would you like to set contributions to the maximum allowed amount?"
   },
   "flows": {
+    "screen1": {
+      "defaultMessages": [
+        "Welcome to our interactive ABLE planning tool. Start by providing basic demographic information on the left input screen. You will be able to navigate to any of the input screens to edit all this information.",
+        "Your state of residence is used to determine plan eligibility as well as to calculate certain state tax benefits.",
+        "Similarly, your tax filing status and Adjusted Gross Income (AGI) will help us determine and project federal and, where applicable, state tax benefits of investing in an ABLE account. Remember that your AGI is not the same as your salary. It may be more than your earned income due to other sources of income. Conversely, for most taxpayers, it often is less than your earned income due to deductions or exemptions. You can find your AGI in your most recent tax return if you filed one. If you are not sure what your current AGI is, simply put your salary and wages.",
+        "Finally, we proposed a default investment return assumption. Feel free to change the investment return assumption to try out different scenarios."
+      ]
+    },
     "screen2": {
       "defaultMessages": [
         "Please use the input fields on the left to plan for account activity.",
@@ -171,14 +160,25 @@
         "This tool allows you to plan for monthly recurring contributions and withdrawals. Recurring contributions are assumed to start on the 1st of the following month. You can also select an end month and year for contributions. Recurring withdrawals are assumed to continue until the end of the time horizon selected. You can choose the month and year in which those withdrawals will start.",
         "As you input your information, messages will appear in this window that will help you navigate certain contribution and account balance limits and make suggested changes to your contribution and withdrawal inputs."
       ]
-    },
-    "screen1": {
-      "defaultMessages": [
-        "Welcome to our interactive ABLE planning tool. Start by providing basic demographic information on the left input screen. You will be able to navigate to any of the input screens to edit all this information.",
-        "Your state of residence is used to determine plan eligibility as well as to calculate certain state tax benefits.",
-        "Similarly, your tax filing status and Adjusted Gross Income (AGI) will help us determine and project federal and, where applicable, state tax benefits of investing in an ABLE account. Remember that your AGI is not the same as your salary. It may be more than your earned income due to other sources of income. Conversely, for most taxpayers, it often is less than your earned income due to deductions or exemptions. You can find your AGI in your most recent tax return if you filed one. If you are not sure what your current AGI is, simply put your salary and wages.",
-        "Finally, we proposed a default investment return assumption. Feel free to change the investment return assumption to try out different scenarios."
-      ]
     }
+  },
+  "home": {
+    "heading": "Welcome",
+    "intro": "This is the clean foundation for the ABLE Planner. UI, copy, and logic will be layered in gradually.",
+    "languageLoaded": "Language loaded: {{lang}}"
+  },
+  "landing": {
+    "disclosuresBody": "This tool is for informational and educational purposes only\nThis ABLE planning tool is provided solely for general informational and educational purposes. It is not intended to provide legal, tax, investment, or financial advice, and should not be relied upon as a substitute for advice from qualified professionals.\n\nNo guarantee of results\nAll projections, charts, and reports generated by this tool are hypothetical and based on user-provided assumptions. Actual results may differ materially. There is no guarantee that projected balances, investment returns, contribution eligibility, or tax benefits will be achieved.\n\nYou may lose some or all of the money invested in an ABLE account.\n\nInvestment risk\nABLE accounts are subject to market risk, including the possible loss of principal. Investment returns are not guaranteed, and past performance is not indicative of future results. Changes in market conditions, fees, expenses, and investment selections may significantly affect outcomes.\n\nAssumptions and simplifications\nThis tool relies on simplifying assumptions, which may include constant or estimated rates of return, regular contribution and withdrawal schedules, and simplified treatment of taxes and tax benefits. Actual ABLE program rules, investment performance, and tax treatment vary by state and may change over time.\n\nContribution limits and eligibility\nAnnual contribution limits, Work-to-ABLE eligibility, federal benefits, state benefits, and tax treatment are governed by federal and state law and individual ABLE program rules. This tool does not determine eligibility or compliance and should not be used to make final contribution or withdrawal decisions.\n\nWithdrawals and qualified expenses\nWithdrawals from an ABLE account must generally be used for qualified disability expenses to avoid adverse tax consequences. This tool does not evaluate whether planned withdrawals qualify under applicable rules.\n\nNot an offer or recommendation\nNothing contained in this tool constitutes an offer to sell, a solicitation of an offer to buy, or a recommendation regarding any investment, security, or financial product.\n\nUse at your own discretion\nBy using this tool, you acknowledge that you are solely responsible for how you interpret and use the information provided. For guidance specific to your situation, consider consulting a qualified financial, tax, or legal professional, or your state’s ABLE program administrator.",
+    "disclosuresIntro": "Please read the following important disclosures and limitations before using this tool.",
+    "disclosuresTitle": "Important Disclosures and Limitations",
+    "heroBody": "An ABLE account can be a powerful tool for saving, investing, and paying for qualified disability-related expenses—without jeopardizing critical public benefits.\n\nThis planning tool helps you explore different scenarios, compare outcomes, and better understand how today’s decisions may affect future balances.\n\nUse this tool to:",
+    "heroBullets": [
+      "Explore long-term ABLE account growth under different assumptions",
+      "Understand how contribution limits and eligibility rules may apply",
+      "Model withdrawals alongside ongoing contributions",
+      "Review projected balances, summaries, and charts across time"
+    ],
+    "heroSubtitle": "Explore how contributions, withdrawals, investment growth, and program limits may interact over time.",
+    "heroTitle": "Welcome to the ABLE Planner"
   }
 }
