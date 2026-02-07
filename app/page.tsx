@@ -1608,10 +1608,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       return (
         <div className="space-y-6">
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                {copy?.labels?.schedule?.amortizationTitle ?? ""}
-              </h1>
+            <div className="flex items-center gap-4">
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -1639,6 +1636,12 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                 >
                   <span>{copy?.labels?.schedule?.taxableAccountToggle ?? ""}</span>
                 </button>
+              </div>
+
+              <h1 className="flex-1 text-center text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                {copy?.labels?.schedule?.amortizationTitle ?? ""}
+              </h1>
+              <div className="flex items-center justify-end ml-auto">
                 {languageToggle}
               </div>
             </div>
