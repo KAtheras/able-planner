@@ -81,7 +81,8 @@
     },
     "wtaEarnedIncomeQuestion": "¿Tiene el beneficiario ingresos del trabajo?",
     "wtaEarnedIncomeInput": "Por favor ingrese el ingreso del trabajo estimado:",
-    "wtaRetirementPlanQuestion": "¿Está el beneficiario cubierto por un plan de jubilación?"
+    "wtaRetirementPlanQuestion": "¿Está el beneficiario cubierto por un plan de jubilación?",
+    "disclosures": "Divulgaciones"
   },
   "messages": {
     "balanceCapWarning": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}. También se inician retiros recurrentes en {{withdrawStart}} para mantener el saldo en {{cap}} retirando las ganancias mensuales proyectadas.",

@@ -85,7 +85,8 @@
     },
     "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
     "wtaEarnedIncomeInput": "Please input estimated earned income:",
-    "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?"
+    "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?",
+    "disclosures": "Disclosures"
   },
   "messages": {
     "balanceCapWarning": "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated in {{withdrawStart}} to keep the balance at {{cap}} by withdrawing the projected monthly earnings.",

@@ -164,7 +164,7 @@ const [active, setActive] = useState<NavKey>("inputs");
   const annualReturnWarningText =
     annualReturnWarningMax === null
       ? null
-      : (copy?.labels?.highReturnWarning ?? "That return assumption is unusually high. Consider ≤ {{max}}%.")
+      : (copy?.labels?.highReturnWarning ?? "")
           .replace("{{max}}", formatDecimalToPercentString(annualReturnWarningMax));
 
   const screen1DefaultMessages = copy.flows?.screen1?.defaultMessages ?? INITIAL_MESSAGES;
@@ -216,7 +216,7 @@ const [active, setActive] = useState<NavKey>("inputs");
   const currentClientConfig = getClientConfig(plannerStateCode);
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
-  const planState = planStateOverride ?? planStateFallback ?? "UT";
+  const planState = planStateOverride ?? planStateFallback ?? "";
   const languageToggle = (
     <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-black">
       <button
@@ -1134,7 +1134,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 type="button"
                 className={primaryButtonClass}
                 onClick={changeResidencyToPlan}
-              >{copy?.buttons?.changeResidencyProceed ?? "Change my residency and proceed to the calculator"}</button>
+              >{copy?.buttons?.changeResidencyProceed ?? ""}</button>
             </div>
           </div>
         );
@@ -1150,12 +1150,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               type="button"
               className={primaryButtonClass}
               onClick={acknowledgeNonResident}
-            >{copy?.buttons?.understandProceed ?? "I understand and would like to proceed"}</button>
+            >{copy?.buttons?.understandProceed ?? ""}</button>
             <button
               type="button"
               className={secondaryButtonClass}
               onClick={changeResidencyToPlan}
-            >{copy?.buttons?.changeResidencyProceed ?? "Change my residency and proceed to the calculator"}</button>
+            >{copy?.buttons?.changeResidencyProceed ?? ""}</button>
           </div>
         </div>
       );
@@ -1171,7 +1171,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
               <p className="text-sm leading-relaxed">
                 
-{(copy?.messages?.planMaxReached ?? "In this planning tool, contributions stop in {{month}} because the projected balance reaches the plan maximum of {{cap}}.")
+{(copy?.messages?.planMaxReached ?? "")
   .replace("{{month}}", planMessages[0].data.monthLabel)
   
 .replace("{{cap}}", formatCurrency(planMessages[0].data.planMax).replace(".00", ""))}
@@ -1182,13 +1182,13 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           {ssiMessages.length > 0 && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
               <div className="mb-2 whitespace-pre-line text-sm leading-relaxed">{
-              (copy?.messages?.balanceCapWarning ?? "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated in {{withdrawStart}} to keep the balance at {{cap}} by withdrawing the projected monthly earnings.")
+              (copy?.messages?.balanceCapWarning ?? "")
   .split("{{cap}}").join("$100,000")
   
-.replace("{{breach}}", (ssiMessages[0]?.data?.breachLabel ?? ssiMessages[0]?.data?.monthLabel ?? "Month Unknown"))
+.replace("{{breach}}", (ssiMessages[0]?.data?.breachLabel ?? ssiMessages[0]?.data?.monthLabel ?? ""))
   
-.replace("{{stop}}", (ssiMessages[0]?.data?.stopLabel ?? planMessages[0]?.data?.monthLabel ?? "Month Unknown"))
-  .replace("{{withdrawStart}}", (forcedMsg?.data?.monthLabel ?? "Month Unknown"))
+.replace("{{stop}}", (ssiMessages[0]?.data?.stopLabel ?? planMessages[0]?.data?.monthLabel ?? ""))
+  .replace("{{withdrawStart}}", (forcedMsg?.data?.monthLabel ?? ""))
 }</div>
             </div>
           )}
@@ -1225,7 +1225,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                   "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black",
                 ].join(" ")}
                 onClick={promptlyStartWta}
-              >{copy?.buttons?.yes ?? "Yes"}</button>
+              >{copy?.buttons?.yes ?? ""}</button>
               <button
                 type="button"
                 className={[
@@ -1233,7 +1233,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                   "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                 ].join(" ")}
                 onClick={handleOverLimitNo}
-              >{copy?.buttons?.no ?? "No"}</button>
+              >{copy?.buttons?.no ?? ""}</button>
             </div>
           </div>
         );
@@ -1260,7 +1260,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                     ].join(" ")}
                     onClick={() => handleEarnedIncomeAnswer(true)}
-                  >{copy?.buttons?.yes ?? "Yes"}</button>
+                  >{copy?.buttons?.yes ?? ""}</button>
                   <button
                     type="button"
                     className={[
@@ -1270,7 +1270,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                     ].join(" ")}
                     onClick={() => handleEarnedIncomeAnswer(false)}
-                  >{copy?.buttons?.no ?? "No"}</button>
+                  >{copy?.buttons?.no ?? ""}</button>
                 </div>
               </div>
               {wtaHasEarnedIncome === true && (
@@ -1298,7 +1298,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                           : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                       ].join(" ")}
                       onClick={() => evaluateWtaEligibility(true)}
-                    >{copy?.buttons?.yes ?? "Yes"}</button>
+                    >{copy?.buttons?.yes ?? ""}</button>
                     <button
                       type="button"
                       className={[
@@ -1308,7 +1308,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                           : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                       ].join(" ")}
                       onClick={() => evaluateWtaEligibility(false)}
-                    >{copy?.buttons?.no ?? "No"}</button>
+                    >{copy?.buttons?.no ?? ""}</button>
                   </div>
                 </div>
               )}
@@ -1534,8 +1534,8 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
             <p className="text-xs leading-relaxed">
               {(copy?.messages?.ableDepletionNotice ??
                 "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.")
-                .replace("{{reachMonthYear}}", endingValueInfo.reachLabel || "Month Unknown")
-                .replace("{{stopMonthYear}}", endingValueInfo.stopLabel || "Month Unknown")}
+                .replace("{{reachMonthYear}}", endingValueInfo.reachLabel || "")
+                .replace("{{stopMonthYear}}", endingValueInfo.stopLabel || "")}
             </p>
           </div>
         );
@@ -1545,7 +1545,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
           <div className="flex items-center justify-between gap-4">
             <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              {copy?.messages?.accountEndingValueLabel ?? "ACCOUNT ENDING VALUE"}
+              {copy?.messages?.accountEndingValueLabel ?? ""}
             </div>
             <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 tabular-nums">
               {endingValueInfo.endingLabel}
@@ -1670,7 +1670,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
             : active === "schedule"
               ? "Schedule"
               : active === "disclosures"
-                ? "Disclosures"
+                ? (copy?.labels?.disclosures ?? "")
                 : active.toUpperCase();
       return (
         <div className="space-y-6">
@@ -1696,7 +1696,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                 className="rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
                 onClick={() => setInputStep(1)}
               >
-                {copy?.buttons?.back ?? "Back"}
+                {copy?.buttons?.back ?? ""}
               </button>
             )}
           </div>
@@ -1712,14 +1712,14 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
               ].join(" ")}
               onClick={goToNextStep}
             >
-              {copy?.buttons?.next ?? "Next"}
+              {copy?.buttons?.next ?? ""}
             </button>
             <button
               type="button"
               className="rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
               onClick={resetInputs}
             >
-              {copy?.buttons?.refresh ?? "Refresh"}
+              {copy?.buttons?.refresh ?? ""}
             </button>
             {languageToggle}
           </div>
@@ -1898,7 +1898,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                                     ].join(" ")}
                                     onClick={() => updateAnswer(question.key, true)}
-                                  >{copy?.buttons?.yes ?? "Yes"}</button>
+                                  >{copy?.buttons?.yes ?? ""}</button>
                                   <button
                                     type="button"
                                     className={[
@@ -1908,7 +1908,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                                     ].join(" ")}
                                     onClick={() => updateAnswer(question.key, false)}
-                                  >{copy?.buttons?.no ?? "No"}</button>
+                                  >{copy?.buttons?.no ?? ""}</button>
                                 </div>
                               </div>
                             );
@@ -1925,7 +1925,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                                 : "border border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed",
                             ].join(" ")}
                             onClick={evaluateFsc}
-                          >{copy?.buttons?.evaluate ?? "Evaluate"}</button>
+                          >{copy?.buttons?.evaluate ?? ""}</button>
                         </div>
                       </div>
                     ) : (
@@ -1956,7 +1956,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-black">
         <TopNav
-          title={copy.app?.title ?? "ABLE Planner"}
+          title={copy.app?.title ?? ""}
           tagline={copy.app?.tagline}
           rightSlot={
             <div className="flex items-center gap-2">
@@ -2037,7 +2037,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black">
       <TopNav
-        title={copy.app?.title ?? "ABLE Planner"}
+        title={copy.app?.title ?? ""}
         tagline={copy.app?.tagline}
         rightSlot={
           <div className="flex items-center gap-2">
