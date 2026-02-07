@@ -135,7 +135,7 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
                     className="bg-white text-[13px] text-slate-600"
                   >
                     <td className="border-b border-sky-200 px-3 py-3 font-bold whitespace-nowrap">
-                      Account totals
+                      {labels?.accountTotals ?? ""}
                     </td>
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                       {formatCurrencyDisplay(yearRow.contribution)}
@@ -256,7 +256,7 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
                     className="bg-white text-[13px] text-slate-600"
                   >
                     <td className="border-b border-sky-200 px-3 py-3 font-bold whitespace-nowrap">
-                      Account totals
+                      {labels?.accountTotals ?? ""}
                     </td>
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                       {formatCurrencyDisplay(yearRow.contribution)}
