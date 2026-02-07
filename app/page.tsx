@@ -1658,8 +1658,38 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       );
     }
 
-    if (active !== "inputs") {
-      const screenLabel =
+    
+      if (active === "disclosures") {
+        return (
+          <div className="space-y-6">
+            <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
+              <div className="flex items-center justify-between gap-4">
+                <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                  {copy?.assumptionsCopy?.title ?? ""}
+                </h1>
+                {languageToggle}
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {copy?.assumptionsCopy?.items?.map((item, i) => (
+                  <p
+                    key={i}
+                    className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
+                  >
+                    <strong className="font-semibold text-zinc-900 dark:text-zinc-50">
+                      {item?.lead ?? ""}
+                    </strong>{" "}
+                    {item?.body ?? ""}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      if (active !== "inputs") {
+        const screenLabel =
           active === "account_growth"
             ? (copy?.ui?.sidebar?.account_growth ?? "")
             : active === "tax_benefits"
@@ -1669,19 +1699,21 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                 : active === "disclosures"
                   ? (copy?.ui?.sidebar?.disclosures ?? "")
                   : "";
-      return (
-        <div className="space-y-6">
-          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
-            <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
-              {screenLabel}{copy?.labels?.ui?.shellSuffix ?? ""}
-            </h1>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {copy?.labels?.ui?.placeholderComingSoon ?? ""}
-            </p>
+
+        return (
+          <div className="space-y-6">
+            <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
+              <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
+                {screenLabel}{copy?.labels?.ui?.shellSuffix ?? ""}
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                {copy?.labels?.ui?.placeholderComingSoon ?? ""}
+              </p>
+            </div>
           </div>
-        </div>
-      );
-    }
+        );
+      }
+
 
     return (
       <div className="space-y-6">
