@@ -66,7 +66,6 @@
       "amortization": "Amortization",
       "disclosures": "Disclosures"
     },
-    "fscIntro": "Answer these questions to estimate eligibility.",
     "highReturnWarning": "That return assumption is unusually high. Consider ≤ {{max}}%.",
     "residencyNotAllowed": "The beneficiary is not eligible to open a {{plan}} account because the {{plan}} plan requires the beneficiary to be a resident of {{state}}.",
     "residencyGeneralAdvice": "You should check to see if your home state offers an ABLE plan, which may provide certain state tax benefits.",
@@ -105,8 +104,7 @@
     "accountEndingValueLabel": "ACCOUNT ENDING VALUE",
     "ableDepletionNotice": "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.",
     "wtaAutoAppliedAdjustedLine": "We adjusted your planned contributions in an amount that keeps you below the annual contribution limit.",
-    "wtaAutoAppliedMonthlyCapHint": "(This year: {{current}}/mo through Dec; starting Jan: {{future}}/mo.)",
-    "intro1": "Welcome to our interactive ABLE planning tool. Start by providing basic demographic information on the left input screen. You will be able to navigate to any of the input screens to edit all this information."
+    "wtaAutoAppliedMonthlyCapHint": "(This year: {{current}}/mo through Dec; starting Jan: {{future}}/mo.)"
   },
   "buttons": {
     "welcomeContinue": "I Understand — Continue",
@@ -154,6 +152,25 @@
       "tax_benefits": "Tax Benefits",
       "schedule": "Amortization",
       "disclosures": "Disclosures"
+    }
+  },
+  "flows": {
+    "screen2": {
+      "defaultMessages": [
+        "Please use the input fields on the left to plan for account activity.",
+        "We would like to know the time-period you want to plan for, so that we can project and present information for a meaningful time horizon.",
+        "The starting balance should either be an existing ABLE account balance or a qualified rollover from another plan.",
+        "This tool allows you to plan for monthly recurring contributions and withdrawals. Recurring contributions are assumed to start on the 1st of the following month. You can also select an end month and year for contributions. Recurring withdrawals are assumed to continue until the end of the time horizon selected. You can choose the month and year in which those withdrawals will start.",
+        "As you input your information, messages will appear in this window that will help you navigate certain contribution and account balance limits and make suggested changes to your contribution and withdrawal inputs."
+      ]
+    },
+    "screen1": {
+      "defaultMessages": [
+        "Welcome to our interactive ABLE planning tool. Start by providing basic demographic information on the left input screen. You will be able to navigate to any of the input screens to edit all this information.",
+        "Your state of residence is used to determine plan eligibility as well as to calculate certain state tax benefits.",
+        "Similarly, your tax filing status and Adjusted Gross Income (AGI) will help us determine and project federal and, where applicable, state tax benefits of investing in an ABLE account. Remember that your AGI is not the same as your salary. It may be more than your earned income due to other sources of income. Conversely, for most taxpayers, it often is less than your earned income due to deductions or exemptions. You can find your AGI in your most recent tax return if you filed one. If you are not sure what your current AGI is, simply put your salary and wages.",
+        "Finally, we proposed a default investment return assumption. Feel free to change the investment return assumption to try out different scenarios."
+      ]
     }
   }
 }

@@ -62,7 +62,6 @@
       "amortization": "Amortización",
       "disclosures": "Divulgaciones"
     },
-    "fscIntro": "Responda estas preguntas para estimar la elegibilidad.",
     "highReturnWarning": "Esa suposición de rendimiento es inusualmente alta. Considere ≤ {{max}}%.",
     "residencyNotAllowed": "El beneficiario no es elegible para abrir una cuenta {{plan}} porque el plan {{plan}} requiere que el beneficiario sea residente de {{state}}.",
     "residencyGeneralAdvice": "Debe verificar si su estado de residencia ofrece un plan ABLE, lo cual puede proporcionar ciertos beneficios fiscales estatales.",
@@ -101,8 +100,7 @@
     "accountEndingValueLabel": "VALOR FINAL DE LA CUENTA",
     "ableDepletionNotice": "Según sus supuestos, el saldo de la cuenta ABLE llega a cero en {{reachMonthYear}}. En consecuencia, los retiros se detienen en este planificador después de {{stopMonthYear}}.",
     "wtaAutoAppliedAdjustedLine": "Ajustamos sus contribuciones planificadas para mantenerlas por debajo del límite anual de contribución.",
-    "wtaAutoAppliedMonthlyCapHint": "(Este año: {{current}}/mes hasta dic.; a partir de ene.: {{future}}/mes.)",
-    "intro1": "Bienvenido a nuestra herramienta interactiva de planificación ABLE. Comience proporcionando información demográfica básica en la pantalla de entradas de la izquierda. Podrá navegar a cualquiera de las pantallas de entrada para editar toda esta información."
+    "wtaAutoAppliedMonthlyCapHint": "(Este año: {{current}}/mes hasta dic.; a partir de ene.: {{future}}/mes.)"
   },
   "buttons": {
     "welcomeContinue": "Entiendo — Continuar",
@@ -138,14 +136,6 @@
     "language": "es",
     "direction": "ltr"
   },
-  "blocks": {
-    "rightCardPrimary": {
-      "default": "TESTOS PAGOS"
-    },
-    "rightCardSecondary": {
-      "default": "TESTOS PAGOS"
-    }
-  },
   "ui": {
     "inputs": {
       "demographics": {
@@ -162,6 +152,25 @@
       "tax_benefits": "Beneficios fiscales",
       "schedule": "Amortización",
       "disclosures": "Divulgaciones"
+    }
+  },
+  "flows": {
+    "screen2": {
+      "defaultMessages": [
+        "Utilice los campos de entrada de la izquierda para planificar la actividad de la cuenta.",
+        "Nos gustaría conocer el período que desea planificar, para poder proyectar y presentar información para un horizonte significativo.",
+        "El saldo inicial debe ser un saldo existente de una cuenta ABLE o una transferencia calificada desde otro plan.",
+        "Esta herramienta le permite planificar contribuciones y retiros recurrentes mensuales. Se supone que las contribuciones recurrentes comienzan el día 1 del mes siguiente. También puede seleccionar un mes y año de finalización para las contribuciones. Se supone que los retiros recurrentes continúan hasta el final del horizonte de tiempo seleccionado. Puede elegir el mes y el año en que comenzarán esos retiros.",
+        "A medida que ingrese su información, aparecerán mensajes en esta ventana que le ayudarán a navegar ciertos límites de contribución y saldo de la cuenta y a realizar cambios sugeridos en sus entradas de contribución y retiro."
+      ]
+    },
+    "screen1": {
+      "defaultMessages": [
+        "Bienvenido a nuestra herramienta interactiva de planificación ABLE. Comience proporcionando información demográfica básica en la pantalla de entradas de la izquierda. Podrá navegar a cualquiera de las pantallas de entrada para editar toda esta información.",
+        "Su estado de residencia se utiliza para determinar la elegibilidad del plan y también para calcular ciertos beneficios fiscales estatales.",
+        "De manera similar, su estado civil para impuestos y su Ingreso Bruto Ajustado (AGI) nos ayudarán a determinar y proyectar beneficios fiscales federales y, cuando corresponda, estatales de invertir en una cuenta ABLE. Recuerde que su AGI no es lo mismo que su salario. Puede ser mayor que su ingreso del trabajo debido a otras fuentes de ingresos. Por el contrario, para la mayoría de los contribuyentes, a menudo es menor que su ingreso del trabajo debido a deducciones o exenciones. Puede encontrar su AGI en su declaración de impuestos más reciente si presentó una. Si no está seguro de cuál es su AGI actual, simplemente ingrese su salario y sueldos.",
+        "Finalmente, propusimos una suposición predeterminada de rendimiento de inversión. Siéntase libre de cambiar la suposición de rendimiento de inversión para probar diferentes escenarios."
+      ]
     }
   }
 }

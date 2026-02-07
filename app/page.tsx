@@ -35,13 +35,7 @@ const EMPTY_FSC: FscAnswers = {
 
 const INITIAL_MESSAGES: string[] = ["", "", "", ""];
 
-const SCREEN2_DEFAULT_MESSAGES: string[] = [
-  "Please use the input fields on the left to plan for account activity.",
-  "We would like to know the time-period you want to plan for, so that we can project and present information for a meaningful time horizon.",
-  "The starting balance should either be an existing ABLE account balance or a qualified rollover from another plan.",
-  "This tool allows you to plan for monthly recurring contributions and withdrawals. Recurring contributions are assumed to start on the 1st of the following month. You can also select an end month and year for contributions. Recurring withdrawals are assumed to continue until the end of the time horizon selected. You can choose the month and year in which those withdrawals will start.",
-  "As you input your information, messages will appear in this window that will help you navigate certain contribution and account balance limits and make suggested changes to your contribution and withdrawal inputs.",
-];
+const SCREEN2_DEFAULT_MESSAGES: string[] = ["", "", "", "", ""];
 
 const WTA_BASE_ANNUAL_LIMIT = 20000;
 const getMonthsRemainingInCurrentCalendarYear = (startIndex: number) => {
@@ -1879,7 +1873,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                         <div>
                           <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">{copy?.labels?.inputs?.fscEligibilityTitle ?? ""}</h2>
                           <p className="text-xs text-zinc-500">
-                            {copy?.labels?.fscIntro ?? ""}
+                            {copy?.labels?.fsc?.intro ?? ""}
                           </p>
                         </div>
                         <div className="space-y-3">
