@@ -76,12 +76,20 @@
       "federalTaxes": "Impuestos federales",
       "stateTaxes": "Impuestos estatales",
       "scheduleTitle": "Cronograma",
-      "amortizationTitle": "Amortización"
+      "amortizationTitle": "Cronograma de amortización",
+      "ableAccountToggle": "Cuenta ABLE",
+      "taxableAccountToggle": "Cuenta imponible",
+      "accountTotals": "Totales de la cuenta",
+      "enterTimeHorizonPrompt": "Ingrese un horizonte temporal para ver el cronograma."
     },
     "wtaEarnedIncomeQuestion": "¿Tiene el beneficiario ingresos del trabajo?",
     "wtaEarnedIncomeInput": "Por favor ingrese el ingreso del trabajo estimado:",
     "wtaRetirementPlanQuestion": "¿Está el beneficiario cubierto por un plan de jubilación?",
-    "disclosures": "Divulgaciones"
+    "disclosures": "Divulgaciones",
+    "ui": {
+      "shellSuffix": " (Borrador)",
+      "placeholderComingSoon": "El contenido de marcador de posición estará disponible pronto."
+    }
   },
   "messages": {
     "balanceCapWarning": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}. También se inician retiros recurrentes en {{withdrawStart}} para mantener el saldo en {{cap}} retirando las ganancias mensuales proyectadas.",

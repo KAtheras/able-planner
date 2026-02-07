@@ -1555,10 +1555,10 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           <div className="space-y-6">
             <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
               <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                Amortization schedule
-              </h1>
+                  {copy?.labels?.schedule?.amortizationTitle ?? ""}
+                </h1>
               <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-                Enter a time horizon to view the schedule.
+                {copy?.labels?.schedule?.enterTimeHorizonPrompt ?? ""}
               </p>
             </div>
           </div>
@@ -1610,7 +1610,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                Amortization schedule
+                {copy?.labels?.schedule?.amortizationTitle ?? ""}
               </h1>
               <div className="flex flex-wrap items-center gap-2">
                 <button
@@ -1624,7 +1624,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                   ].join(" ")}
                   onClick={() => setAmortizationView("able")}
                 >
-                  ABLE Account
+                  {copy?.labels?.schedule?.ableAccountToggle ?? ""}
                 </button>
                 <button
                   type="button"
@@ -1637,7 +1637,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                   ].join(" ")}
                   onClick={() => setAmortizationView("taxable")}
                 >
-                  <span>Taxable Account</span>
+                  <span>{copy?.labels?.schedule?.taxableAccountToggle ?? ""}</span>
                 </button>
                 {languageToggle}
               </div>
@@ -1657,23 +1657,23 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
 
     if (active !== "inputs") {
       const screenLabel =
-        active === "account_growth"
-          ? "Account Growth"
-          : active === "tax_benefits"
-            ? "Tax Benefits"
-            : active === "schedule"
-              ? "Schedule"
-              : active === "disclosures"
-                ? (copy?.labels?.disclosures ?? "")
-                : active.toUpperCase();
+          active === "account_growth"
+            ? (copy?.ui?.sidebar?.account_growth ?? "")
+            : active === "tax_benefits"
+              ? (copy?.ui?.sidebar?.tax_benefits ?? "")
+              : active === "schedule"
+                ? (copy?.ui?.sidebar?.schedule ?? "")
+                : active === "disclosures"
+                  ? (copy?.ui?.sidebar?.disclosures ?? "")
+                  : "";
       return (
         <div className="space-y-6">
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
             <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
-              {screenLabel} (Shell)
+              {screenLabel}{copy?.labels?.ui?.shellSuffix ?? ""}
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Placeholder content is coming soon.
+              {copy?.labels?.ui?.placeholderComingSoon ?? ""}
             </p>
           </div>
         </div>

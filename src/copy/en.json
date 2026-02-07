@@ -80,12 +80,20 @@
       "federalTaxes": "Federal Taxes",
       "stateTaxes": "State Taxes",
       "scheduleTitle": "Schedule",
-      "amortizationTitle": "Amortization"
+      "amortizationTitle": "Amortization Schedule",
+      "ableAccountToggle": "ABLE Account",
+      "taxableAccountToggle": "Taxable Account",
+      "accountTotals": "Account totals",
+      "enterTimeHorizonPrompt": "Enter a time horizon to view the schedule."
     },
     "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
     "wtaEarnedIncomeInput": "Please input estimated earned income:",
     "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?",
-    "disclosures": "Disclosures"
+    "disclosures": "Disclosures",
+    "ui": {
+      "shellSuffix": " (Shell)",
+      "placeholderComingSoon": "Placeholder content is coming soon."
+    }
   },
   "messages": {
     "balanceCapWarning": "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated in {{withdrawStart}} to keep the balance at {{cap}} by withdrawing the projected monthly earnings.",
