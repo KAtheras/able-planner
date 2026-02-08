@@ -438,7 +438,12 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
     for (const ableMonth of ableYear.months) {
       const contribution = Number.isFinite(ableMonth.contribution) ? Math.max(0, ableMonth.contribution) : 0;
       const withdrawal = Number.isFinite(ableMonth.withdrawal) ? Math.max(0, ableMonth.withdrawal) : 0;
-      const balanceAfterCashFlow = prevBalance + contribution - withdrawal;
+      const availableBalance = prevBalance + contribution;
+      const actualWithdrawal = Math.min(
+        withdrawal,
+        Math.max(0, Number.isFinite(availableBalance) ? availableBalance : 0),
+      );
+      const balanceAfterCashFlow = availableBalance - actualWithdrawal;
       // Taxable schedule uses same cashflow timing as ABLE: contributions + withdrawals assumed at start of month.
       const normalizedBasis = Math.max(0, Number.isFinite(balanceAfterCashFlow) ? balanceAfterCashFlow : 0);
       let earnings = normalizedBasis * monthlyReturnDecimal;
@@ -446,7 +451,7 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
         earnings = 0;
       }
      yearContribution += contribution;
-     yearWithdrawal += withdrawal;
+     yearWithdrawal += actualWithdrawal;
      yearInvestmentReturn += earnings;
      yearEarnings += earnings;
 
@@ -469,7 +474,7 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
         monthIndex: ableMonth.monthIndex,
         monthLabel: ableMonth.monthLabel,
         contribution,
-        withdrawal,
+        withdrawal: actualWithdrawal,
         investmentReturn: earnings,
         federalTaxOnEarnings,
         stateTaxOnEarnings,
