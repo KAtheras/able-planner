@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
@@ -307,6 +307,7 @@ const [active, setActive] = useState<NavKey>("inputs");
 
   const [showWelcome, setShowWelcome] = useState(true);
   const [amortizationView, setAmortizationView] = useState<"able" | "taxable">("able");
+  const fscPassedRef = useRef(false);
   const currentClientConfig = getClientConfig(plannerStateCode);
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
@@ -503,9 +504,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     }
 
     setAgiGateEligible(true);
-    setFscStatus("idle");
-    setMessagesMode("intro");
-    setFscQ({ ...EMPTY_FSC });
+    if (fscPassedRef.current) {
+      setFscStatus("eligible");
+    }
   }, [plannerAgi, plannerFilingStatus]);
 
   useEffect(() => {
@@ -1113,6 +1114,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         fscQ.isStudent === false &&
         fscQ.isDependent === false;
       setFscStatus(eligible ? "eligible" : "ineligible");
+      fscPassedRef.current = eligible;
       setMessagesMode("intro");
     };
 
