@@ -170,6 +170,7 @@ export function buildPlannerSchedule({
       annualReturnDecimal: safeAnnualReturnDecimal,
       federalTaxRateDecimal: safeFederalTaxRateDecimal,
       stateTaxRateDecimal: safeStateTaxRateDecimal,
+      startingBalance,
     }),
   };
 }
