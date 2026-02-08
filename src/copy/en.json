@@ -10,10 +10,18 @@
   "ui": {
     "sidebar": {
       "account_growth": "Account Growth",
-      "disclosures": "Disclosures",
+      "disclosures": "Assumptions",
       "inputs": "Inputs",
       "schedule": "Amortization",
       "tax_benefits": "Tax Benefits"
+    },
+    "assumptions": {
+      "title": "Assumptions",
+      "items": [
+        "AGI is treated as taxable income for estimating federal and state tax benefits.",
+        "Federal Saver’s Credit and state tax benefits are capped by estimated tax liability when applicable.",
+        "Tax rules vary and may change; these results are estimates for planning purposes only."
+      ]
     },
     "inputs": {
       "accountActivity": {
@@ -105,14 +113,7 @@
       "student": "Are you a full-time student?",
       "taxLiability": "Do you have federal income tax liability?"
     },
-    "disclosures": "Disclosures",
-    "nav": {
-      "amortization": "Amortization",
-      "disclosures": "Disclosures",
-      "growth": "Account Growth",
-      "inputs": "Inputs",
-      "taxBenefits": "Tax Benefits"
-    },
+
     "ui": {
       "placeholderComingSoon": "Placeholder content is coming soon.",
       "shellSuffix": " (Shell)"

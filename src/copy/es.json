@@ -10,10 +10,18 @@
   "ui": {
     "sidebar": {
       "account_growth": "Crecimiento de la cuenta",
-      "disclosures": "Divulgaciones",
+      "disclosures": "Supuestos",
       "inputs": "Entradas",
       "schedule": "Amortización",
       "tax_benefits": "Beneficios fiscales"
+    },
+    "assumptions": {
+      "title": "Supuestos",
+      "items": [
+        "Se usa el AGI como ingreso imponible para estimar beneficios fiscales federales y estatales.",
+        "El Crédito del Ahorrador federal y los beneficios fiscales estatales se limitan por la obligación tributaria estimada cuando corresponda.",
+        "Las reglas fiscales varían y pueden cambiar; estos resultados son estimaciones solo para fines de planificación."
+      ]
     },
     "inputs": {
       "accountActivity": {
@@ -106,13 +114,6 @@
       "taxLiability": "¿Tiene obligación de pagar impuestos federales sobre la renta?"
     },
     "disclosures": "Divulgaciones",
-    "nav": {
-      "amortization": "Amortización",
-      "disclosures": "Divulgaciones",
-      "growth": "Crecimiento de la cuenta",
-      "inputs": "Entradas",
-      "taxBenefits": "Beneficios fiscales"
-    },
     "ui": {
       "placeholderComingSoon": "El contenido de marcador de posición estará disponible pronto.",
       "shellSuffix": " (Borrador)"
