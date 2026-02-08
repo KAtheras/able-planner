@@ -10,7 +10,7 @@
   "ui": {
     "sidebar": {
       "account_growth": "Account Growth",
-      "disclosures": "Disclosures",
+      "disclosures": "Assumptions",
       "inputs": "Inputs",
       "schedule": "Amortization",
       "tax_benefits": "Tax Benefits"
@@ -180,5 +180,22 @@
     ],
     "heroSubtitle": "Explore how contributions, withdrawals, investment growth, and program limits may interact over time.",
     "heroTitle": "Welcome to the ABLE Planner"
+  },
+  "assumptionsCopy": {
+    "title": "Assumptions",
+    "items": [
+      {
+        "lead": "This tool is for planning, not legal or tax advice.",
+        "body": "All results depend on your inputs and are illustrative only. Consult qualified professionals before making decisions."
+      },
+      {
+        "lead": "Investment returns are modeled using simplifying assumptions.",
+        "body": "Actual markets fluctuate. Small changes in assumptions can materially change outcomes."
+      },
+      {
+        "lead": "Rules and benefits are simplified.",
+        "body": "Eligibility, limits, and tax treatment vary by state and individual circumstances."
+      }
+    ]
   }
 }

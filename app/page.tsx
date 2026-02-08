@@ -12,7 +12,107 @@ import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrack
 import federalSaversContributionLimits from "@/config/rules/federalSaversContributionLimits.json";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
+import stateTaxRates from "@/config/rules/stateTaxRates.json";
+
+// TAX LIABILITY HELPERS (PROGRESSIVE BRACKETS)
+type TaxBracket = { min: number; max?: number; rate: number };
+
+function clampMoney(x: number): number {
+  if (!Number.isFinite(x)) return 0;
+  return Math.max(0, x);
+}
+
+function computeProgressiveTax(income: number, brackets: TaxBracket[]): number {
+  const y = clampMoney(income);
+  if (y <= 0) return 0;
+
+  const sorted = (Array.isArray(brackets) ? brackets : [])
+    .filter((b) => b && Number.isFinite(b.min) && Number.isFinite(b.rate))
+    .map((b) => ({
+      min: Number(b.min),
+      max: Number.isFinite(b.max as any) ? Number(b.max) : undefined,
+      rate: Number(b.rate),
+    }))
+    .sort((a, b) => a.min - b.min);
+
+  let tax = 0;
+
+  for (const b of sorted) {
+    const minEff = b.min > 0 ? b.min - 1 : 0; // handles JSON that uses 0..X then X+1..Y
+    const upper = b.max === undefined ? y : Math.min(y, b.max);
+    const taxable = Math.max(0, upper - minEff);
+    if (taxable <= 0) continue;
+    tax += taxable * Math.max(0, b.rate);
+    if (b.max !== undefined && y <= b.max) break;
+  }
+
+  return clampMoney(tax);
+}
+
+function getFederalIncomeTaxLiability(filingStatus: FilingStatus, agi: number): number {
+  const key = filingStatus as keyof typeof federalTaxBrackets;
+  const rows: any[] = (federalTaxBrackets as any)[key] ?? [];
+  const brackets: TaxBracket[] = rows.map((r) => ({
+    min: Number(r.min ?? 0),
+    max: Number.isFinite(r.max) ? Number(r.max) : undefined,
+    rate: Number(r.rate ?? 0),
+  }));
+  return computeProgressiveTax(agi, brackets);
+}
+
+function getStateIncomeTaxLiability(stateCode: string, filingStatus: FilingStatus, agi: number): number {
+  const st = (stateCode || "").toUpperCase();
+  const byState: any = (stateTaxRates as any)[st];
+  const rows: any[] = byState?.[filingStatus] ?? [];
+  const brackets: TaxBracket[] = rows.map((r: any) => ({
+    min: Number(r.min ?? 0),
+    max: Number.isFinite(r.max) ? Number(r.max) : undefined,
+    rate: Number(r.rate ?? 0),
+  }));
+  return computeProgressiveTax(agi, brackets);
+}
+
+function computeStateBenefitCapped(
+  benefit: ReturnType<typeof getStateTaxBenefitConfig> | null,
+  contributionsForYear: number,
+  agi: number,
+  filingStatus: FilingStatus,
+  stateCode: string,
+): number {
+  const contrib = clampMoney(contributionsForYear);
+  const income = clampMoney(agi);
+  const st = (stateCode || "").toUpperCase();
+
+  if (!benefit) return 0;
+
+  const type = (benefit as any).type as "none" | "deduction" | "credit";
+  const amount = clampMoney((benefit as any).amount ?? 0);
+  const creditPercent = clampMoney((benefit as any).creditPercent ?? 0);
+
+  if (type === "none") return 0;
+
+  // State tax liability used to cap NON-refundable credits (and is also the ceiling for tax savings).
+  const taxBefore = getStateIncomeTaxLiability(st, filingStatus, income);
+  if (taxBefore <= 0) return 0;
+
+  if (type === "credit") {
+    const qualifying = amount > 0 ? Math.min(contrib, amount) : 0;
+    const rawCredit = qualifying * creditPercent;
+    return Math.max(0, Math.min(taxBefore, rawCredit));
+  }
+
+  // type === "deduction"
+  // Deduction base cannot exceed income (AGI-as-taxable-income model).
+  const deductibleBase = amount > 0 ? Math.min(contrib, amount, income) : 0;
+  if (deductibleBase <= 0) return 0;
+
+  const taxAfter = getStateIncomeTaxLiability(st, filingStatus, Math.max(0, income - deductibleBase));
+  const savings = Math.max(0, taxBefore - taxAfter);
+  return Math.max(0, Math.min(taxBefore, savings));
+}
+
 import wtaPovertyLevel from "@/config/rules/wtaPovertyLevel.json";
+import federalTaxBrackets from "@/config/rules/federalTaxBrackets.json";
 import { buildPlannerSchedule } from "@/lib/calc/usePlannerSchedule";
 
 const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
@@ -1581,12 +1681,21 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       const stateBenefitConfig = getStateTaxBenefitConfig(benefitStateCode, plannerFilingStatus);
       const scheduleRowsWithBenefits = scheduleRows.map((yearRow) => {
         const contributionsForYear = Math.max(0, yearRow.contribution);
-        const federalCredit = showFederalSaverCredit
+        const federalTaxLiability = showFederalSaverCredit
+          ? getFederalIncomeTaxLiability(plannerFilingStatus, agiValid ? agiValue : 0)
+          : 0;
+        const federalCreditRaw = showFederalSaverCredit
           ? Math.min(contributionsForYear, fscContributionLimit) * fscCreditPercent
           : 0;
-        const stateBenefitAmount = computeStateTaxBenefitAmount(
+        const federalCredit = showFederalSaverCredit
+          ? Math.min(federalCreditRaw, federalTaxLiability)
+          : 0;
+        const stateBenefitAmount = computeStateBenefitCapped(
           stateBenefitConfig,
           contributionsForYear,
+          agiValid ? agiValue : 0,
+          plannerFilingStatus,
+          benefitStateCode,
         );
         const months = yearRow.months.map((monthRow) => {
           const monthNumber = (monthRow.monthIndex % 12) + 1;

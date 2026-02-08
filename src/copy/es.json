@@ -10,7 +10,7 @@
   "ui": {
     "sidebar": {
       "account_growth": "Crecimiento de la cuenta",
-      "disclosures": "Divulgaciones",
+      "disclosures": "Supuestos",
       "inputs": "Entradas",
       "schedule": "Amortización",
       "tax_benefits": "Beneficios fiscales"
@@ -180,5 +180,22 @@
     ],
     "heroSubtitle": "Explore cómo las contribuciones, los retiros, el crecimiento de las inversiones y los límites del programa pueden interactuar con el tiempo.",
     "heroTitle": "Bienvenido al Planificador ABLE"
+  },
+  "assumptionsCopy": {
+    "title": "Supuestos",
+    "items": [
+      {
+        "lead": "Esta herramienta es solo para planificación, no asesoría legal ni fiscal.",
+        "body": "Los resultados dependen de los datos ingresados y son ilustrativos. Consulte a profesionales calificados."
+      },
+      {
+        "lead": "Los rendimientos se modelan con supuestos simplificados.",
+        "body": "Los mercados reales fluctúan y los resultados pueden variar significativamente."
+      },
+      {
+        "lead": "Las reglas y beneficios se presentan de forma simplificada.",
+        "body": "La elegibilidad, los límites y el tratamiento fiscal varían según el estado y la situación personal."
+      }
+    ]
   }
 }
