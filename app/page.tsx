@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
@@ -261,10 +261,6 @@ const [active, setActive] = useState<NavKey>("inputs");
       : (copy?.labels?.highReturnWarning ?? "")
           .replace("{{max}}", formatDecimalToPercentString(annualReturnWarningMax));
 
-  const screen1DefaultMessages = copy.flows?.screen1?.defaultMessages ?? INITIAL_MESSAGES;
-  const screen2DefaultMessages = copy.flows?.screen2?.defaultMessages ?? SCREEN2_DEFAULT_MESSAGES;
-  const [screen1Messages, setScreen1Messages] = useState<string[]>(() => [...screen1DefaultMessages]);
-  const [screen2Messages, setScreen2Messages] = useState<string[]>(() => [...screen2DefaultMessages]);
   const [nonResidentProceedAck, setNonResidentProceedAck] = useState(false);
   const [isSsiEligible, setIsSsiEligible] = useState(false);
   const [startingBalance, setStartingBalance] = useState("");
@@ -312,6 +308,28 @@ const [active, setActive] = useState<NavKey>("inputs");
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
   const planState = planStateOverride ?? planStateFallback ?? "";
+  const getClientBlock = (slot: "landingWelcome" | "disclosuresAssumptions" | "rightCardPrimary" | "rightCardSecondary") => {
+    const raw = currentClientConfig?.clientBlocks?.[slot]?.[language];
+    return typeof raw === "string" && raw.trim() ? raw : "";
+  };
+  const rightCardPrimaryOverride = getClientBlock("rightCardPrimary");
+  const rightCardSecondaryOverride = getClientBlock("rightCardSecondary");
+  const screen1DefaultMessages = useMemo(
+    () =>
+      rightCardPrimaryOverride
+        ? [rightCardPrimaryOverride]
+        : copy.flows?.screen1?.defaultMessages ?? INITIAL_MESSAGES,
+    [rightCardPrimaryOverride, copy.flows?.screen1?.defaultMessages],
+  );
+  const screen2DefaultMessages = useMemo(
+    () =>
+      rightCardSecondaryOverride
+        ? [rightCardSecondaryOverride]
+        : copy.flows?.screen2?.defaultMessages ?? SCREEN2_DEFAULT_MESSAGES,
+    [rightCardSecondaryOverride, copy.flows?.screen2?.defaultMessages],
+  );
+  const [screen1Messages, setScreen1Messages] = useState<string[]>(() => [...screen1DefaultMessages]);
+  const [screen2Messages, setScreen2Messages] = useState<string[]>(() => [...screen2DefaultMessages]);
   const languageToggle = (
     <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-black">
       <button
@@ -366,6 +384,7 @@ const [active, setActive] = useState<NavKey>("inputs");
   };
 
   const disclosuresBodyParagraphs = (landingCopy.disclosuresBody || "").split("\n\n").filter(Boolean);
+  const landingWelcomeOverride = getClientBlock("landingWelcome");
 
   const sanitizeAgiInput = (value: string) => {
     if (value === "") return "";
@@ -1775,25 +1794,31 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       const assumptionItems = Array.isArray(copy?.ui?.assumptions?.items)
         ? copy.ui!.assumptions!.items
         : [];
+      const disclosuresAssumptionsOverride = getClientBlock("disclosuresAssumptions");
       return (
         <div className="space-y-6">
-      <div className="flex justify-end">{languageToggle}</div>
-      <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
-        <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
-          {assumptionTitle}
-        </h1>
-        {assumptionItems.length > 0 && (
-          <ul className="mt-4 space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
-            {assumptionItems.map((item, index) => (
-              <li
-                key={`assumption-${index}`}
-                className="list-disc pl-5 text-left text-sm text-zinc-600 dark:text-zinc-400"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-        )}
+          <div className="flex justify-end">{languageToggle}</div>
+          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
+            <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
+              {assumptionTitle}
+            </h1>
+            {disclosuresAssumptionsOverride && (
+              <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+                {disclosuresAssumptionsOverride}
+              </p>
+            )}
+            {!disclosuresAssumptionsOverride && assumptionItems.length > 0 && (
+              <ul className="mt-4 space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
+                {assumptionItems.map((item, index) => (
+                  <li
+                    key={`assumption-${index}`}
+                    className="list-disc pl-5 text-left text-sm text-zinc-600 dark:text-zinc-400"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
       </div>
         </div>
       );
@@ -2115,48 +2140,52 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
             </h1>
 
             <p className="mt-4 max-w-6xl mx-auto text-left text-base text-zinc-600 dark:text-zinc-400">
-              {landingCopy.heroBody}
+              {landingWelcomeOverride || landingCopy.heroBody}
             </p>
 
-            {landingCopy.heroBullets.length > 0 && (
-              <ul className="mt-4 flex flex-col items-center gap-2 text-base text-zinc-600 dark:text-zinc-400">
-                {landingCopy.heroBullets.map((bullet, index) => (
-                  <li
-                    key={`hero-bullet-${index}`}
-                    className="w-full max-w-xl list-disc pl-5 text-left"
-                  >
-                    {bullet}
-                  </li>
-                ))}
-              </ul>
-            )}
+            {!landingWelcomeOverride && (
+              <>
+                {landingCopy.heroBullets.length > 0 && (
+                  <ul className="mt-4 flex flex-col items-center gap-2 text-base text-zinc-600 dark:text-zinc-400">
+                    {landingCopy.heroBullets.map((bullet, index) => (
+                      <li
+                        key={`hero-bullet-${index}`}
+                        className="w-full max-w-xl list-disc pl-5 text-left"
+                      >
+                        {bullet}
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-            <section className="mt-6 space-y-2 text-left text-sm text-zinc-600 dark:text-zinc-400">
-              <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
-                {landingCopy.disclosuresTitle}
-              </p>
-              {landingCopy.disclosuresIntro && (
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  {landingCopy.disclosuresIntro}
-                </p>
-              )}
-              {disclosuresBodyParagraphs.map((paragraph, index) => {
-                const [leadIn, ...restParts] = paragraph.split("\n");
-                const rest = restParts.join("\n").trim();
-                return (
-                  <p key={`disclosure-${index}`} className="text-sm text-zinc-600 dark:text-zinc-400">
-                    {restParts.length > 0 ? (
-                      <>
-                        <strong>{leadIn.trim()}</strong>
-                        {rest ? ` ${rest}` : null}
-                      </>
-                    ) : (
-                      paragraph
-                    )}
+                <section className="mt-6 space-y-2 text-left text-sm text-zinc-600 dark:text-zinc-400">
+                  <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                    {landingCopy.disclosuresTitle}
                   </p>
-                );
-              })}
-            </section>
+                  {landingCopy.disclosuresIntro && (
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      {landingCopy.disclosuresIntro}
+                    </p>
+                  )}
+                  {disclosuresBodyParagraphs.map((paragraph, index) => {
+                    const [leadIn, ...restParts] = paragraph.split("\n");
+                    const rest = restParts.join("\n").trim();
+                    return (
+                      <p key={`disclosure-${index}`} className="text-sm text-zinc-600 dark:text-zinc-400">
+                        {restParts.length > 0 ? (
+                          <>
+                            <strong>{leadIn.trim()}</strong>
+                            {rest ? ` ${rest}` : null}
+                          </>
+                        ) : (
+                          paragraph
+                        )}
+                      </p>
+                    );
+                  })}
+                </section>
+              </>
+            )}
 
             <button
               type="button"
