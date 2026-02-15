@@ -324,10 +324,22 @@ export async function POST(request: Request) {
     }
     switch (bracket.type) {
       case "max":
+        if (typeof bracket.value !== "number") {
+          return false;
+        }
         return agiValue <= bracket.value;
       case "range":
+        if (
+          typeof bracket.min !== "number" ||
+          typeof bracket.max !== "number"
+        ) {
+          return false;
+        }
         return agiValue >= bracket.min && agiValue <= bracket.max;
       case "min":
+        if (typeof bracket.value !== "number") {
+          return false;
+        }
         return agiValue > bracket.value;
       default:
         return false;
@@ -400,9 +412,16 @@ export async function POST(request: Request) {
     const horizonEndMonths = startTotalMonths + horizonMonths;
     let targetEndMonths = horizonEndMonths;
     if (contributionEnd) {
+      if (
+        typeof contributionEnd.year !== "number" ||
+        typeof contributionEnd.month !== "number"
+      ) {
+        projectionNotes.push("contributionEnd invalid after validation");
+      } else {
       const candidateMonths =
         contributionEnd.year * 12 + (contributionEnd.month - 1);
       targetEndMonths = Math.min(candidateMonths, horizonEndMonths);
+      }
     }
     if (targetEndMonths < startTotalMonths) {
       projectionWindowMonths = 0;
