@@ -2017,7 +2017,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
 
     return (
       <div className="space-y-6">
-        <div className="mb-6 flex items-center justify-between text-xs font-semibold">
+        <div className="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-30 -mx-4 mb-6 flex items-center justify-between border-b border-zinc-200 bg-zinc-50/95 px-4 py-2 text-xs font-semibold backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:py-0">
           <div className="flex items-center gap-3">
             {inputStep === 2 && (
               <button
@@ -2289,7 +2289,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           }
         />
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-[calc(env(safe-area-inset-top)+7.5rem)] md:pt-6">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6">
           <div className="flex justify-center">{languageToggle}</div>
           <div className="mt-6" />
           <div className="text-center">
@@ -2380,7 +2380,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           labels={copy.ui?.sidebar}
           desktopTopOffsetPx={sidebarDesktopTopOffset}
         />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-[calc(env(safe-area-inset-top)+7.5rem)] pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:pt-6 md:pb-6">{content}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:pb-6">{content}</main>
       </div>
       <footer className="px-4 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-center text-xs text-zinc-500 dark:text-zinc-400 md:pb-4">
         © 2026 Spectra Professional Services, LLC. All rights reserved.
