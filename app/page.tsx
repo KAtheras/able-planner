@@ -317,14 +317,20 @@ const [active, setActive] = useState<NavKey>("inputs");
   const screen1DefaultMessages = useMemo(
     () =>
       rightCardPrimaryOverride
-        ? [rightCardPrimaryOverride]
+        ? rightCardPrimaryOverride
+            .split(/\n\s*\n/)
+            .map((part) => part.trim())
+            .filter(Boolean)
         : copy.flows?.screen1?.defaultMessages ?? INITIAL_MESSAGES,
     [rightCardPrimaryOverride, copy.flows?.screen1?.defaultMessages],
   );
   const screen2DefaultMessages = useMemo(
     () =>
       rightCardSecondaryOverride
-        ? [rightCardSecondaryOverride]
+        ? rightCardSecondaryOverride
+            .split(/\n\s*\n/)
+            .map((part) => part.trim())
+            .filter(Boolean)
         : copy.flows?.screen2?.defaultMessages ?? SCREEN2_DEFAULT_MESSAGES,
     [rightCardSecondaryOverride, copy.flows?.screen2?.defaultMessages],
   );
@@ -1738,40 +1744,44 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       return (
         <div className="space-y-6">
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
-            <div className="flex items-center gap-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  aria-pressed={amortizationView === "able"}
-                  className={[
-                    "rounded-full px-4 py-1 text-xs font-semibold transition",
-                    amortizationView === "able"
-                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                      : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400",
-                  ].join(" ")}
-                  onClick={() => setAmortizationView("able")}
-                >
-                  {copy?.labels?.schedule?.ableAccountToggle ?? ""}
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={amortizationView === "taxable"}
-                  className={[
-                    "flex items-center gap-2 rounded-full px-4 py-1 text-xs font-semibold transition",
-                    amortizationView === "taxable"
-                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                      : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400",
-                  ].join(" ")}
-                  onClick={() => setAmortizationView("taxable")}
-                >
-                  <span>{copy?.labels?.schedule?.taxableAccountToggle ?? ""}</span>
-                </button>
-              </div>
-
-              <h1 className="flex-1 text-center text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            <div className="flex flex-col items-center gap-3 md:flex-row md:items-center md:gap-4">
+              <h1 className="order-1 w-full text-center text-lg font-semibold text-zinc-900 dark:text-zinc-50 md:order-2 md:flex-1">
                 {copy?.labels?.schedule?.amortizationTitle ?? ""}
               </h1>
-              <div className="flex items-center justify-end ml-auto">
+              <div className="order-2 flex w-full items-center justify-between md:order-1 md:w-auto md:justify-start">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-pressed={amortizationView === "able"}
+                    className={[
+                      "rounded-full px-4 py-1 text-xs font-semibold transition",
+                      amortizationView === "able"
+                        ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                        : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400",
+                    ].join(" ")}
+                    onClick={() => setAmortizationView("able")}
+                  >
+                    {copy?.labels?.schedule?.ableAccountToggle ?? ""}
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={amortizationView === "taxable"}
+                    className={[
+                      "flex items-center gap-2 rounded-full px-4 py-1 text-xs font-semibold transition",
+                      amortizationView === "taxable"
+                        ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                        : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400",
+                    ].join(" ")}
+                    onClick={() => setAmortizationView("taxable")}
+                  >
+                    <span>{copy?.labels?.schedule?.taxableAccountToggle ?? ""}</span>
+                  </button>
+                </div>
+                <div className="md:hidden">
+                  {languageToggle}
+                </div>
+              </div>
+              <div className="order-3 hidden items-center justify-center md:ml-auto md:flex md:justify-end">
                 {languageToggle}
               </div>
             </div>
@@ -2214,7 +2224,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       />
       <div className="mx-auto flex w-full max-w-6xl">
         <Sidebar active={active} onChange={setActive} labels={copy.ui?.sidebar} />
-        <main className="mx-auto w-full max-w-6xl px-4 pt-6">{content}</main>
+        <main className="mx-auto w-full max-w-6xl px-4 pt-6 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:pb-6">{content}</main>
       </div>
     </div>
   );

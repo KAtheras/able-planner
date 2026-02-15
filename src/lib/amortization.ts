@@ -439,34 +439,53 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
       const contribution = Number.isFinite(ableMonth.contribution) ? Math.max(0, ableMonth.contribution) : 0;
       const withdrawal = Number.isFinite(ableMonth.withdrawal) ? Math.max(0, ableMonth.withdrawal) : 0;
       const availableBalance = prevBalance + contribution;
-      const actualWithdrawal = Math.min(
-        withdrawal,
-        Math.max(0, Number.isFinite(availableBalance) ? availableBalance : 0),
-      );
-      const balanceAfterCashFlow = availableBalance - actualWithdrawal;
+      const normalizedLabel = ableMonth.monthLabel.replace(/^[-–—]+\s*/, "");
+      const isDecember = normalizedLabel.startsWith("Dec ");
+
+      let federalTaxOnEarnings = 0;
+      let stateTaxOnEarnings = 0;
+      const safeAvailableBalance = Math.max(0, Number.isFinite(availableBalance) ? availableBalance : 0);
+      const shouldPostDepletionYearTaxNow =
+        !isDecember && yearEarnings > 0 && withdrawal >= safeAvailableBalance && safeAvailableBalance > 0;
+      let reservedForTax = 0;
+      if (shouldPostDepletionYearTaxNow) {
+        const taxableEarnings = Math.max(0, yearEarnings);
+        const federalDue = taxableEarnings * safeFederalTaxRateDecimal;
+        const stateDue = taxableEarnings * safeStateTaxRateDecimal;
+        const totalDue = federalDue + stateDue;
+        if (totalDue > 0) {
+          reservedForTax = Math.min(safeAvailableBalance, totalDue);
+          const federalShare = federalDue / totalDue;
+          federalTaxOnEarnings = reservedForTax * federalShare;
+          stateTaxOnEarnings = reservedForTax - federalTaxOnEarnings;
+          yearFederalTax += federalTaxOnEarnings;
+          yearStateTax += stateTaxOnEarnings;
+          yearEarnings = 0;
+        }
+      }
+
+      const distributableBalance = Math.max(0, safeAvailableBalance - reservedForTax);
+      const actualWithdrawal = Math.min(withdrawal, distributableBalance);
+      const balanceAfterCashFlow = distributableBalance - actualWithdrawal;
       // Taxable schedule uses same cashflow timing as ABLE: contributions + withdrawals assumed at start of month.
       const normalizedBasis = Math.max(0, Number.isFinite(balanceAfterCashFlow) ? balanceAfterCashFlow : 0);
       let earnings = normalizedBasis * monthlyReturnDecimal;
       if (!Number.isFinite(earnings) || earnings < 0) {
         earnings = 0;
       }
-     yearContribution += contribution;
-     yearWithdrawal += actualWithdrawal;
-     yearInvestmentReturn += earnings;
-     yearEarnings += earnings;
+      yearContribution += contribution;
+      yearWithdrawal += actualWithdrawal;
+      yearInvestmentReturn += earnings;
+      yearEarnings += earnings;
 
-      const normalizedLabel = ableMonth.monthLabel.replace(/^[-–—]+\s*/, "");
-      const isDecember = normalizedLabel.startsWith("Dec ");
-      let federalTaxOnEarnings = 0;
-      let stateTaxOnEarnings = 0;
       let monthEndingBalance = normalizedBasis + earnings;
       if (isDecember) {
         const taxableEarnings = Math.max(0, yearEarnings);
-        federalTaxOnEarnings = taxableEarnings * safeFederalTaxRateDecimal;
-        stateTaxOnEarnings = taxableEarnings * safeStateTaxRateDecimal;
+        federalTaxOnEarnings += taxableEarnings * safeFederalTaxRateDecimal;
+        stateTaxOnEarnings += taxableEarnings * safeStateTaxRateDecimal;
         monthEndingBalance = normalizedBasis + earnings - federalTaxOnEarnings - stateTaxOnEarnings;
-        yearFederalTax += federalTaxOnEarnings;
-        yearStateTax += stateTaxOnEarnings;
+        yearFederalTax += taxableEarnings * safeFederalTaxRateDecimal;
+        yearStateTax += taxableEarnings * safeStateTaxRateDecimal;
         yearEarnings = 0;
       }
 
