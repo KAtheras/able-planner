@@ -45,8 +45,8 @@ export function buildAccountGrowthNarrative({
 
   const ableEndingBalanceRaw = ableRows.at(-1)?.endingBalance;
   const taxableEndingBalanceRaw = taxableRows.at(-1)?.endingBalance;
-  const ableEndingBalance = Number.isFinite(ableEndingBalanceRaw) ? ableEndingBalanceRaw : 0;
-  const taxableEndingBalance = Number.isFinite(taxableEndingBalanceRaw) ? taxableEndingBalanceRaw : 0;
+  const ableEndingBalance = Number.isFinite(ableEndingBalanceRaw) ? Number(ableEndingBalanceRaw) : 0;
+  const taxableEndingBalance = Number.isFinite(taxableEndingBalanceRaw) ? Number(taxableEndingBalanceRaw) : 0;
 
   let taxableDepletionLabel: string | null = null;
   for (const yearRow of taxableRows) {

@@ -1903,17 +1903,8 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       );
     }
 
-    if (active !== "inputs") {
-      const screenLabel =
-          active === "account_growth"
-            ? (copy?.ui?.sidebar?.account_growth ?? "")
-            : active === "tax_benefits"
-              ? (copy?.ui?.sidebar?.tax_benefits ?? "")
-              : active === "schedule"
-                ? (copy?.ui?.sidebar?.schedule ?? "")
-                : active === "disclosures"
-                  ? (copy?.ui?.sidebar?.disclosures ?? "")
-                  : "";
+    if (active === "tax_benefits") {
+      const screenLabel = copy?.ui?.sidebar?.tax_benefits ?? "";
       return (
         <div className="space-y-6">
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
