@@ -277,21 +277,31 @@ export default function DemographicsForm({
               </div>
             ) : null}
           </div>
-          <select
-            id="demographics-residence"
-            value={stateOfResidence}
-            onChange={(e) => onChange?.({ stateOfResidence: e.target.value })}
-            className="mt-1 w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm leading-normal text-zinc-900 dark:border-zinc-200 dark:bg-zinc-900 dark:text-zinc-100"
-          >
-            <option value="">
-              {copy?.labels?.selectState ?? "Select a state"}
-            </option>
-            {Object.entries(planLevelInfo).map(([code, info]) => (
-              <option key={code} value={code}>
-                {info.name}
+          <div className="relative mt-1">
+            <select
+              id="demographics-residence"
+              value={stateOfResidence}
+              onChange={(e) => onChange?.({ stateOfResidence: e.target.value })}
+              className="w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 py-2 pr-8 text-sm leading-normal text-zinc-900 dark:border-zinc-200 dark:bg-zinc-900 dark:text-zinc-100"
+            >
+              <option value="">
+                {copy?.labels?.selectState ?? "Select a state"}
               </option>
-            ))}
-          </select>
+              {Object.entries(planLevelInfo).map(([code, info]) => (
+                <option key={code} value={code}>
+                  {info.name}
+                </option>
+              ))}
+            </select>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
+            >
+              <svg viewBox="0 0 12 12" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m2.5 4.5 3.5 3 3.5-3" />
+              </svg>
+            </span>
+          </div>
         </div>
         <div>
           <div
@@ -333,25 +343,35 @@ export default function DemographicsForm({
               </div>
             ) : null}
           </div>
-          <select
-            id="demographics-filing-status"
-            value={filingStatus}
-            onChange={(e) => onChange?.({ filingStatus: e.target.value })}
-            className="mt-1 w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm leading-normal text-zinc-900 dark:border-zinc-200 dark:bg-zinc-900 dark:text-zinc-100"
-          >
-            <option value="single">
-              {copy?.labels?.filing?.single ?? "Single"}
-            </option>
-            <option value="married_joint">
-              {copy?.labels?.filing?.married_joint ?? "Married Filing Jointly"}
-            </option>
-            <option value="married_separate">
-              {copy?.labels?.filing?.married_separate ?? "Married Filing Separately"}
-            </option>
-            <option value="head_of_household">
-              {copy?.labels?.filing?.head_of_household ?? "Head of Household"}
-            </option>
-          </select>
+          <div className="relative mt-1">
+            <select
+              id="demographics-filing-status"
+              value={filingStatus}
+              onChange={(e) => onChange?.({ filingStatus: e.target.value })}
+              className="w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 py-2 pr-8 text-sm leading-normal text-zinc-900 dark:border-zinc-200 dark:bg-zinc-900 dark:text-zinc-100"
+            >
+              <option value="single">
+                {copy?.labels?.filing?.single ?? "Single"}
+              </option>
+              <option value="married_joint">
+                {copy?.labels?.filing?.married_joint ?? "Married Filing Jointly"}
+              </option>
+              <option value="married_separate">
+                {copy?.labels?.filing?.married_separate ?? "Married Filing Separately"}
+              </option>
+              <option value="head_of_household">
+                {copy?.labels?.filing?.head_of_household ?? "Head of Household"}
+              </option>
+            </select>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
+            >
+              <svg viewBox="0 0 12 12" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m2.5 4.5 3.5 3 3.5-3" />
+              </svg>
+            </span>
+          </div>
         </div>
         <div>
           <div

@@ -431,39 +431,59 @@ export default function AccountActivityForm({
             ) : null}
           </div>
           <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-200 dark:bg-zinc-900">
-            <select
-              id="activity-contribution-end-month"
-              value={contributionEndMonth}
-              onChange={(e) => onChange?.({ contributionEndMonth: e.target.value })}
-              className="flex-1 bg-transparent text-zinc-900 focus:outline-none dark:text-zinc-100"
-            >
-              <option value="">
-                {copy?.labels?.monthPlaceholder ?? "Month"}
-              </option>
-              {monthOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+            <div className="relative flex-1">
+              <select
+                id="activity-contribution-end-month"
+                value={contributionEndMonth}
+                onChange={(e) => onChange?.({ contributionEndMonth: e.target.value })}
+                className="w-full appearance-none bg-transparent pr-6 text-zinc-900 focus:outline-none dark:text-zinc-100"
+              >
+                <option value="">
+                  {copy?.labels?.monthPlaceholder ?? "Month"}
                 </option>
-              ))}
-            </select>
+                {monthOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
+              >
+                <svg viewBox="0 0 12 12" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m2.5 4.5 3.5 3 3.5-3" />
+                </svg>
+              </span>
+            </div>
             <label htmlFor="activity-contribution-end-year" className="sr-only">
               Contribution End Year
             </label>
-            <select
-              id="activity-contribution-end-year"
-              value={contributionEndYear}
-              onChange={(e) => onChange?.({ contributionEndYear: e.target.value })}
-              className="flex-1 bg-transparent text-zinc-900 focus:outline-none dark:text-zinc-100"
-            >
-              <option value="">
-                {copy?.labels?.yearPlaceholder ?? "Year"}
-              </option>
-              {contributionYearOptions.map((year) => (
-                <option key={year} value={year}>
-                  {year}
+            <div className="relative flex-1">
+              <select
+                id="activity-contribution-end-year"
+                value={contributionEndYear}
+                onChange={(e) => onChange?.({ contributionEndYear: e.target.value })}
+                className="w-full appearance-none bg-transparent pr-6 text-zinc-900 focus:outline-none dark:text-zinc-100"
+              >
+                <option value="">
+                  {copy?.labels?.yearPlaceholder ?? "Year"}
                 </option>
-              ))}
-            </select>
+                {contributionYearOptions.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
+              >
+                <svg viewBox="0 0 12 12" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m2.5 4.5 3.5 3 3.5-3" />
+                </svg>
+              </span>
+            </div>
           </div>
         </div>
 
@@ -502,39 +522,59 @@ export default function AccountActivityForm({
             ) : null}
           </div>
           <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-200 dark:bg-zinc-900">
-            <select
-              id="activity-withdrawal-start-month"
-              value={withdrawalStartMonth}
-              onChange={(e) => onChange?.({ withdrawalStartMonth: e.target.value })}
-              className="flex-1 bg-transparent text-zinc-900 focus:outline-none dark:text-zinc-100"
-            >
-              <option value="">
-                {copy?.labels?.monthPlaceholder ?? "Month"}
-              </option>
-              {monthOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+            <div className="relative flex-1">
+              <select
+                id="activity-withdrawal-start-month"
+                value={withdrawalStartMonth}
+                onChange={(e) => onChange?.({ withdrawalStartMonth: e.target.value })}
+                className="w-full appearance-none bg-transparent pr-6 text-zinc-900 focus:outline-none dark:text-zinc-100"
+              >
+                <option value="">
+                  {copy?.labels?.monthPlaceholder ?? "Month"}
                 </option>
-              ))}
-            </select>
+                {monthOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
+              >
+                <svg viewBox="0 0 12 12" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m2.5 4.5 3.5 3 3.5-3" />
+                </svg>
+              </span>
+            </div>
             <label htmlFor="activity-withdrawal-start-year" className="sr-only">
               Withdrawal Start Year
             </label>
-            <select
-              id="activity-withdrawal-start-year"
-              value={withdrawalStartYear}
-              onChange={(e) => onChange?.({ withdrawalStartYear: e.target.value })}
-              className="flex-1 bg-transparent text-zinc-900 focus:outline-none dark:text-zinc-100"
-            >
-              <option value="">
-                {copy?.labels?.yearPlaceholder ?? "Year"}
-              </option>
-              {withdrawalYearOptions.map((year) => (
-                <option key={year} value={year}>
-                  {year}
+            <div className="relative flex-1">
+              <select
+                id="activity-withdrawal-start-year"
+                value={withdrawalStartYear}
+                onChange={(e) => onChange?.({ withdrawalStartYear: e.target.value })}
+                className="w-full appearance-none bg-transparent pr-6 text-zinc-900 focus:outline-none dark:text-zinc-100"
+              >
+                <option value="">
+                  {copy?.labels?.yearPlaceholder ?? "Year"}
                 </option>
-              ))}
-            </select>
+                {withdrawalYearOptions.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
+              >
+                <svg viewBox="0 0 12 12" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m2.5 4.5 3.5 3 3.5-3" />
+                </svg>
+              </span>
+            </div>
           </div>
         </div>
 
