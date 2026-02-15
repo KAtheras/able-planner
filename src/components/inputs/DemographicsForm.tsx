@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 
 type DemographicsCopy = {
@@ -80,6 +80,21 @@ export default function DemographicsForm({
   const ssiCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
   const fscCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
 
+  const calloutButtonClass =
+    "inline-flex h-5 w-5 items-center justify-center rounded-full border border-[var(--brand-primary)] text-xs font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2";
+  const calloutPanelClass =
+    "absolute left-0 top-full z-20 mt-1 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed shadow-sm bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100";
+
+  const closeAllCallouts = useCallback(() => {
+    setShowNameCallout(false);
+    setShowStateCallout(false);
+    setShowFilingCallout(false);
+    setShowAgiCallout(false);
+    setShowAnnualReturnCallout(false);
+    setShowSsiCallout(false);
+    setShowFscCallout(false);
+  }, []);
+
   useEffect(() => {
     if (!showNameCallout && !showStateCallout && !showFilingCallout && !showAgiCallout && !showAnnualReturnCallout && !showSsiCallout && !showFscCallout) {
       return;
@@ -97,22 +112,23 @@ export default function DemographicsForm({
       if (clickedNameAnchor || clickedStateAnchor || clickedFilingAnchor || clickedAgiAnchor || clickedAnnualReturnAnchor || clickedSsiAnchor || clickedFscAnchor) {
         return;
       }
-      setShowNameCallout(false);
-      setShowStateCallout(false);
-      setShowFilingCallout(false);
-      setShowAgiCallout(false);
-      setShowAnnualReturnCallout(false);
-      setShowSsiCallout(false);
-      setShowFscCallout(false);
+      closeAllCallouts();
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeAllCallouts();
+      }
     };
 
     window.addEventListener("mousedown", handlePointerDown);
     window.addEventListener("touchstart", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("mousedown", handlePointerDown);
       window.removeEventListener("touchstart", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showNameCallout, showStateCallout, showFilingCallout, showAgiCallout, showAnnualReturnCallout, showSsiCallout, showFscCallout]);
+  }, [closeAllCallouts, showNameCallout, showStateCallout, showFilingCallout, showAgiCallout, showAnnualReturnCallout, showSsiCallout, showFscCallout]);
 
   const defaultButtonLabel =
     fscStatus === "idle"
@@ -139,18 +155,16 @@ export default function DemographicsForm({
             {copy?.labels?.nameCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
+                className={calloutButtonClass}
                 aria-label="Beneficiary information"
+                aria-controls="demographics-name-callout"
+                aria-describedby={showNameCallout ? "demographics-name-callout" : undefined}
+                aria-haspopup="true"
                 aria-expanded={showNameCallout}
                 onClick={() => {
                   const next = !showNameCallout;
+                  closeAllCallouts();
                   setShowNameCallout(next);
-                  setShowStateCallout(false);
-                  setShowFilingCallout(false);
-                  setShowAgiCallout(false);
-                  setShowAnnualReturnCallout(false);
-                  setShowSsiCallout(false);
-                  setShowFscCallout(false);
                 }}
               >
                 i
@@ -158,8 +172,9 @@ export default function DemographicsForm({
             ) : null}
             {showNameCallout && copy?.labels?.nameCallout ? (
               <div
-                className="absolute left-0 top-full z-20 mt-1 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
-                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                id="demographics-name-callout"
+                role="tooltip"
+                className={`${calloutPanelClass} w-80`}
               >
                 {copy.labels.nameCallout}
               </div>
@@ -184,18 +199,16 @@ export default function DemographicsForm({
             {copy?.labels?.stateOfResidenceCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
+                className={calloutButtonClass}
                 aria-label="State of residence information"
+                aria-controls="demographics-state-callout"
+                aria-describedby={showStateCallout ? "demographics-state-callout" : undefined}
+                aria-haspopup="true"
                 aria-expanded={showStateCallout}
                 onClick={() => {
                   const next = !showStateCallout;
+                  closeAllCallouts();
                   setShowStateCallout(next);
-                  setShowNameCallout(false);
-                  setShowFilingCallout(false);
-                  setShowAgiCallout(false);
-                  setShowAnnualReturnCallout(false);
-                  setShowSsiCallout(false);
-                  setShowFscCallout(false);
                 }}
               >
                 i
@@ -203,8 +216,9 @@ export default function DemographicsForm({
             ) : null}
             {showStateCallout && copy?.labels?.stateOfResidenceCallout ? (
               <div
-                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
-                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                id="demographics-state-callout"
+                role="tooltip"
+                className={`${calloutPanelClass} w-72`}
               >
                 {copy.labels.stateOfResidenceCallout}
               </div>
@@ -237,18 +251,16 @@ export default function DemographicsForm({
             {copy?.labels?.filingStatusCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
+                className={calloutButtonClass}
                 aria-label="Filing status information"
+                aria-controls="demographics-filing-callout"
+                aria-describedby={showFilingCallout ? "demographics-filing-callout" : undefined}
+                aria-haspopup="true"
                 aria-expanded={showFilingCallout}
                 onClick={() => {
                   const next = !showFilingCallout;
+                  closeAllCallouts();
                   setShowFilingCallout(next);
-                  setShowNameCallout(false);
-                  setShowStateCallout(false);
-                  setShowAgiCallout(false);
-                  setShowAnnualReturnCallout(false);
-                  setShowSsiCallout(false);
-                  setShowFscCallout(false);
                 }}
               >
                 i
@@ -256,8 +268,9 @@ export default function DemographicsForm({
             ) : null}
             {showFilingCallout && copy?.labels?.filingStatusCallout ? (
               <div
-                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
-                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                id="demographics-filing-callout"
+                role="tooltip"
+                className={`${calloutPanelClass} w-72`}
               >
                 {copy.labels.filingStatusCallout}
               </div>
@@ -294,18 +307,16 @@ export default function DemographicsForm({
             {copy?.labels?.agiCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
+                className={calloutButtonClass}
                 aria-label="Taxable income information"
+                aria-controls="demographics-agi-callout"
+                aria-describedby={showAgiCallout ? "demographics-agi-callout" : undefined}
+                aria-haspopup="true"
                 aria-expanded={showAgiCallout}
                 onClick={() => {
                   const next = !showAgiCallout;
+                  closeAllCallouts();
                   setShowAgiCallout(next);
-                  setShowNameCallout(false);
-                  setShowStateCallout(false);
-                  setShowFilingCallout(false);
-                  setShowAnnualReturnCallout(false);
-                  setShowSsiCallout(false);
-                  setShowFscCallout(false);
                 }}
               >
                 i
@@ -313,8 +324,9 @@ export default function DemographicsForm({
             ) : null}
             {showAgiCallout && copy?.labels?.agiCallout ? (
               <div
-                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
-                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                id="demographics-agi-callout"
+                role="tooltip"
+                className={`${calloutPanelClass} w-72`}
               >
                 {copy.labels.agiCallout}
               </div>
@@ -353,18 +365,16 @@ export default function DemographicsForm({
             {copy?.labels?.annualReturnCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
+                className={calloutButtonClass}
                 aria-label="Annual return assumption information"
+                aria-controls="demographics-annual-return-callout"
+                aria-describedby={showAnnualReturnCallout ? "demographics-annual-return-callout" : undefined}
+                aria-haspopup="true"
                 aria-expanded={showAnnualReturnCallout}
                 onClick={() => {
                   const next = !showAnnualReturnCallout;
+                  closeAllCallouts();
                   setShowAnnualReturnCallout(next);
-                  setShowNameCallout(false);
-                  setShowStateCallout(false);
-                  setShowFilingCallout(false);
-                  setShowAgiCallout(false);
-                  setShowSsiCallout(false);
-                  setShowFscCallout(false);
                 }}
               >
                 i
@@ -372,8 +382,9 @@ export default function DemographicsForm({
             ) : null}
             {showAnnualReturnCallout && copy?.labels?.annualReturnCallout ? (
               <div
-                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
-                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                id="demographics-annual-return-callout"
+                role="tooltip"
+                className={`${calloutPanelClass} w-72`}
               >
                 {copy.labels.annualReturnCallout}
               </div>
@@ -421,18 +432,16 @@ export default function DemographicsForm({
             {copy?.labels?.ssiEligibilityCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
+                className={calloutButtonClass}
                 aria-label="SSI eligibility information"
+                aria-controls="demographics-ssi-callout"
+                aria-describedby={showSsiCallout ? "demographics-ssi-callout" : undefined}
+                aria-haspopup="true"
                 aria-expanded={showSsiCallout}
                 onClick={() => {
                   const next = !showSsiCallout;
+                  closeAllCallouts();
                   setShowSsiCallout(next);
-                  setShowNameCallout(false);
-                  setShowStateCallout(false);
-                  setShowFilingCallout(false);
-                  setShowAgiCallout(false);
-                  setShowAnnualReturnCallout(false);
-                  setShowFscCallout(false);
                 }}
               >
                 i
@@ -440,8 +449,9 @@ export default function DemographicsForm({
             ) : null}
             {showSsiCallout && copy?.labels?.ssiEligibilityCallout ? (
               <div
-                className="absolute left-0 top-full z-20 mt-1 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
-                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                id="demographics-ssi-callout"
+                role="tooltip"
+                className={`${calloutPanelClass} w-80`}
               >
                 {copy.labels.ssiEligibilityCallout}
               </div>
@@ -455,18 +465,16 @@ export default function DemographicsForm({
               {copy?.labels?.fscHeadingCallout ? (
                 <button
                   type="button"
-                  className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
+                  className={calloutButtonClass}
                   aria-label="Federal Saver's Credit information"
+                  aria-controls="demographics-fsc-callout"
+                  aria-describedby={showFscCallout ? "demographics-fsc-callout" : undefined}
+                  aria-haspopup="true"
                   aria-expanded={showFscCallout}
                   onClick={() => {
                     const next = !showFscCallout;
+                    closeAllCallouts();
                     setShowFscCallout(next);
-                    setShowNameCallout(false);
-                    setShowStateCallout(false);
-                    setShowFilingCallout(false);
-                    setShowAgiCallout(false);
-                    setShowAnnualReturnCallout(false);
-                    setShowSsiCallout(false);
                   }}
                 >
                   i
@@ -474,8 +482,9 @@ export default function DemographicsForm({
               ) : null}
               {showFscCallout && copy?.labels?.fscHeadingCallout ? (
                 <div
-                  className="absolute left-0 top-full z-20 mt-1 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
-                  style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                  id="demographics-fsc-callout"
+                  role="tooltip"
+                  className={`${calloutPanelClass} w-80`}
                 >
                   {copy.labels.fscHeadingCallout}
                 </div>

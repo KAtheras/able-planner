@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
@@ -16,6 +16,26 @@ import stateTaxRates from "@/config/rules/stateTaxRates.json";
 
 // TAX LIABILITY HELPERS (PROGRESSIVE BRACKETS)
 type TaxBracket = { min: number; max?: number; rate: number };
+type TaxBracketInput = { min?: number; max?: number; rate?: number };
+type TaxBracketMap = Record<string, TaxBracketInput[]>;
+type StateTaxBracketMap = Record<string, TaxBracketMap>;
+type ClientBlocks = Partial<
+  Record<"landingWelcome" | "disclosuresAssumptions" | "rightCardPrimary" | "rightCardSecondary", Partial<Record<SupportedLanguage, string>>>
+>;
+
+function resolveDefaultMessages(
+  override: string,
+  fallback: string[] | undefined,
+  defaultMessages: string[],
+): string[] {
+  if (override) {
+    return override
+      .split(/\n\s*\n/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+  return [...(fallback ?? defaultMessages)];
+}
 
 function clampMoney(x: number): number {
   if (!Number.isFinite(x)) return 0;
@@ -30,7 +50,7 @@ function computeProgressiveTax(income: number, brackets: TaxBracket[]): number {
     .filter((b) => b && Number.isFinite(b.min) && Number.isFinite(b.rate))
     .map((b) => ({
       min: Number(b.min),
-      max: Number.isFinite(b.max as any) ? Number(b.max) : undefined,
+      max: typeof b.max === "number" && Number.isFinite(b.max) ? Number(b.max) : undefined,
       rate: Number(b.rate),
     }))
     .sort((a, b) => a.min - b.min);
@@ -51,10 +71,10 @@ function computeProgressiveTax(income: number, brackets: TaxBracket[]): number {
 
 function getFederalIncomeTaxLiability(filingStatus: FilingStatusOption, agi: number): number {
   const key = filingStatus as keyof typeof federalTaxBrackets;
-  const rows: any[] = (federalTaxBrackets as any)[key] ?? [];
+  const rows = (federalTaxBrackets as TaxBracketMap)[key] ?? [];
   const brackets: TaxBracket[] = rows.map((r) => ({
     min: Number(r.min ?? 0),
-    max: Number.isFinite(r.max) ? Number(r.max) : undefined,
+    max: typeof r.max === "number" && Number.isFinite(r.max) ? Number(r.max) : undefined,
     rate: Number(r.rate ?? 0),
   }));
   return computeProgressiveTax(agi, brackets);
@@ -62,11 +82,11 @@ function getFederalIncomeTaxLiability(filingStatus: FilingStatusOption, agi: num
 
 function getStateIncomeTaxLiability(stateCode: string, filingStatus: FilingStatusOption, agi: number): number {
   const st = (stateCode || "").toUpperCase();
-  const byState: any = (stateTaxRates as any)[st];
-  const rows: any[] = byState?.[filingStatus] ?? [];
-  const brackets: TaxBracket[] = rows.map((r: any) => ({
+  const byState = (stateTaxRates as StateTaxBracketMap)[st];
+  const rows = byState?.[filingStatus] ?? [];
+  const brackets: TaxBracket[] = rows.map((r) => ({
     min: Number(r.min ?? 0),
-    max: Number.isFinite(r.max) ? Number(r.max) : undefined,
+    max: typeof r.max === "number" && Number.isFinite(r.max) ? Number(r.max) : undefined,
     rate: Number(r.rate ?? 0),
   }));
   return computeProgressiveTax(agi, brackets);
@@ -85,9 +105,9 @@ function computeStateBenefitCapped(
 
   if (!benefit) return 0;
 
-  const type = (benefit as any).type as "none" | "deduction" | "credit";
-  const amount = clampMoney((benefit as any).amount ?? 0);
-  const creditPercent = clampMoney((benefit as any).creditPercent ?? 0);
+  const type = benefit.type;
+  const amount = clampMoney(benefit.amount ?? 0);
+  const creditPercent = clampMoney(benefit.creditPercent ?? 0);
 
   if (type === "none") return 0;
 
@@ -206,41 +226,6 @@ const getStateTaxBenefitConfig = (
   return entry.benefits[filingStatus] ?? entry.benefits.single ?? null;
 };
 
-const computeStateTaxBenefitAmount = (
-  benefit: StateTaxBenefitConfig | null,
-  contributions: number,
-): number => {
-  if (!benefit || contributions <= 0) return 0;
-  const percent = Math.max(0, benefit.creditPercent ?? 0);
-  const cap = Math.max(0, benefit.amount ?? 0);
-  const contributionValue = Math.max(0, contributions);
-
-  if (benefit.type === "credit" || (benefit.type === "none" && percent > 0)) {
-    const fromPercent = percent > 0 ? contributionValue * percent : 0;
-    if (cap > 0 && percent > 0) {
-      return Math.min(fromPercent, cap);
-    }
-    if (percent > 0) {
-      return fromPercent;
-    }
-    if (cap > 0) {
-      return cap;
-    }
-    return 0;
-  }
-
-  if (benefit.type === "deduction") {
-    if (percent > 0) {
-      const fromPercent = contributionValue * percent;
-      return cap > 0 ? Math.min(fromPercent, cap) : fromPercent;
-    }
-    return cap > 0 ? Math.min(contributionValue, cap) : 0;
-  }
-
-  return 0;
-};
-
-
 export default function Home() {
   const [language, setLanguage] = useState<SupportedLanguage>("en");
 const [active, setActive] = useState<NavKey>("inputs");
@@ -313,30 +298,20 @@ const [active, setActive] = useState<NavKey>("inputs");
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
   const planState = planStateOverride ?? planStateFallback ?? "";
   const getClientBlock = (slot: "landingWelcome" | "disclosuresAssumptions" | "rightCardPrimary" | "rightCardSecondary") => {
-    const raw = (currentClientConfig as any)?.clientBlocks?.[slot]?.[language];
+    const raw = (currentClientConfig as { clientBlocks?: ClientBlocks } | undefined)?.clientBlocks?.[slot]?.[language];
     return typeof raw === "string" && raw.trim() ? raw : "";
   };
   const rightCardPrimaryOverride = getClientBlock("rightCardPrimary");
   const rightCardSecondaryOverride = getClientBlock("rightCardSecondary");
-  const screen1DefaultMessages = useMemo(
-    () =>
-      rightCardPrimaryOverride
-        ? rightCardPrimaryOverride
-            .split(/\n\s*\n/)
-            .map((part) => part.trim())
-            .filter(Boolean)
-        : copy.flows?.screen1?.defaultMessages ?? INITIAL_MESSAGES,
-    [rightCardPrimaryOverride, copy.flows?.screen1?.defaultMessages],
+  const screen1DefaultMessages = resolveDefaultMessages(
+    rightCardPrimaryOverride,
+    copy.flows?.screen1?.defaultMessages,
+    INITIAL_MESSAGES,
   );
-  const screen2DefaultMessages = useMemo(
-    () =>
-      rightCardSecondaryOverride
-        ? rightCardSecondaryOverride
-            .split(/\n\s*\n/)
-            .map((part) => part.trim())
-            .filter(Boolean)
-        : copy.flows?.screen2?.defaultMessages ?? SCREEN2_DEFAULT_MESSAGES,
-    [rightCardSecondaryOverride, copy.flows?.screen2?.defaultMessages],
+  const screen2DefaultMessages = resolveDefaultMessages(
+    rightCardSecondaryOverride,
+    copy.flows?.screen2?.defaultMessages,
+    SCREEN2_DEFAULT_MESSAGES,
   );
   const [screen1Messages, setScreen1Messages] = useState<string[]>(() => [...screen1DefaultMessages]);
   const [screen2Messages, setScreen2Messages] = useState<string[]>(() => [...screen2DefaultMessages]);
@@ -512,13 +487,27 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       startIndex,
       horizonEndIndex: Math.max(startIndex, horizonEndIndex),
     };
-  }, [getTimeHorizonLimits, timeHorizonYears]);useEffect(() => {
+  }, [getTimeHorizonLimits, timeHorizonYears]);
+
+  useEffect(() => {
     if (messagesMode !== "intro") {
       return;
     }
-    setScreen1Messages([...screen1DefaultMessages]);
-    setScreen2Messages([...screen2DefaultMessages]);
-  }, [language, messagesMode, screen1DefaultMessages, screen2DefaultMessages]);useEffect(() => {
+    const nextScreen1Messages = resolveDefaultMessages(
+      rightCardPrimaryOverride,
+      copy.flows?.screen1?.defaultMessages,
+      INITIAL_MESSAGES,
+    );
+    const nextScreen2Messages = resolveDefaultMessages(
+      rightCardSecondaryOverride,
+      copy.flows?.screen2?.defaultMessages,
+      SCREEN2_DEFAULT_MESSAGES,
+    );
+    setScreen1Messages(nextScreen1Messages);
+    setScreen2Messages(nextScreen2Messages);
+  }, [language, messagesMode, rightCardPrimaryOverride, rightCardSecondaryOverride, copy.flows?.screen1?.defaultMessages, copy.flows?.screen2?.defaultMessages]);
+
+  useEffect(() => {
     const agiValue = Number(plannerAgi);
     if (!plannerAgi || Number.isNaN(agiValue) || agiValue < 0 || !plannerFilingStatus) {
       setAgiGateEligible(null);
@@ -691,6 +680,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     wtaDismissed,
     wtaAutoApplied,
     getHorizonConfig,
+    applySetToMax,
     setWtaMode,
     setWtaAutoApplied,
   ]);
@@ -1135,12 +1125,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return { currentYearMaxMonthly, futureYearMaxMonthly };
     };
     const formatMonthlyLabel = (value: number) => formatCurrency(value).replace(".00", "");
-    const applySetToMax = (limit: number) => {
-      const { currentYearMaxMonthly, futureYearMaxMonthly } = deriveMonthlyCaps(limit);
-      setMonthlyContribution(String(currentYearMaxMonthly));
-      setMonthlyContributionFuture(String(futureYearMaxMonthly));
-    };
-
     const horizonLimits = getTimeHorizonLimits();
     const monthOptions = Array.from({ length: 12 }, (_, i) => {
   const date = new Date(2020, i, 1);
@@ -1227,10 +1211,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       setWtaHasEarnedIncome(null);
       setWtaEarnedIncome("");
       setWtaRetirementPlan(null);
-    };
-
-    const resolveCombinedLimitWithAutoContribution = () => {
-      applySetToMax(wtaCombinedLimit);
     };
 
     const handleOverLimitNo = () => {
@@ -1515,8 +1495,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return renderScreen2Messages();
       }
 
-      const overageReference = breachNow ? plannedCurrentYearContribution : plannedAnnualContribution;
-      const baseLimitOverage = Math.max(0, overageReference - WTA_BASE_ANNUAL_LIMIT);
       if (wtaStatus === "ineligible" && !wtaDismissed) {
         const baseLimitCaps = deriveMonthlyCaps(WTA_BASE_ANNUAL_LIMIT);
         return (
@@ -2115,7 +2093,9 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                 {inputStep === 1 ? (
                   <>
                     {showResidencyWarning ? (
-                      renderResidencyWarning()
+                      <div role="status" aria-live="polite">
+                        {renderResidencyWarning()}
+                      </div>
                     ) : showQuestionnaire ? (
                       <div className="space-y-4">
                         <div>
@@ -2127,32 +2107,49 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                         <div className="space-y-3">
                           {questions.map((question) => {
                             const answer = fscQ[question.key];
+                            const groupName = `fsc-${question.key}`;
+                            const yesId = `${groupName}-yes`;
+                            const noId = `${groupName}-no`;
                             return (
-                              <div key={question.key} className="space-y-2">
-                                <p className="text-xs font-semibold text-zinc-500">{question.label}</p>
+                              <fieldset key={question.key} className="space-y-2">
+                                <legend className="text-xs font-semibold text-zinc-500">{question.label}</legend>
                                 <div className="flex gap-2">
-                                  <button
-                                    type="button"
+                                  <input
+                                    id={yesId}
+                                    type="radio"
+                                    name={groupName}
+                                    className="sr-only peer"
+                                    checked={answer === true}
+                                    onChange={() => updateAnswer(question.key, true)}
+                                  />
+                                  <label
+                                    htmlFor={yesId}
                                     className={[
-                                      "flex-1 rounded-full border px-3 py-1 text-xs font-semibold transition",
+                                      "flex-1 cursor-pointer rounded-full border px-3 py-1 text-center text-xs font-semibold transition focus-within:outline-none focus-within:ring-2 focus-within:ring-[var(--brand-primary)] focus-within:ring-offset-2",
                                       answer === true
                                         ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
                                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                                     ].join(" ")}
-                                    onClick={() => updateAnswer(question.key, true)}
-                                  >{copy?.buttons?.yes ?? ""}</button>
-                                  <button
-                                    type="button"
+                                  >{copy?.buttons?.yes ?? ""}</label>
+                                  <input
+                                    id={noId}
+                                    type="radio"
+                                    name={groupName}
+                                    className="sr-only peer"
+                                    checked={answer === false}
+                                    onChange={() => updateAnswer(question.key, false)}
+                                  />
+                                  <label
+                                    htmlFor={noId}
                                     className={[
-                                      "flex-1 rounded-full border px-3 py-1 text-xs font-semibold transition",
+                                      "flex-1 cursor-pointer rounded-full border px-3 py-1 text-center text-xs font-semibold transition focus-within:outline-none focus-within:ring-2 focus-within:ring-[var(--brand-primary)] focus-within:ring-offset-2",
                                       answer === false
                                         ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
                                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                                     ].join(" ")}
-                                    onClick={() => updateAnswer(question.key, false)}
-                                  >{copy?.buttons?.no ?? ""}</button>
+                                  >{copy?.buttons?.no ?? ""}</label>
                                 </div>
-                              </div>
+                              </fieldset>
                             );
                           })}
                         </div>
@@ -2172,8 +2169,9 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                       </div>
                     ) : annualReturnWarningText ? (
                       <div
-                        className="rounded-2xl border border-[var(--brand-primary)] p-3 text-xs text-zinc-900 dark:text-zinc-100"
-                        style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                        role="status"
+                        aria-live="polite"
+                        className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-xs text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100"
                       >
                         {annualReturnWarningText}
                       </div>

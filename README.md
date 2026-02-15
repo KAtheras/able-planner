@@ -2,6 +2,15 @@
 
 A secure, accessible, bilingual ABLE planning application.
 
+## ACCESSIBILITY REQUIREMENT (MANDATORY)
+
+All new code and all code changes in this repository must be built and reviewed for accessibility compliance by default.
+
+- Accessibility is a release-blocking requirement, not optional polish.
+- UI work must include keyboard accessibility, semantic markup, proper labeling, and screen-reader support.
+- Visual updates must maintain readable contrast and visible focus states.
+- If a change cannot meet accessibility requirements immediately, do not ship it without an explicit follow-up and owner.
+
 ## Tech Stack
 - Next.js (App Router)
 - TypeScript

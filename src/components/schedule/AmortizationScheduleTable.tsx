@@ -57,7 +57,6 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
   const baseAbleRows = rows.filter((row) => row.year !== -1);
   const baseTaxableRows = taxableRows.filter((row) => row.year !== -1);
 
-  const allAbleMonths = baseAbleRows.flatMap((row) => row.months);
   const ableTotalsRow: YearRow = {
     year: -1,
     yearLabel: "Account totals",
@@ -72,7 +71,6 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
     months: [],
   };
 
-  const allTaxableMonths = baseTaxableRows.flatMap((row) => row.months);
   const taxableTotalsRow: TaxableYearRow = {
     year: -1,
     months: [],
