@@ -32,8 +32,12 @@
       "en": "ILLINOIS TEST — These assumptions and disclosures apply specifically to Illinois.",
       "es": "PRUEBA ILLINOIS — Estas suposiciones y divulgaciones aplican específicamente a Illinois."
     },
-    "rightCardSecondary": {
-      "en": "ILLINOIS TEST — Secondary informational message for Illinois users.",
+     "rightCardPrimary": {
+      "en": "This is where the ABLE planner shares updates, alerts, and guidance based on your inputs and may ask for additional information. Please use the input fields on the left to provide the requested information for the ABLE planner.",
+      "es": "PRUEBA ILLINOIS — Mensaje informativo secundario para usuarios de Illinois."
+    },
+     "rightCardSecondary": {
+      "en": "Use the Account Activity inputs on the left to define your planning assumptions. Use the information icons next to each input for field-specific guidance.",
       "es": "PRUEBA ILLINOIS — Mensaje informativo secundario para usuarios de Illinois."
     }
   }

@@ -479,14 +479,14 @@ export default function DemographicsForm({
           <div ref={ssiCalloutAnchorRef} className="relative inline-flex items-center gap-1">
             <label
               htmlFor="demographics-ssi"
-              className="flex items-center gap-3 text-sm"
+              className="flex items-center gap-3 text-sm uppercase tracking-wide"
             >
               <input
                 id="demographics-ssi"
                 type="checkbox"
                 checked={isSsiEligible}
                 onChange={(e) => onChange?.({ isSsiEligible: e.target.checked })}
-                className="h-4 w-4 rounded border-zinc-300 accent-[var(--brand-primary)]"
+                className="h-5 w-5 rounded border-zinc-300 accent-[var(--brand-primary)]"
               />
               {copy?.labels?.ssiEligibilityLabel ?? "Beneficiary is eligible for SSI"}
             </label>

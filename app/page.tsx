@@ -154,6 +154,12 @@ const EMPTY_FSC: FscAnswers = {
   isStudent: null,
   isDependent: null,
 };
+const FSC_REQUIRED_ANSWERS: Record<keyof FscAnswers, boolean> = {
+  hasTaxLiability: true,
+  isOver18: true,
+  isStudent: false,
+  isDependent: false,
+};
 
 const INITIAL_MESSAGES: string[] = ["", "", "", ""];
 
@@ -571,15 +577,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   );
 
   useEffect(() => {
-    if (!wtaDismissed && (wtaMode === "noPath" || wtaMode === "combinedLimit")) {
-      return;
-    }
-    if (
-      !wtaDismissed &&
-      (wtaMode === "initialPrompt" || wtaMode === "wtaQuestion")
-    ) {
-      return;
-    }
     const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
     const plannedAnnual = Number.isFinite(numeric) ? numeric * 12 : 0;
     const { startIndex, safeYears } = getHorizonConfig();
@@ -593,14 +590,25 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const plannedNextCalendarYear = Number.isFinite(numeric)
       ? numeric * monthsInNextCalendarYearWithinHorizon
       : 0;
+    const overBaseLimit =
+      plannedCurrentYear > WTA_BASE_ANNUAL_LIMIT ||
+      plannedNextCalendarYear > WTA_BASE_ANNUAL_LIMIT;
+
+    if (!wtaDismissed && (wtaMode === "noPath" || wtaMode === "combinedLimit")) {
+      return;
+    }
+    if (!wtaDismissed && (wtaMode === "initialPrompt" || wtaMode === "wtaQuestion")) {
+      if (overBaseLimit) {
+        return;
+      }
+      setWtaMode("idle");
+      return;
+    }
 
     if (wtaStatus === "unknown") {
       // If the current annualized contribution exceeds the base limit, ALWAYS prompt WTA,
       // even if we previously auto-prompted due to a future-year projection.
-      if (
-        plannedCurrentYear > WTA_BASE_ANNUAL_LIMIT ||
-        plannedNextCalendarYear > WTA_BASE_ANNUAL_LIMIT
-      ) {
+      if (overBaseLimit) {
         if (wtaAutoPromptedForIncrease) {
           setWtaAutoPromptedForIncrease(false);
         }
@@ -1182,15 +1190,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       { key: "isDependent", label: (copy.labels?.fsc?.dependent ?? "")},
     ];
 
-    const allAnswered = Object.values(fscQ).every((value) => value !== null);
-
-    const evaluateFsc = () => {
-      if (!allAnswered) return;
-      const eligible =
-        fscQ.hasTaxLiability === true &&
-        fscQ.isOver18 === true &&
-        fscQ.isStudent === false &&
-        fscQ.isDependent === false;
+    const finalizeFscEvaluation = (eligible: boolean) => {
       setFscStatus(eligible ? "eligible" : "ineligible");
       fscPassedRef.current = eligible;
       setMessagesMode("intro");
@@ -1201,8 +1201,19 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       }
     };
 
-    const updateAnswer = (key: keyof FscAnswers, value: boolean) => {
+    const currentQuestionIndexRaw = questions.findIndex((question) => fscQ[question.key] === null);
+    const currentQuestionIndex = currentQuestionIndexRaw === -1 ? questions.length - 1 : currentQuestionIndexRaw;
+    const currentQuestion = questions[currentQuestionIndex];
+    const answerFscQuestion = (key: keyof FscAnswers, value: boolean) => {
       setFscQ((prev) => ({ ...prev, [key]: value }));
+      const required = FSC_REQUIRED_ANSWERS[key];
+      if (value !== required) {
+        finalizeFscEvaluation(false);
+        return;
+      }
+      if (currentQuestionIndex >= questions.length - 1) {
+        finalizeFscEvaluation(true);
+      }
     };
 
     const showQuestionnaire = messagesMode === "fsc" && agiGateEligible === true;
@@ -1407,7 +1418,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 type="button"
                 className={[
                   buttonBase,
-                  "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black",
+                  "border-transparent bg-[var(--brand-primary)] text-white",
                 ].join(" ")}
                 onClick={promptlyStartWta}
               >{copy?.buttons?.yes ?? ""}</button>
@@ -1441,7 +1452,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                     className={[
                       buttonBase,
                       wtaHasEarnedIncome === true
-                        ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
+                        ? "border-transparent bg-[var(--brand-primary)] text-white"
                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                     ].join(" ")}
                     onClick={() => handleEarnedIncomeAnswer(true)}
@@ -1451,7 +1462,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                     className={[
                       buttonBase,
                       wtaHasEarnedIncome === false
-                        ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
+                        ? "border-transparent bg-[var(--brand-primary)] text-white"
                         : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                     ].join(" ")}
                     onClick={() => handleEarnedIncomeAnswer(false)}
@@ -1479,7 +1490,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                       className={[
                         buttonBase,
                         wtaRetirementPlan === true
-                          ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
+                          ? "border-transparent bg-[var(--brand-primary)] text-white"
                           : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                       ].join(" ")}
                       onClick={() => evaluateWtaEligibility(true)}
@@ -1489,7 +1500,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                       className={[
                         buttonBase,
                         wtaRetirementPlan === false
-                          ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
+                          ? "border-transparent bg-[var(--brand-primary)] text-white"
                           : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
                       ].join(" ")}
                       onClick={() => evaluateWtaEligibility(false)}
@@ -2129,67 +2140,33 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                             {copy?.labels?.fsc?.intro ?? ""}
                           </p>
                         </div>
-                        <div className="space-y-3">
-                          {questions.map((question) => {
-                            const answer = fscQ[question.key];
-                            const groupName = `fsc-${question.key}`;
-                            const yesId = `${groupName}-yes`;
-                            const noId = `${groupName}-no`;
-                            return (
-                              <fieldset key={question.key} className="space-y-2">
-                                <legend className="text-xs font-semibold text-zinc-500">{question.label}</legend>
-                                <div className="flex gap-2">
-                                  <input
-                                    id={yesId}
-                                    type="radio"
-                                    name={groupName}
-                                    className="sr-only peer"
-                                    checked={answer === true}
-                                    onChange={() => updateAnswer(question.key, true)}
-                                  />
-                                  <label
-                                    htmlFor={yesId}
-                                    className={[
-                                      "flex-1 cursor-pointer rounded-full border px-3 py-1 text-center text-xs font-semibold transition focus-within:outline-none focus-within:ring-2 focus-within:ring-[var(--brand-primary)] focus-within:ring-offset-2",
-                                      answer === true
-                                        ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
-                                        : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
-                                    ].join(" ")}
-                                  >{copy?.buttons?.yes ?? ""}</label>
-                                  <input
-                                    id={noId}
-                                    type="radio"
-                                    name={groupName}
-                                    className="sr-only peer"
-                                    checked={answer === false}
-                                    onChange={() => updateAnswer(question.key, false)}
-                                  />
-                                  <label
-                                    htmlFor={noId}
-                                    className={[
-                                      "flex-1 cursor-pointer rounded-full border px-3 py-1 text-center text-xs font-semibold transition focus-within:outline-none focus-within:ring-2 focus-within:ring-[var(--brand-primary)] focus-within:ring-offset-2",
-                                      answer === false
-                                        ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-black"
-                                        : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
-                                    ].join(" ")}
-                                  >{copy?.buttons?.no ?? ""}</label>
-                                </div>
-                              </fieldset>
-                            );
-                          })}
-                        </div>
-                        <div>
-                          <button
-                            type="button"
-                            disabled={!allAnswered}
-                            className={[
-                              "w-full rounded-full px-4 py-2 text-xs font-semibold transition",
-                              allAnswered
-                                ? "bg-[var(--brand-primary)] text-white"
-                                : "border border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed",
-                            ].join(" ")}
-                            onClick={evaluateFsc}
-                          >{copy?.buttons?.evaluate ?? ""}</button>
+                        <div className="rounded-2xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
+                          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                            {language === "es"
+                              ? `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`
+                              : `Question ${currentQuestionIndex + 1} of ${questions.length}`}
+                          </p>
+                          <fieldset className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-900/40">
+                            <legend className="px-1 text-xs font-semibold text-zinc-700 dark:text-zinc-200">
+                              {currentQuestion.label}
+                            </legend>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                className="flex-1 rounded-full border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                                onClick={() => answerFscQuestion(currentQuestion.key, true)}
+                              >
+                                {copy?.buttons?.yes ?? ""}
+                              </button>
+                              <button
+                                type="button"
+                                className="flex-1 rounded-full border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                                onClick={() => answerFscQuestion(currentQuestion.key, false)}
+                              >
+                                {copy?.buttons?.no ?? ""}
+                              </button>
+                            </div>
+                          </fieldset>
                         </div>
                       </div>
                     ) : annualReturnWarningText ? (
