@@ -49,7 +49,7 @@ function computeProgressiveTax(income: number, brackets: TaxBracket[]): number {
   return clampMoney(tax);
 }
 
-function getFederalIncomeTaxLiability(filingStatus: FilingStatus, agi: number): number {
+function getFederalIncomeTaxLiability(filingStatus: FilingStatusOption, agi: number): number {
   const key = filingStatus as keyof typeof federalTaxBrackets;
   const rows: any[] = (federalTaxBrackets as any)[key] ?? [];
   const brackets: TaxBracket[] = rows.map((r) => ({
@@ -60,7 +60,7 @@ function getFederalIncomeTaxLiability(filingStatus: FilingStatus, agi: number): 
   return computeProgressiveTax(agi, brackets);
 }
 
-function getStateIncomeTaxLiability(stateCode: string, filingStatus: FilingStatus, agi: number): number {
+function getStateIncomeTaxLiability(stateCode: string, filingStatus: FilingStatusOption, agi: number): number {
   const st = (stateCode || "").toUpperCase();
   const byState: any = (stateTaxRates as any)[st];
   const rows: any[] = byState?.[filingStatus] ?? [];
@@ -76,7 +76,7 @@ function computeStateBenefitCapped(
   benefit: ReturnType<typeof getStateTaxBenefitConfig> | null,
   contributionsForYear: number,
   agi: number,
-  filingStatus: FilingStatus,
+  filingStatus: FilingStatusOption,
   stateCode: string,
 ): number {
   const contrib = clampMoney(contributionsForYear);
@@ -118,6 +118,7 @@ import { buildPlannerSchedule } from "@/lib/calc/usePlannerSchedule";
 const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
 
 type FilingStatusOption = "single" | "married_joint" | "married_separate" | "head_of_household";
+type PlannerState = string;
 
 type FscAnswers = {
   hasTaxLiability: boolean | null;
@@ -309,7 +310,7 @@ const [active, setActive] = useState<NavKey>("inputs");
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
   const planState = planStateOverride ?? planStateFallback ?? "";
   const getClientBlock = (slot: "landingWelcome" | "disclosuresAssumptions" | "rightCardPrimary" | "rightCardSecondary") => {
-    const raw = currentClientConfig?.clientBlocks?.[slot]?.[language];
+    const raw = (currentClientConfig as any)?.clientBlocks?.[slot]?.[language];
     return typeof raw === "string" && raw.trim() ? raw : "";
   };
   const rightCardPrimaryOverride = getClientBlock("rightCardPrimary");
@@ -366,7 +367,7 @@ const [active, setActive] = useState<NavKey>("inputs");
       </button>
     </div>
   );
-  const planInfoMap = planLevelInfo as Record<
+  const planInfoMap = planLevelInfo as unknown as Record<
     string,
     { name?: string; residencyRequired?: boolean; maxAccountBalance?: number }
   >;
@@ -481,7 +482,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   const getTimeHorizonLimits = useCallback(() => {
     const client = getClientConfig(plannerStateCode);
     const maxYears =
-      client?.constraints?.timeHorizonMax ??
       client?.constraints?.timeHorizonYearsHardMax ??
       75;
     return {
@@ -878,8 +878,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const client = getClientConfig(plannerStateCode);
     const candidate =
       client?.defaults?.timeHorizonYears ??
-      client?.defaults?.timeHorizon ??
-      client?.defaults?.defaultTimeHorizonYears ??
       null;
     const fallback = typeof candidate === "number" && Number.isFinite(candidate)
       ? String(Math.round(candidate))
@@ -1306,9 +1304,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               (copy?.messages?.balanceCapWarning ?? "")
   .split("{{cap}}").join("$100,000")
   
-.replace("{{breach}}", (ssiMessages[0]?.data?.breachLabel ?? ssiMessages[0]?.data?.monthLabel ?? ""))
+.replace("{{breach}}", (ssiMessages[0]?.data?.monthLabel ?? ""))
   
-.replace("{{stop}}", (ssiMessages[0]?.data?.stopLabel ?? planMessages[0]?.data?.monthLabel ?? ""))
+.replace("{{stop}}", (planMessages[0]?.data?.monthLabel ?? ssiMessages[0]?.data?.monthLabel ?? ""))
   .replace("{{withdrawStart}}", (forcedMsg?.data?.monthLabel ?? ""))
 }</div>
             </div>

@@ -39,17 +39,7 @@ type Props = {
   view: ViewMode;
   labels?: {
     monthYear?: string;
-    contributions?: string;
-    withdrawals?: string;
-    investmentReturns?: string;
-    accountBalance?: string;
-    federalSaversCredit?: string;
-    stateTaxBenefit?: string;
-    federalTaxes?: string;
-    stateTaxes?: string;
-  };
-  labels?: {
-    monthYear?: string;
+    accountTotals?: string;
     contributions?: string;
     withdrawals?: string;
     investmentReturns?: string;

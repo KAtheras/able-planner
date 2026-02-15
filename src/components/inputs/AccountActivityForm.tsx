@@ -13,6 +13,10 @@ type AccountActivityCopy = {
     startingBalanceLabel?: string;
     monthlyContributionLabel?: string;
     monthlyWithdrawalLabel?: string;
+    contributionEndLabel?: string;
+    withdrawalStartLabel?: string;
+    contributionIncreaseLabel?: string;
+    withdrawalIncreaseLabel?: string;
     monthPlaceholder?: string;
     yearPlaceholder?: string;
   };

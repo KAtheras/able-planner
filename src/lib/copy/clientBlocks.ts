@@ -16,12 +16,14 @@ export function getClientBlockText(args: {
   clientConfig: unknown;
   planState: string;
 }): string {
+  const copyValue = args.copy as any;
+  const clientConfigValue = args.clientConfig as any;
   const lang =
-    String(args.copy?.metadata?.language ?? args.copy?.meta?.language ?? "en") as "en" | "es";
-  const block: BlockCopyEntry | undefined = args.copy?.blocks?.[args.slot];
+    String(copyValue?.metadata?.language ?? copyValue?.meta?.language ?? "en") as "en" | "es";
+  const block: BlockCopyEntry | undefined = copyValue?.blocks?.[args.slot];
   if (!block) return "";
 
-  const clientValue = args.clientConfig?.clientBlocks?.[args.slot]?.[lang];
+  const clientValue = clientConfigValue?.clientBlocks?.[args.slot]?.[lang];
   if (typeof clientValue === "string" && clientValue.trim()) {
     return clientValue;
   }

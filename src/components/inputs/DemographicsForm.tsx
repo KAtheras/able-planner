@@ -5,6 +5,13 @@ import planLevelInfo from "@/config/rules/planLevelInfo.json";
 type DemographicsCopy = {
   title?: string;
   labels?: {
+    nameLabel?: string;
+    stateOfResidenceLabel?: string;
+    filingStatusLabel?: string;
+    agiLabel?: string;
+    annualReturnLabel?: string;
+    ssiEligibilityLabel?: string;
+    fscHeading?: string;
     selectState?: string;
     checkEligibility?: string;
     filing?: {
