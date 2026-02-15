@@ -1019,7 +1019,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         const nextState = event.target.value as PlannerState;
         setPlannerStateCode(nextState);
       }}
-      className="rounded-full border border-zinc-200 bg-white px-2 py-1 text-xs font-semibold text-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+      className="rounded-full border border-zinc-200 bg-white px-2 py-1 text-xs font-semibold text-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
     >
       <option value="default">Default</option>
       <option value="UT">UT</option>

@@ -281,7 +281,7 @@ export default function DemographicsForm({
             id="demographics-residence"
             value={stateOfResidence}
             onChange={(e) => onChange?.({ stateOfResidence: e.target.value })}
-            className="mt-1 w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm leading-normal text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="mt-1 w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm leading-normal text-zinc-900 dark:border-zinc-200 dark:bg-zinc-900 dark:text-zinc-100"
           >
             <option value="">
               {copy?.labels?.selectState ?? "Select a state"}
@@ -337,7 +337,7 @@ export default function DemographicsForm({
             id="demographics-filing-status"
             value={filingStatus}
             onChange={(e) => onChange?.({ filingStatus: e.target.value })}
-            className="mt-1 w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm leading-normal text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="mt-1 w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm leading-normal text-zinc-900 dark:border-zinc-200 dark:bg-zinc-900 dark:text-zinc-100"
           >
             <option value="single">
               {copy?.labels?.filing?.single ?? "Single"}
@@ -557,7 +557,7 @@ export default function DemographicsForm({
               className={[
                 "w-full rounded-2xl px-4 py-2 text-sm font-semibold transition",
                 fscStatus === "idle"
-                  ? "border border-zinc-200 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+                  ? "border border-zinc-200 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
                   : fscStatus === "eligible"
                   ? "bg-emerald-600 text-white"
                   : "bg-rose-600 text-white",

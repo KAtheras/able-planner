@@ -430,7 +430,7 @@ export default function AccountActivityForm({
               </div>
             ) : null}
           </div>
-          <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-200 dark:bg-zinc-900">
             <select
               id="activity-contribution-end-month"
               value={contributionEndMonth}
@@ -501,7 +501,7 @@ export default function AccountActivityForm({
               </div>
             ) : null}
           </div>
-          <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-200 dark:bg-zinc-900">
             <select
               id="activity-withdrawal-start-month"
               value={withdrawalStartMonth}
@@ -650,7 +650,7 @@ export default function AccountActivityForm({
           <button
             type="button"
             onClick={() => onAdvancedClick?.()}
-            className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900/30 dark:text-zinc-200"
+            className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-200 dark:bg-zinc-900/30 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
           >
             Advanced Controls
           </button>
