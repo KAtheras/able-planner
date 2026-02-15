@@ -58,7 +58,11 @@
       "annualReturnCallout": "Este es el rendimiento anual de inversión supuesto que se usa en las proyecciones. Puede cambiarlo para explorar diferentes escenarios.",
       "checkEligibility": "Verificar elegibilidad",
       "contributionEndLabel": "Fin de contribución",
+      "contributionEndCallout": "Seleccione el mes y el año en que deben finalizar las contribuciones recurrentes. Si se deja en blanco, las contribuciones continúan hasta el horizonte temporal seleccionado.",
       "contributionIncreaseLabel": "Aumento anual de contribución (%)",
+      "contributionIncreaseCallout": "Use este campo para modelar aumentos anuales en las contribuciones recurrentes. El planificador puede limitar aumentos automáticamente cuando se superen límites de contribución.",
+      "contributionIncreaseDisabledHelper": "Las contribuciones base ya alcanzan el límite anual; los aumentos están deshabilitados.",
+      "contributionIncreaseBreachHelper": "Con {{pct}}%, las contribuciones exceden el límite anual en el año {{breachYear}}. Los aumentos de contribución se detendrán después del año {{stopYear}}.",
       "demographicsTitle": "Información demográfica",
       "eligibleToEvaluate": "Elegible para evaluar",
       "filing": {
@@ -77,7 +81,9 @@
       "fscIntro": "Responda estas preguntas para estimar su elegibilidad.",
       "fscTaxLiability": "¿Tiene obligación de pagar impuestos federales sobre la renta?",
       "monthlyContributionLabel": "Contribución mensual",
+      "monthlyContributionCallout": "Ingrese el monto de la contribución mensual recurrente. Las contribuciones se modelan como flujos recurrentes y pueden limitarse por reglas del plan ABLE en la proyección.",
       "monthlyWithdrawalLabel": "Retiro mensual",
+      "monthlyWithdrawalCallout": "Ingrese el monto del retiro mensual recurrente. En la comparación imponible, los retiros siguen el mismo patrón salvo que la cuenta imponible se agote antes.",
       "monthPlaceholder": "Mes",
       "nameLabel": "Nombre del beneficiario",
       "nameCallout": "El beneficiario es la persona que es titular de la cuenta ABLE y para quien están destinados los fondos. Las contribuciones, los retiros y las reglas de elegibilidad se aplican a esta persona.",
@@ -87,11 +93,15 @@
       "ssiEligibilityCallout": "El Ingreso Suplementario de Seguridad (SSI) es un programa federal basado en necesidades que proporciona asistencia mensual en efectivo a personas con discapacidades y con ingresos y recursos limitados. Los saldos de la cuenta ABLE de hasta $100,000 están excluidos del límite de recursos de SSI, pero los montos por encima de ese umbral pueden afectar la elegibilidad. Marcar esta casilla instruirá al planificador a detener las contribuciones e implementar retiros cuando sea necesario para mantener el saldo proyectado de su cuenta por debajo de $100,000.",
       "ssiEligibleLabel": "El beneficiario es elegible para SSI",
       "startingBalanceLabel": "Saldo inicial",
+      "startingBalanceCallout": "El saldo inicial debe reflejar un saldo existente de cuenta ABLE y/o una transferencia calificada utilizada para iniciar esta proyección.",
       "stateOfResidenceLabel": "Estado de residencia",
       "stateOfResidenceCallout": "Su estado de residencia se utiliza para determinar la elegibilidad del plan y ciertos beneficios fiscales estatales.",
       "timeHorizonYearsFallback": "Horizonte de tiempo (años)",
+      "timeHorizonCallout": "Elija cuánto tiempo desea planificar. El horizonte seleccionado determina hasta cuándo corren las proyecciones y dónde terminan los cronogramas de contribuciones o retiros.",
       "withdrawalIncreaseLabel": "Aumento anual de retiro (%)",
+      "withdrawalIncreaseCallout": "Use este campo para modelar aumentos anuales en los retiros recurrentes con el tiempo.",
       "withdrawalStartLabel": "Inicio del retiro",
+      "withdrawalStartCallout": "Seleccione el mes y el año en que deben comenzar los retiros recurrentes. Si se deja en blanco, los retiros comienzan al inicio de la proyección.",
       "wtaEarnedIncomeInput": "Por favor ingrese el ingreso estimado del trabajo:",
       "wtaEarnedIncomeQuestion": "¿El beneficiario tiene ingresos del trabajo?",
       "wtaRetirementPlanQuestion": "¿El beneficiario está cubierto por un plan de jubilación?",
@@ -160,11 +170,8 @@
     },
     "screen2": {
       "defaultMessages": [
-        "Utilice los campos de entrada de la izquierda para planificar la actividad de la cuenta.",
-        "Nos gustaría conocer el período que desea planificar, para poder proyectar y presentar información para un horizonte significativo.",
-        "El saldo inicial debe ser un saldo existente de una cuenta ABLE o una transferencia calificada desde otro plan.",
-        "Esta herramienta le permite planificar contribuciones y retiros recurrentes mensuales. Se supone que las contribuciones recurrentes comienzan el día 1 del mes siguiente. También puede seleccionar un mes y año de finalización para las contribuciones. Se supone que los retiros recurrentes continúan hasta el final del horizonte de tiempo seleccionado. Puede elegir el mes y el año en que comenzarán esos retiros.",
-        "A medida que ingrese su información, aparecerán mensajes en esta ventana que le ayudarán a navegar ciertos límites de contribución y saldo de la cuenta y a realizar cambios sugeridos en sus entradas de contribución y retiro."
+        "Use los campos de Actividad de la cuenta a la izquierda para definir sus supuestos de planificación.",
+        "Use los íconos de información junto a cada campo para ver orientación específica."
       ]
     }
   },

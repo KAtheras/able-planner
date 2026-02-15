@@ -65,6 +65,7 @@ export default function DemographicsForm({
   onFscClick,
   copy,
 }: DemographicsFormProps) {
+  const sectionRef = useRef<HTMLElement | null>(null);
   const [showStateCallout, setShowStateCallout] = useState(false);
   const [showFilingCallout, setShowFilingCallout] = useState(false);
   const [showAgiCallout, setShowAgiCallout] = useState(false);
@@ -130,6 +131,50 @@ export default function DemographicsForm({
     };
   }, [closeAllCallouts, showNameCallout, showStateCallout, showFilingCallout, showAgiCallout, showAnnualReturnCallout, showSsiCallout, showFscCallout]);
 
+  useEffect(() => {
+    const root = sectionRef.current;
+    if (!root) return;
+
+    const syncLabelRows = () => {
+      const labels = Array.from(
+        root.querySelectorAll<HTMLElement>("[data-paired-label-row]"),
+      );
+      for (const label of labels) {
+        label.style.minHeight = "";
+      }
+
+      if (!window.matchMedia("(min-width: 768px)").matches) {
+        return;
+      }
+
+      const rows = new Map<string, HTMLElement[]>();
+      for (const label of labels) {
+        const row = label.dataset.pairedLabelRow;
+        if (!row) continue;
+        const bucket = rows.get(row) ?? [];
+        bucket.push(label);
+        rows.set(row, bucket);
+      }
+
+      for (const rowLabels of rows.values()) {
+        const maxHeight = Math.max(...rowLabels.map((label) => label.getBoundingClientRect().height));
+        const appliedHeight = `${Math.ceil(maxHeight)}px`;
+        for (const label of rowLabels) {
+          label.style.minHeight = appliedHeight;
+        }
+      }
+    };
+
+    syncLabelRows();
+    const observer = new ResizeObserver(syncLabelRows);
+    observer.observe(root);
+    window.addEventListener("resize", syncLabelRows);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", syncLabelRows);
+    };
+  }, [copy]);
+
   const defaultButtonLabel =
     fscStatus === "idle"
       ? copy?.labels?.checkEligibility ?? "Check eligibility"
@@ -138,14 +183,18 @@ export default function DemographicsForm({
       : copy?.buttons?.notEligibleRetest ?? "";
 
   return (
-    <section className="space-y-6">
+    <section ref={sectionRef} className="space-y-6">
       <h1 className="text-2xl font-semibold">
         {copy?.title ?? copy?.labels?.demographicsTitle ?? "Demographic Information"}
       </h1>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>
-          <div ref={nameCalloutAnchorRef} className="relative flex items-center gap-1">
+          <div
+            ref={nameCalloutAnchorRef}
+            data-paired-label-row="1"
+            className="relative flex items-center gap-1"
+          >
             <label
               htmlFor="demographics-beneficiary-name"
               className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
@@ -189,7 +238,11 @@ export default function DemographicsForm({
           />
         </div>
         <div>
-          <div ref={stateCalloutAnchorRef} className="relative flex items-center gap-1">
+          <div
+            ref={stateCalloutAnchorRef}
+            data-paired-label-row="1"
+            className="relative flex items-center gap-1"
+          >
             <label
               htmlFor="demographics-residence"
               className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
@@ -241,7 +294,11 @@ export default function DemographicsForm({
           </select>
         </div>
         <div>
-          <div ref={filingCalloutAnchorRef} className="relative flex items-center gap-1">
+          <div
+            ref={filingCalloutAnchorRef}
+            data-paired-label-row="2"
+            className="relative flex items-center gap-1"
+          >
             <label
               htmlFor="demographics-filing-status"
               className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
@@ -297,7 +354,11 @@ export default function DemographicsForm({
           </select>
         </div>
         <div>
-          <div ref={agiCalloutAnchorRef} className="relative flex items-center gap-1">
+          <div
+            ref={agiCalloutAnchorRef}
+            data-paired-label-row="2"
+            className="relative flex items-center gap-1"
+          >
             <label
               htmlFor="demographics-agi"
               className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"

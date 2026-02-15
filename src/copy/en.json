@@ -58,7 +58,11 @@
       "annualReturnCallout": "This is the assumed annual investment return used in projections. You can change it to explore different scenarios.",
       "checkEligibility": "Check eligibility",
       "contributionEndLabel": "Contribution End",
+      "contributionEndCallout": "Select the month and year when recurring contributions should stop. If left blank, contributions continue through the selected time horizon. The ABLE planner will stop contributions at an earlier date if certain SSI or plan account balance limits are reached, as applicable.",
       "contributionIncreaseLabel": "Annual contribution increase (%)",
+      "contributionIncreaseCallout": "Use this to model annual increases in recurring contributions. The planner may limit increases automatically when contribution limits would be exceeded.",
+      "contributionIncreaseDisabledHelper": "Base contributions already meet the annual limit; increases are disabled.",
+      "contributionIncreaseBreachHelper": "At {{pct}}%, contributions exceed the annual limit in year {{breachYear}}. Contribution increases will stop after year {{stopYear}}.",
       "demographicsTitle": "Demographic Information",
       "eligibleToEvaluate": "Eligible to Evaluate",
       "filing": {
@@ -77,7 +81,9 @@
       "fscIntro": "Answer these questions to estimate eligibility.",
       "fscTaxLiability": "Do you have federal income tax liability?",
       "monthlyContributionLabel": "Monthly Contribution",
+      "monthlyContributionCallout": "Enter the recurring monthly contribution amount. Contributions are modeled as recurring cash flows and may be capped by ABLE plan rules in the projection.",
       "monthlyWithdrawalLabel": "Monthly Withdrawal",
+      "monthlyWithdrawalCallout": "Enter the recurring monthly withdrawal amount.",
       "monthPlaceholder": "Month",
       "nameLabel": "Beneficiary Name",
       "nameCallout": "The beneficiary is the person who owns the ABLE account and for whom the funds are intended. Contributions, withdrawals, and eligibility rules apply to this individual.",
@@ -87,11 +93,15 @@
       "ssiEligibilityCallout": "Supplemental Security Income (SSI) is a needs-based federal program that provides monthly cash assistance to individuals with disabilities and limited income and resources. ABLE account balances up to $100,000 are excluded from the SSI resource limit, but amounts above that threshold may affect eligibility. Checking this box will instructs the planner to stop contributions and implement withdrawals where necessary, to keep your projected account balance under $100,000",
       "ssiEligibleLabel": "Beneficiary is eligible for SSI",
       "startingBalanceLabel": "Starting Balance",
+      "startingBalanceCallout": "Starting balance should reflect an existing ABLE account balance and/or qualified rollover amount used to begin this projection.",
       "stateOfResidenceLabel": "State of residence",
       "stateOfResidenceCallout": "Your state of residence is used to determine plan eligibility and certain state tax benefits.",
       "timeHorizonYearsFallback": "Time Horizon (years)",
+      "timeHorizonCallout": "Choose how long you want to plan. The selected horizon determines how far projections run and where contribution or withdrawal schedules end.",
       "withdrawalIncreaseLabel": "Annual withdrawal increase (%)",
+      "withdrawalIncreaseCallout": "Use this to model annual increases in recurring withdrawals over time.",
       "withdrawalStartLabel": "Withdrawal Start",
+      "withdrawalStartCallout": "Select the month and year when recurring withdrawals should begin. If left blank, withdrawals start at the beginning of the projection. The ABLE planner will implement required withdrawals in an amount necessary to keep the account balances under the SSI limit, if applicable.",
       "wtaEarnedIncomeInput": "Please input estimated earned income:",
       "wtaEarnedIncomeQuestion": "Does the beneficiary have earned income?",
       "wtaRetirementPlanQuestion": "Is the beneficiary covered by a retirement plan?",
@@ -161,11 +171,8 @@
     },
     "screen2": {
       "defaultMessages": [
-        "Please use the input fields on the left to plan for account activity.",
-        "We would like to know the time-period you want to plan for, so that we can project and present information for a meaningful time horizon.",
-        "The starting balance should either be an existing ABLE account balance or a qualified rollover from another plan.",
-        "This tool allows you to plan for monthly recurring contributions and withdrawals. Recurring contributions are assumed to start on the 1st of the following month. You can also select an end month and year for contributions. Recurring withdrawals are assumed to continue until the end of the time horizon selected. You can choose the month and year in which those withdrawals will start.",
-        "As you input your information, messages will appear in this window that will help you navigate certain contribution and account balance limits and make suggested changes to your contribution and withdrawal inputs."
+        "Use the Account Activity inputs on the left to define your planning assumptions.",
+        "Use the information icons next to each input for field-specific guidance."
       ]
     }
   },

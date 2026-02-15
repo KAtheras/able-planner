@@ -773,18 +773,23 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       setContributionIncreasePct("0");
       setStopContributionIncreasesAfterYear(null);
       setContributionIncreaseHelperText(
-        "Base contributions already meet the annual limit; increases are disabled.",
+        copy?.labels?.inputs?.contributionIncreaseDisabledHelper ??
+          "Base contributions already meet the annual limit; increases are disabled.",
       );
       return;
     }
 
     setContributionIncreaseHelperText(
-      `At ${contributionIncreasePct}%, contributions exceed the annual limit in year ${limitBreachYear}. Contribution increases will stop after year ${
-        limitBreachYear - 1
-      }.`,
+      (copy?.labels?.inputs?.contributionIncreaseBreachHelper ??
+        "At {{pct}}%, contributions exceed the annual limit in year {{breachYear}}. Contribution increases will stop after year {{stopYear}}.")
+        .replace("{{pct}}", contributionIncreasePct)
+        .replace("{{breachYear}}", String(limitBreachYear))
+        .replace("{{stopYear}}", String(limitBreachYear - 1)),
     );
   }, [
     annualContributionLimit,
+    copy?.labels?.inputs?.contributionIncreaseBreachHelper,
+    copy?.labels?.inputs?.contributionIncreaseDisabledHelper,
     contributionIncreasePct,
     monthlyContributionNum,
     timeHorizonYears,
@@ -1051,7 +1056,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       setContributionIncreasePct("0");
       setStopContributionIncreasesAfterYear(null);
       setContributionIncreaseHelperText(
-        "Base contributions already meet the annual limit; increases are disabled.",
+        copy?.labels?.inputs?.contributionIncreaseDisabledHelper ??
+          "Base contributions already meet the annual limit; increases are disabled.",
       );
       if (input) {
         input.setAttribute("readOnly", "true");
@@ -1066,7 +1072,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       input.classList.remove("pointer-events-none");
     }
     void contributionBreachYear;
-  }, [monthlyContribution, wtaStatus, wtaCombinedLimit, getHorizonConfig, contributionBreachYear]);
+  }, [
+    contributionBreachYear,
+    copy?.labels?.inputs?.contributionIncreaseDisabledHelper,
+    getHorizonConfig,
+    monthlyContribution,
+    wtaCombinedLimit,
+    wtaStatus,
+  ]);
 
   const content = (() => {
     const agiValue = Number(plannerAgi);
@@ -1340,7 +1353,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
           {renderAccountEndingBlock()}
           {planMessages.length > 0 && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
+            <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
               <p className="text-sm leading-relaxed">
                 
 {(copy?.messages?.planMaxReached ?? "")
@@ -1352,7 +1365,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             </div>
           )}
           {ssiMessages.length > 0 && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/60 dark:text-amber-50">
+            <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
               <div className="mb-2 whitespace-pre-line text-sm leading-relaxed">{
               (copy?.messages?.balanceCapWarning ?? "")
   .split("{{cap}}").join("$100,000")
@@ -1700,7 +1713,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
     const renderAccountEndingBlock = () => {
       if (endingValueInfo.depletionEligible) {
         return (
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-100">
+          <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
             <p className="text-xs leading-relaxed">
               {(copy?.messages?.ableDepletionNotice ??
                 "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.")
