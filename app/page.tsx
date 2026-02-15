@@ -1938,7 +1938,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                       "rounded-full px-4 py-1 text-xs font-semibold transition",
                       amortizationView === "able"
                         ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                        : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400",
+                        : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800",
                     ].join(" ")}
                     onClick={() => setAmortizationView("able")}
                   >
@@ -1951,7 +1951,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                       "flex items-center gap-2 rounded-full px-4 py-1 text-xs font-semibold transition",
                       amortizationView === "taxable"
                         ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                        : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400",
+                        : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800",
                     ].join(" ")}
                     onClick={() => setAmortizationView("taxable")}
                   >
@@ -2308,7 +2308,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                     {landingCopy.heroBullets.map((bullet, index) => (
                       <li
                         key={`hero-bullet-${index}`}
-                        className="w-full max-w-xl list-disc pl-5 text-left"
+                        className="w-full max-w-xl list-inside list-disc text-left"
                       >
                         {bullet}
                       </li>

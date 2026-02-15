@@ -134,7 +134,7 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                       {formatCurrencyDisplay(yearRow.earnings)}
                     </td>
-                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-50">
+                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-900">
                       {formatCurrencyDisplay(yearRow.endingBalance)}
                     </td>
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
@@ -170,7 +170,7 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
                   <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                     {formatCurrencyDisplay(yearRow.earnings)}
                   </td>
-                  <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-50">
+                  <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-900">
                     {formatCurrencyDisplay(yearRow.endingBalance)}
                   </td>
                   <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
@@ -261,7 +261,7 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                       {formatCurrencyDisplay(-yearRow.stateTaxOnEarnings)}
                     </td>
-                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-50">
+                    <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-900">
                       {formatCurrencyDisplay(yearRow.endingBalance)}
                     </td>
                   </tr>
@@ -297,7 +297,7 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
                   <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                     {formatCurrencyDisplay(-yearRow.stateTaxOnEarnings)}
                   </td>
-                  <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-50">
+                  <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-900">
                     {formatCurrencyDisplay(yearRow.endingBalance)}
                   </td>
                 </tr>
