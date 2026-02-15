@@ -2203,7 +2203,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
 
   if (showWelcome) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
         <TopNav
           title={copy.app?.title ?? ""}
           tagline={copy.app?.tagline}
@@ -2217,7 +2217,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           }
         />
 
-        <main className="mx-auto w-full max-w-6xl px-4 pt-6">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6">
           <div className="flex justify-center">{languageToggle}</div>
           <div className="mt-6" />
           <div className="text-center">
@@ -2283,12 +2283,15 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
             <div className="mt-4" />
           </div>
         </main>
+        <footer className="px-4 pb-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
+          © 2026 Spectra Professional Services, LLC. All rights reserved.
+        </footer>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
       <TopNav
         title={copy.app?.title ?? ""}
         tagline={copy.app?.tagline}
@@ -2300,8 +2303,11 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       />
       <div className="mx-auto flex w-full max-w-6xl">
         <Sidebar active={active} onChange={setActive} labels={copy.ui?.sidebar} />
-        <main className="mx-auto w-full max-w-6xl px-4 pt-6 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:pb-6">{content}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:pb-6">{content}</main>
       </div>
+      <footer className="px-4 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-center text-xs text-zinc-500 dark:text-zinc-400 md:pb-4">
+        © 2026 Spectra Professional Services, LLC. All rights reserved.
+      </footer>
     </div>
   );
 }

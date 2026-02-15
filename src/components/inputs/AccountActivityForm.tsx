@@ -430,12 +430,12 @@ export default function AccountActivityForm({
               </div>
             ) : null}
           </div>
-          <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm">
+          <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             <select
               id="activity-contribution-end-month"
               value={contributionEndMonth}
               onChange={(e) => onChange?.({ contributionEndMonth: e.target.value })}
-              className="flex-1 bg-transparent focus:outline-none"
+              className="flex-1 bg-transparent text-zinc-900 focus:outline-none dark:text-zinc-100"
             >
               <option value="">
                 {copy?.labels?.monthPlaceholder ?? "Month"}
@@ -453,7 +453,7 @@ export default function AccountActivityForm({
               id="activity-contribution-end-year"
               value={contributionEndYear}
               onChange={(e) => onChange?.({ contributionEndYear: e.target.value })}
-              className="flex-1 bg-transparent focus:outline-none"
+              className="flex-1 bg-transparent text-zinc-900 focus:outline-none dark:text-zinc-100"
             >
               <option value="">
                 {copy?.labels?.yearPlaceholder ?? "Year"}
@@ -501,12 +501,12 @@ export default function AccountActivityForm({
               </div>
             ) : null}
           </div>
-          <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm">
+          <div className="mt-1 flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             <select
               id="activity-withdrawal-start-month"
               value={withdrawalStartMonth}
               onChange={(e) => onChange?.({ withdrawalStartMonth: e.target.value })}
-              className="flex-1 bg-transparent focus:outline-none"
+              className="flex-1 bg-transparent text-zinc-900 focus:outline-none dark:text-zinc-100"
             >
               <option value="">
                 {copy?.labels?.monthPlaceholder ?? "Month"}
@@ -524,7 +524,7 @@ export default function AccountActivityForm({
               id="activity-withdrawal-start-year"
               value={withdrawalStartYear}
               onChange={(e) => onChange?.({ withdrawalStartYear: e.target.value })}
-              className="flex-1 bg-transparent focus:outline-none"
+              className="flex-1 bg-transparent text-zinc-900 focus:outline-none dark:text-zinc-100"
             >
               <option value="">
                 {copy?.labels?.yearPlaceholder ?? "Year"}
