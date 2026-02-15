@@ -80,6 +80,7 @@
       "monthlyWithdrawalLabel": "Retiro mensual",
       "monthPlaceholder": "Mes",
       "nameLabel": "Nombre del beneficiario",
+      "nameCallout": "El beneficiario es la persona que es titular de la cuenta ABLE y para quien están destinados los fondos. Las contribuciones, los retiros y las reglas de elegibilidad se aplican a esta persona.",
       "plannerConsoleTitle": "CONSOLA DEL PLANIFICADOR",
       "selectState": "Seleccione un estado",
       "ssiEligibilityLabel": "El beneficiario es elegible para SSI",

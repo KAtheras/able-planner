@@ -7,6 +7,7 @@ type DemographicsCopy = {
   title?: string;
   labels?: {
     nameLabel?: string;
+    nameCallout?: string;
     stateOfResidenceLabel?: string;
     stateOfResidenceCallout?: string;
     filingStatusLabel?: string;
@@ -70,6 +71,8 @@ export default function DemographicsForm({
   const [showAnnualReturnCallout, setShowAnnualReturnCallout] = useState(false);
   const [showSsiCallout, setShowSsiCallout] = useState(false);
   const [showFscCallout, setShowFscCallout] = useState(false);
+  const [showNameCallout, setShowNameCallout] = useState(false);
+  const nameCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
   const stateCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
   const filingCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
   const agiCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
@@ -78,21 +81,23 @@ export default function DemographicsForm({
   const fscCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!showStateCallout && !showFilingCallout && !showAgiCallout && !showAnnualReturnCallout && !showSsiCallout && !showFscCallout) {
+    if (!showNameCallout && !showStateCallout && !showFilingCallout && !showAgiCallout && !showAnnualReturnCallout && !showSsiCallout && !showFscCallout) {
       return;
     }
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node | null;
       if (!target) return;
+      const clickedNameAnchor = Boolean(nameCalloutAnchorRef.current?.contains(target));
       const clickedStateAnchor = Boolean(stateCalloutAnchorRef.current?.contains(target));
       const clickedFilingAnchor = Boolean(filingCalloutAnchorRef.current?.contains(target));
       const clickedAgiAnchor = Boolean(agiCalloutAnchorRef.current?.contains(target));
       const clickedAnnualReturnAnchor = Boolean(annualReturnCalloutAnchorRef.current?.contains(target));
       const clickedSsiAnchor = Boolean(ssiCalloutAnchorRef.current?.contains(target));
       const clickedFscAnchor = Boolean(fscCalloutAnchorRef.current?.contains(target));
-      if (clickedStateAnchor || clickedFilingAnchor || clickedAgiAnchor || clickedAnnualReturnAnchor || clickedSsiAnchor || clickedFscAnchor) {
+      if (clickedNameAnchor || clickedStateAnchor || clickedFilingAnchor || clickedAgiAnchor || clickedAnnualReturnAnchor || clickedSsiAnchor || clickedFscAnchor) {
         return;
       }
+      setShowNameCallout(false);
       setShowStateCallout(false);
       setShowFilingCallout(false);
       setShowAgiCallout(false);
@@ -107,7 +112,7 @@ export default function DemographicsForm({
       window.removeEventListener("mousedown", handlePointerDown);
       window.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [showStateCallout, showFilingCallout, showAgiCallout, showAnnualReturnCallout, showSsiCallout, showFscCallout]);
+  }, [showNameCallout, showStateCallout, showFilingCallout, showAgiCallout, showAnnualReturnCallout, showSsiCallout, showFscCallout]);
 
   const defaultButtonLabel =
     fscStatus === "idle"
@@ -124,12 +129,42 @@ export default function DemographicsForm({
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>
-          <label
-            htmlFor="demographics-beneficiary-name"
-            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
-          >
-            {copy?.labels?.nameLabel ?? "Beneficiary Name"}
-          </label>
+          <div ref={nameCalloutAnchorRef} className="relative flex items-center gap-1">
+            <label
+              htmlFor="demographics-beneficiary-name"
+              className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+            >
+              {copy?.labels?.nameLabel ?? "Beneficiary Name"}
+            </label>
+            {copy?.labels?.nameCallout ? (
+              <button
+                type="button"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
+                aria-label="Beneficiary information"
+                aria-expanded={showNameCallout}
+                onClick={() => {
+                  const next = !showNameCallout;
+                  setShowNameCallout(next);
+                  setShowStateCallout(false);
+                  setShowFilingCallout(false);
+                  setShowAgiCallout(false);
+                  setShowAnnualReturnCallout(false);
+                  setShowSsiCallout(false);
+                  setShowFscCallout(false);
+                }}
+              >
+                i
+              </button>
+            ) : null}
+            {showNameCallout && copy?.labels?.nameCallout ? (
+              <div
+                className="absolute left-0 top-full z-20 mt-1 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
+                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+              >
+                {copy.labels.nameCallout}
+              </div>
+            ) : null}
+          </div>
           <input
             id="demographics-beneficiary-name"
             type="text"
@@ -149,12 +184,13 @@ export default function DemographicsForm({
             {copy?.labels?.stateOfResidenceCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
                 aria-label="State of residence information"
                 aria-expanded={showStateCallout}
                 onClick={() => {
                   const next = !showStateCallout;
                   setShowStateCallout(next);
+                  setShowNameCallout(false);
                   setShowFilingCallout(false);
                   setShowAgiCallout(false);
                   setShowAnnualReturnCallout(false);
@@ -201,12 +237,13 @@ export default function DemographicsForm({
             {copy?.labels?.filingStatusCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
                 aria-label="Filing status information"
                 aria-expanded={showFilingCallout}
                 onClick={() => {
                   const next = !showFilingCallout;
                   setShowFilingCallout(next);
+                  setShowNameCallout(false);
                   setShowStateCallout(false);
                   setShowAgiCallout(false);
                   setShowAnnualReturnCallout(false);
@@ -257,12 +294,13 @@ export default function DemographicsForm({
             {copy?.labels?.agiCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
                 aria-label="Taxable income information"
                 aria-expanded={showAgiCallout}
                 onClick={() => {
                   const next = !showAgiCallout;
                   setShowAgiCallout(next);
+                  setShowNameCallout(false);
                   setShowStateCallout(false);
                   setShowFilingCallout(false);
                   setShowAnnualReturnCallout(false);
@@ -315,12 +353,13 @@ export default function DemographicsForm({
             {copy?.labels?.annualReturnCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
                 aria-label="Annual return assumption information"
                 aria-expanded={showAnnualReturnCallout}
                 onClick={() => {
                   const next = !showAnnualReturnCallout;
                   setShowAnnualReturnCallout(next);
+                  setShowNameCallout(false);
                   setShowStateCallout(false);
                   setShowFilingCallout(false);
                   setShowAgiCallout(false);
@@ -375,19 +414,20 @@ export default function DemographicsForm({
                 type="checkbox"
                 checked={isSsiEligible}
                 onChange={(e) => onChange?.({ isSsiEligible: e.target.checked })}
-                className="h-4 w-4 rounded border-zinc-300"
+                className="h-4 w-4 rounded border-zinc-300 accent-[var(--brand-primary)]"
               />
               {copy?.labels?.ssiEligibilityLabel ?? "Beneficiary is eligible for SSI"}
             </label>
             {copy?.labels?.ssiEligibilityCallout ? (
               <button
                 type="button"
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
                 aria-label="SSI eligibility information"
                 aria-expanded={showSsiCallout}
                 onClick={() => {
                   const next = !showSsiCallout;
                   setShowSsiCallout(next);
+                  setShowNameCallout(false);
                   setShowStateCallout(false);
                   setShowFilingCallout(false);
                   setShowAgiCallout(false);
@@ -415,12 +455,13 @@ export default function DemographicsForm({
               {copy?.labels?.fscHeadingCallout ? (
                 <button
                   type="button"
-                  className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[var(--brand-primary)] text-[10px] font-bold text-[var(--brand-primary)] hover:bg-[var(--brand-ring)]"
                   aria-label="Federal Saver's Credit information"
                   aria-expanded={showFscCallout}
                   onClick={() => {
                     const next = !showFscCallout;
                     setShowFscCallout(next);
+                    setShowNameCallout(false);
                     setShowStateCallout(false);
                     setShowFilingCallout(false);
                     setShowAgiCallout(false);

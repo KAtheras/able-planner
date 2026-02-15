@@ -80,6 +80,7 @@
       "monthlyWithdrawalLabel": "Monthly Withdrawal",
       "monthPlaceholder": "Month",
       "nameLabel": "Beneficiary Name",
+      "nameCallout": "The beneficiary is the person who owns the ABLE account and for whom the funds are intended. Contributions, withdrawals, and eligibility rules apply to this individual.",
       "plannerConsoleTitle": "PLANNER CONSOLE",
       "selectState": "Select a state",
       "ssiEligibilityLabel": "Beneficiary is eligible for SSI",
@@ -154,7 +155,8 @@
   "flows": {
     "screen1": {
       "defaultMessages": [
-        "This is where the ABLE planner shares updates, alerts, and guidance based on your inputs and may ask for additional information."
+        "This is where the ABLE planner shares updates, alerts, and guidance based on your inputs and may ask for additional information.",
+        "Please use the input fields on the left to provide the requested information for the ABLE planner."
       ]
     },
     "screen2": {
