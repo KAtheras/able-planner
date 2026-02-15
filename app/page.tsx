@@ -1520,7 +1520,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                     inputMode="decimal"
                     value={wtaEarnedIncome}
                     onChange={(e) => setWtaEarnedIncome(sanitizeAmountInput(e.target.value))}
-                    className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm dark:border-zinc-800 dark:bg-zinc-950"
+                    className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)] focus-visible:ring-inset md:text-sm dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
                   />
                 </div>
               )}
