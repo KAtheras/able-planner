@@ -97,7 +97,7 @@ export default function DemographicsForm({
             id="demographics-residence"
             value={stateOfResidence}
             onChange={(e) => onChange?.({ stateOfResidence: e.target.value })}
-            className="mt-1 h-10 w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 text-sm leading-normal"
+            className="mt-1 w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm leading-normal"
           >
             <option value="">
               {copy?.labels?.selectState ?? "Select a state"}
@@ -120,7 +120,7 @@ export default function DemographicsForm({
             id="demographics-filing-status"
             value={filingStatus}
             onChange={(e) => onChange?.({ filingStatus: e.target.value })}
-            className="mt-1 h-10 w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 text-sm leading-normal"
+            className="mt-1 w-full appearance-none rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm leading-normal"
           >
             <option value="single">
               {copy?.labels?.filing?.single ?? "Single"}

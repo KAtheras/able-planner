@@ -903,6 +903,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     }
   }, [beneficiaryStateOfResidence, planState]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+  }, [showWelcome, active, inputStep]);
+
   const handleWelcomeContinue = () => {
     sessionStorage.setItem(WELCOME_KEY, "true");
     setShowWelcome(false);
