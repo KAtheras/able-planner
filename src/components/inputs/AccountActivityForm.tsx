@@ -117,7 +117,7 @@ export default function AccountActivityForm({
             value={timeHorizonYears}
             onChange={(e) => onChange?.({ timeHorizonYears: e.target.value })}
             onBlur={() => onTimeHorizonBlur?.()}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm"
           />
         </div>
         <div>
@@ -134,7 +134,7 @@ export default function AccountActivityForm({
             autoComplete="off"
             value={startingBalance}
             onChange={(e) => onChange?.({ startingBalance: e.target.value })}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm"
           />
         </div>
 
@@ -152,7 +152,7 @@ export default function AccountActivityForm({
             autoComplete="off"
             value={monthlyContribution}
             onChange={(e) => onChange?.({ monthlyContribution: e.target.value })}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm"
           />
         </div>
 
@@ -170,7 +170,7 @@ export default function AccountActivityForm({
             autoComplete="off"
             value={monthlyWithdrawal}
             onChange={(e) => onChange?.({ monthlyWithdrawal: e.target.value })}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm"
           />
         </div>
 
@@ -282,7 +282,7 @@ export default function AccountActivityForm({
             }
             disabled={contributionIncreaseDisabled}
             aria-describedby={contributionIncreaseHelperId}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm"
           />
           {contributionIncreaseHelperText ? (
             <p
@@ -312,7 +312,7 @@ export default function AccountActivityForm({
                 withdrawalIncreasePct: sanitizePercentageInput(e.target.value),
               })
             }
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm"
           />
         </div>
 

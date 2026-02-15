@@ -170,7 +170,7 @@ export default function DemographicsForm({
             type="text"
             value={beneficiaryName}
             onChange={(e) => onChange?.({ beneficiaryName: e.target.value })}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm"
           />
         </div>
         <div>
@@ -341,7 +341,7 @@ export default function DemographicsForm({
               }
               onChange?.({ agi: String(Math.max(0, parsed)) });
             }}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
         </div>
         <div className="md:col-span-2">
@@ -400,7 +400,7 @@ export default function DemographicsForm({
               }
               onChange?.({ annualReturn: String(Math.max(0, parsed)) });
             }}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
         </div>
         <div className="md:col-span-2">

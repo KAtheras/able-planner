@@ -926,12 +926,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return;
     }
 
-    const mode: "annual" | "residency" | "fsc" | null = annualReturnWarningText
-      ? "annual"
-      : residencyBlocking
-        ? "residency"
-        : showFscQuestionnaire
-          ? "fsc"
+    const mode: "annual" | "residency" | "fsc" | null = residencyBlocking
+      ? "residency"
+      : showFscQuestionnaire
+        ? "fsc"
+        : annualReturnWarningText
+          ? "annual"
           : null;
 
     if (!mode || lastMobileConsoleModeRef.current === mode) {
@@ -1472,7 +1472,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                     inputMode="decimal"
                     value={wtaEarnedIncome}
                     onChange={(e) => setWtaEarnedIncome(sanitizeAmountInput(e.target.value))}
-                    className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+                    className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm dark:border-zinc-800 dark:bg-zinc-950"
                   />
                 </div>
               )}
@@ -2114,14 +2114,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                 <div className="mb-4 mt-2 border-b border-zinc-200 dark:border-zinc-800" />
                 {inputStep === 1 ? (
                   <>
-                    {annualReturnWarningText ? (
-                      <div
-                        className="rounded-2xl border border-[var(--brand-primary)] p-3 text-xs text-zinc-900 dark:text-zinc-100"
-                        style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
-                      >
-                        {annualReturnWarningText}
-                      </div>
-                    ) : showResidencyWarning ? (
+                    {showResidencyWarning ? (
                       renderResidencyWarning()
                     ) : showQuestionnaire ? (
                       <div className="space-y-4">
@@ -2176,6 +2169,13 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                             onClick={evaluateFsc}
                           >{copy?.buttons?.evaluate ?? ""}</button>
                         </div>
+                      </div>
+                    ) : annualReturnWarningText ? (
+                      <div
+                        className="rounded-2xl border border-[var(--brand-primary)] p-3 text-xs text-zinc-900 dark:text-zinc-100"
+                        style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                      >
+                        {annualReturnWarningText}
                       </div>
                     ) : (
                       <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
