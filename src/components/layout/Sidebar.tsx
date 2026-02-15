@@ -4,8 +4,7 @@ import type { ReactNode } from "react";
 
 export type NavKey =
   | "inputs"
-  | "account_growth"
-  | "tax_benefits"
+  | "reports"
   | "schedule"
   | "disclosures";
 
@@ -43,32 +42,13 @@ function IconChat() {
   );
 }
 
-function IconChart() {
+function IconReports() {
   return (
     <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">
       <path
         fill="currentColor"
         d="M5 19h14v2H3V3h2v16Zm4-2H7V9h2v8Zm5 0h-2V5h2v12Zm5 0h-2v-6h2v6Z"
       />
-    </svg>
-  );
-}
-
-function IconDollar() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-7 w-7"
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-      <path d="M12 18V6" />
     </svg>
   );
 }
@@ -86,8 +66,7 @@ function IconGear() {
 
 const ITEMS: NavItem[] = [
   { key: "inputs", label: "Inputs", icon: <IconGrid /> },
-  { key: "account_growth", label: "Account Growth", icon: <IconChart /> },
-  { key: "tax_benefits", label: "Tax Benefits", icon: <IconDollar /> },
+  { key: "reports", label: "Reports", icon: <IconReports /> },
   { key: "schedule", label: "Schedule", icon: <IconChat /> },
   { key: "disclosures", label: "Disclosures", icon: <IconGear /> },
 ];
@@ -96,15 +75,21 @@ type SidebarProps = {
   active: NavKey;
   onChange: (key: NavKey) => void;
   labels?: Partial<Record<NavKey, string>>;
+  desktopTopOffsetPx?: number;
 };
 
-export default function Sidebar({ active, onChange, labels }: SidebarProps) {
+export default function Sidebar({ active, onChange, labels, desktopTopOffsetPx }: SidebarProps) {
   return (
     <>
       {/* Desktop / wide: left sidebar */}
       <nav
         aria-label="Primary"
-        className="hidden h-[calc(100vh-3.5rem)] w-24 flex-col items-center gap-3 border-r border-zinc-200 bg-white px-2 py-4 dark:border-zinc-800 dark:bg-black md:flex"
+        className="hidden h-[calc(100vh-3.5rem)] w-24 flex-col items-center gap-3 border-r border-zinc-200 bg-white px-2 pt-0 pb-4 dark:border-zinc-800 dark:bg-black md:flex"
+        style={
+          typeof desktopTopOffsetPx === "number"
+            ? { paddingTop: `${desktopTopOffsetPx}px` }
+            : undefined
+        }
       >
         {ITEMS.map((item) => {
           const isActive = item.key === active;
@@ -141,7 +126,7 @@ export default function Sidebar({ active, onChange, labels }: SidebarProps) {
         aria-label="Primary"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:hidden"
       >
-        <div className="mx-auto grid max-w-4xl grid-cols-5 gap-1 px-2 py-2">
+        <div className="mx-auto grid max-w-4xl grid-cols-4 gap-1 px-2 py-2">
           {ITEMS.map((item) => {
             const isActive = item.key === active;
             return (

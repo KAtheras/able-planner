@@ -235,7 +235,8 @@ const getStateTaxBenefitConfig = (
 
 export default function Home() {
   const [language, setLanguage] = useState<SupportedLanguage>("en");
-const [active, setActive] = useState<NavKey>("inputs");
+  const [active, setActive] = useState<NavKey>("inputs");
+  const [reportView, setReportView] = useState<"account_growth" | "tax_benefits">("account_growth");
   const [plannerStateCode, setPlannerStateCode] = useState<PlannerState>("default");
   const [inputStep, setInputStep] = useState<1 | 2>(1);
   const [plannerAgi, setPlannerAgi] = useState("");
@@ -296,7 +297,9 @@ const [active, setActive] = useState<NavKey>("inputs");
 
   const [showWelcome, setShowWelcome] = useState(true);
   const [amortizationView, setAmortizationView] = useState<"able" | "taxable">("able");
+  const [sidebarDesktopTopOffset, setSidebarDesktopTopOffset] = useState(0);
   const fscPassedRef = useRef(false);
+  const shellRef = useRef<HTMLDivElement | null>(null);
   const inputsColumnRef = useRef<HTMLDivElement | null>(null);
   const consoleCardRef = useRef<HTMLDivElement | null>(null);
   const lastMobileConsoleModeRef = useRef<"annual" | "residency" | "fsc" | null>(null);
@@ -964,6 +967,45 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     showWelcome,
   ]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const measureSidebarOffset = () => {
+      if (window.innerWidth < 768) return;
+      const shellTop = shellRef.current?.getBoundingClientRect().top;
+      const cardTop = consoleCardRef.current?.getBoundingClientRect().top;
+      if (!Number.isFinite(shellTop) || !Number.isFinite(cardTop)) return;
+      const next = Math.max(0, Math.round((cardTop as number) - (shellTop as number)));
+      setSidebarDesktopTopOffset((prev) => (prev === next ? prev : next));
+    };
+
+    const rafId = window.requestAnimationFrame(measureSidebarOffset);
+    window.addEventListener("resize", measureSidebarOffset);
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => measureSidebarOffset());
+      if (shellRef.current) observer.observe(shellRef.current);
+      if (consoleCardRef.current) observer.observe(consoleCardRef.current);
+    }
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", measureSidebarOffset);
+      observer?.disconnect();
+    };
+  }, [
+    active,
+    inputStep,
+    reportView,
+    showWelcome,
+    language,
+    messagesMode,
+    annualReturnWarningText,
+    residencyBlocking,
+    showFscQuestionnaire,
+  ]);
+
   const handleWelcomeContinue = () => {
     sessionStorage.setItem(WELCOME_KEY, "true");
     setShowWelcome(false);
@@ -1180,7 +1222,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       }
       if (hasContributionIssue) return;
       enforceTimeHorizonLimits();
-      setActive("account_growth");
+      setActive("reports");
+      setReportView("account_growth");
     };
 
     const questions: Array<{ key: keyof FscAnswers; label: string }> = [
@@ -1803,16 +1846,61 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       taxableRows,
     });
 
-    if (active === "account_growth") {
+    if (active === "reports") {
+      const reportTitle = copy?.ui?.sidebar?.reports ?? "Reports";
+      const accountGrowthTabLabel = copy?.labels?.reports?.accountGrowthTab ?? "Account Growth";
+      const taxBenefitsTabLabel = copy?.labels?.reports?.taxBenefitsTab ?? "Tax Benefits";
       return (
         <div className="space-y-6">
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
-            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              {copy?.ui?.sidebar?.account_growth ?? "Account Growth"}
-            </h1>
-            <p className="mt-4 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-              {accountGrowthNarrative}
-            </p>
+            <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+              <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                {reportTitle}
+              </h1>
+              <div
+                role="tablist"
+                aria-label={reportTitle}
+                className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={reportView === "account_growth"}
+                  className={[
+                    "rounded-full px-4 py-1 text-xs font-semibold transition",
+                    reportView === "account_growth"
+                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                      : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+                  ].join(" ")}
+                  onClick={() => setReportView("account_growth")}
+                >
+                  {accountGrowthTabLabel}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={reportView === "tax_benefits"}
+                  className={[
+                    "rounded-full px-4 py-1 text-xs font-semibold transition",
+                    reportView === "tax_benefits"
+                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                      : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+                  ].join(" ")}
+                  onClick={() => setReportView("tax_benefits")}
+                >
+                  {taxBenefitsTabLabel}
+                </button>
+              </div>
+            </div>
+            {reportView === "account_growth" ? (
+              <p className="mt-4 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+                {accountGrowthNarrative}
+              </p>
+            ) : (
+              <p className="mt-4 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                {copy?.labels?.ui?.placeholderComingSoon ?? ""}
+              </p>
+            )}
           </div>
         </div>
       );
@@ -1923,22 +2011,6 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
               </ul>
             )}
       </div>
-        </div>
-      );
-    }
-
-    if (active === "tax_benefits") {
-      const screenLabel = copy?.ui?.sidebar?.tax_benefits ?? "";
-      return (
-        <div className="space-y-6">
-          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
-            <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
-              {screenLabel}{copy?.labels?.ui?.shellSuffix ?? ""}
-            </h1>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {copy?.labels?.ui?.placeholderComingSoon ?? ""}
-            </p>
-          </div>
         </div>
       );
     }
@@ -2301,8 +2373,13 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           </div>
         }
       />
-      <div className="mx-auto flex w-full max-w-6xl">
-        <Sidebar active={active} onChange={setActive} labels={copy.ui?.sidebar} />
+      <div ref={shellRef} className="mx-auto flex w-full max-w-6xl">
+        <Sidebar
+          active={active}
+          onChange={setActive}
+          labels={copy.ui?.sidebar}
+          desktopTopOffsetPx={sidebarDesktopTopOffset}
+        />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:pb-6">{content}</main>
       </div>
       <footer className="px-4 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-center text-xs text-zinc-500 dark:text-zinc-400 md:pb-4">

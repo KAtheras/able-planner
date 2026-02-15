@@ -9,11 +9,10 @@
   },
   "ui": {
     "sidebar": {
-      "account_growth": "Account Growth",
       "disclosures": "Assumptions",
       "inputs": "Inputs",
-      "schedule": "Amortization",
-      "tax_benefits": "Tax Benefits"
+      "reports": "Reports",
+      "schedule": "Amortization"
     },
     "assumptions": {
       "title": "Assumptions",
@@ -50,6 +49,10 @@
     "yes": "Yes"
   },
   "labels": {
+    "reports": {
+      "accountGrowthTab": "Account Growth",
+      "taxBenefitsTab": "Tax Benefits"
+    },
     "inputs": {
       "accountActivityTitle": "Account Activity",
       "agiLabel": "Taxable Income",

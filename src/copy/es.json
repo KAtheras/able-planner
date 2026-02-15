@@ -9,11 +9,10 @@
   },
   "ui": {
     "sidebar": {
-      "account_growth": "Crecimiento de la cuenta",
       "disclosures": "Supuestos",
       "inputs": "Entradas",
-      "schedule": "Amortización",
-      "tax_benefits": "Beneficios fiscales"
+      "reports": "Informes",
+      "schedule": "Amortización"
     },
     "assumptions": {
       "title": "Supuestos",
@@ -50,6 +49,10 @@
     "yes": "Sí"
   },
   "labels": {
+    "reports": {
+      "accountGrowthTab": "Crecimiento de la cuenta",
+      "taxBenefitsTab": "Beneficios fiscales"
+    },
     "inputs": {
       "accountActivityTitle": "Actividad de la cuenta",
       "agiLabel": "Ingreso imponible",
