@@ -28,11 +28,17 @@ function IconGrid() {
 
 function IconChat() {
   return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M3 5h18v14H3zM5 7v4h6V7H5zm0 6v4h6v-4H5zm8-6v4h6V7h-6zm0 6v4h6v-4h-6z"
-      />
+    <svg
+      viewBox="0 0 24 24"
+      className="h-7 w-7"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18" />
     </svg>
   );
 }
@@ -50,11 +56,19 @@ function IconChart() {
 
 function IconDollar() {
   return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M12 2v2.1c-2.7.3-4.5 2-4.5 4.1 0 2.4 1.9 3.5 4.8 4.2 2.4.6 3.2 1.2 3.2 2.4 0 1.3-1.3 2.2-3.5 2.2-2.1 0-3.3-.8-3.8-2.3l-2 .8c.7 2 2.5 3.3 5.8 3.6V22h2v-2.1c2.9-.4 4.6-2.2 4.6-4.4 0-2.7-2.2-3.7-5.1-4.4-2.2-.5-2.9-1.1-2.9-2.2 0-1 .9-2 2.8-2 1.9 0 2.9.8 3.4 2l1.9-.8c-.6-1.6-2-2.7-4.7-3V2h-2z"
-      />
+    <svg
+      viewBox="0 0 24 24"
+      className="h-7 w-7"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+      <path d="M12 18V6" />
     </svg>
   );
 }

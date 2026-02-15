@@ -18,7 +18,7 @@
     "assumptions": {
       "title": "Assumptions",
       "items": [
-        "AGI is treated as taxable income for estimating federal and state tax benefits.",
+        "Taxable income is used for estimating federal and state tax benefits.",
         "Federal Saver’s Credit and state tax benefits are capped by estimated tax liability when applicable.",
         "Tax rules vary and may change; these results are estimates for planning purposes only."
       ]
@@ -38,11 +38,11 @@
     "changeResidencyProceed": "Change my residency and proceed to the calculator",
     "eligibleRetest": "Eligible — Retest",
     "eligibleToEvaluate": "Eligible to evaluate",
-    "enterAgiToTestEligibility": "Enter AGI to test eligibility",
+    "enterAgiToTestEligibility": "Enter Taxable Income to test eligibility",
     "evaluate": "Evaluate",
     "next": "Next",
     "no": "No",
-    "notEligibleBasedOnAgi": "Not eligible based on AGI",
+    "notEligibleBasedOnAgi": "Not eligible based on Taxable Income",
     "notEligibleRetest": "Not eligible — Try Again",
     "refresh": "Refresh",
     "understandProceed": "I understand and would like to proceed",
@@ -52,7 +52,7 @@
   "labels": {
     "inputs": {
       "accountActivityTitle": "Account Activity",
-      "agiLabel": "Adjusted Gross Income (AGI)",
+      "agiLabel": "Taxable Income",
       "annualReturnLabel": "Annual Investment Return Assumption (%)",
       "checkEligibility": "Check eligibility",
       "contributionEndLabel": "Contribution End",
@@ -149,7 +149,7 @@
       "defaultMessages": [
         "Welcome to our interactive ABLE planning tool. Start by providing basic demographic information on the left input screen. You will be able to navigate to any of the input screens to edit all this information.",
         "Your state of residence is used to determine plan eligibility as well as to calculate certain state tax benefits.",
-        "Similarly, your tax filing status and Adjusted Gross Income (AGI) will help us determine and project federal and, where applicable, state tax benefits of investing in an ABLE account. Remember that your AGI is not the same as your salary. It may be more than your earned income due to other sources of income. Conversely, for most taxpayers, it often is less than your earned income due to deductions or exemptions. You can find your AGI in your most recent tax return if you filed one. If you are not sure what your current AGI is, simply put your salary and wages.",
+        "Similarly, your tax filing status and Taxable Income will help us determine and project federal and, where applicable, state tax benefits of investing in an ABLE account. Remember that your taxable income is not the same as your salary. It may be more than your earned income due to other sources of income. Conversely, for most taxpayers, it often is less than your earned income due to deductions or exemptions. You can find your taxable income in your most recent tax return if you filed one. If you are not sure what your current taxable income is, simply put your salary and wages.",
         "Finally, we proposed a default investment return assumption. Feel free to change the investment return assumption to try out different scenarios."
       ]
     },

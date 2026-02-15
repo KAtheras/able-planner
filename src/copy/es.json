@@ -18,7 +18,7 @@
     "assumptions": {
       "title": "Supuestos",
       "items": [
-        "Se usa el AGI como ingreso imponible para estimar beneficios fiscales federales y estatales.",
+        "Se usa el ingreso imponible para estimar beneficios fiscales federales y estatales.",
         "El Crédito del Ahorrador federal y los beneficios fiscales estatales se limitan por la obligación tributaria estimada cuando corresponda.",
         "Las reglas fiscales varían y pueden cambiar; estos resultados son estimaciones solo para fines de planificación."
       ]
@@ -38,11 +38,11 @@
     "changeResidencyProceed": "Cambiar mi residencia y continuar al calculador",
     "eligibleRetest": "Elegible — Reintentar",
     "eligibleToEvaluate": "Elegible para evaluar",
-    "enterAgiToTestEligibility": "Ingrese el AGI para probar la elegibilidad",
+    "enterAgiToTestEligibility": "Ingrese el ingreso imponible para probar la elegibilidad",
     "evaluate": "Evaluar",
     "next": "Siguiente",
     "no": "No",
-    "notEligibleBasedOnAgi": "No elegible según AGI",
+    "notEligibleBasedOnAgi": "No elegible según el ingreso imponible",
     "notEligibleRetest": "No elegible — Reintentar",
     "refresh": "Actualizar",
     "understandProceed": "Entiendo y deseo continuar",
@@ -52,7 +52,7 @@
   "labels": {
     "inputs": {
       "accountActivityTitle": "Actividad de la cuenta",
-      "agiLabel": "Ingreso bruto ajustado (AGI)",
+      "agiLabel": "Ingreso imponible",
       "annualReturnLabel": "Suposición de rendimiento anual de la inversión (%)",
       "checkEligibility": "Verificar elegibilidad",
       "contributionEndLabel": "Fin de contribución",
@@ -149,7 +149,7 @@
       "defaultMessages": [
         "Bienvenido a nuestra herramienta interactiva de planificación ABLE. Comience proporcionando información demográfica básica en la pantalla de entradas de la izquierda. Podrá navegar a cualquiera de las pantallas de entrada para editar toda esta información.",
         "Su estado de residencia se utiliza para determinar la elegibilidad del plan y también para calcular ciertos beneficios fiscales estatales.",
-        "De manera similar, su estado civil para impuestos y su Ingreso Bruto Ajustado (AGI) nos ayudarán a determinar y proyectar beneficios fiscales federales y, cuando corresponda, estatales de invertir en una cuenta ABLE. Recuerde que su AGI no es lo mismo que su salario. Puede ser mayor que su ingreso del trabajo debido a otras fuentes de ingresos. Por el contrario, para la mayoría de los contribuyentes, a menudo es menor que su ingreso del trabajo debido a deducciones o exenciones. Puede encontrar su AGI en su declaración de impuestos más reciente si presentó una. Si no está seguro de cuál es su AGI actual, simplemente ingrese su salario y sueldos.",
+        "De manera similar, su estado civil para impuestos y su ingreso imponible nos ayudarán a determinar y proyectar beneficios fiscales federales y, cuando corresponda, estatales de invertir en una cuenta ABLE. Recuerde que su ingreso imponible no es lo mismo que su salario. Puede ser mayor que su ingreso del trabajo debido a otras fuentes de ingresos. Por el contrario, para la mayoría de los contribuyentes, a menudo es menor que su ingreso del trabajo debido a deducciones o exenciones. Puede encontrar su ingreso imponible en su declaración de impuestos más reciente si presentó una. Si no está seguro de cuál es su ingreso imponible actual, simplemente ingrese su salario y sueldos.",
         "Finalmente, propusimos una suposición predeterminada de rendimiento de inversión. Siéntase libre de cambiar la suposición de rendimiento de inversión para probar diferentes escenarios."
       ]
     },
