@@ -305,6 +305,9 @@ const [active, setActive] = useState<NavKey>("inputs");
   const [showWelcome, setShowWelcome] = useState(true);
   const [amortizationView, setAmortizationView] = useState<"able" | "taxable">("able");
   const fscPassedRef = useRef(false);
+  const inputsColumnRef = useRef<HTMLDivElement | null>(null);
+  const consoleCardRef = useRef<HTMLDivElement | null>(null);
+  const lastMobileConsoleModeRef = useRef<"annual" | "residency" | "fsc" | null>(null);
   const currentClientConfig = getClientConfig(plannerStateCode);
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
@@ -376,6 +379,12 @@ const [active, setActive] = useState<NavKey>("inputs");
   const planLabel = `${planName} Able`;
   const planResidencyRequired = Boolean(planInfoEntry?.residencyRequired);
   const planMaxBalance = planInfoMap[planState]?.maxAccountBalance ?? planInfoMap.default?.maxAccountBalance ?? null;
+  const residencyMismatch =
+    Boolean(beneficiaryStateOfResidence) &&
+    Boolean(planState) &&
+    beneficiaryStateOfResidence.toUpperCase() !== planState;
+  const residencyBlocking = residencyMismatch && (planResidencyRequired || !nonResidentProceedAck);
+  const showFscQuestionnaire = messagesMode === "fsc" && agiGateEligible === true;
   const monthlyContributionNum =
     Number((monthlyContribution ?? "").replace(".00","")) || 0;
   const annualContributionLimit =
@@ -909,6 +918,48 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     }
   }, [showWelcome, active, inputStep]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile || showWelcome || active !== "inputs" || inputStep !== 1) {
+      lastMobileConsoleModeRef.current = null;
+      return;
+    }
+
+    const mode: "annual" | "residency" | "fsc" | null = annualReturnWarningText
+      ? "annual"
+      : residencyBlocking
+        ? "residency"
+        : showFscQuestionnaire
+          ? "fsc"
+          : null;
+
+    if (!mode || lastMobileConsoleModeRef.current === mode) {
+      if (!mode) {
+        lastMobileConsoleModeRef.current = null;
+      }
+      return;
+    }
+
+    lastMobileConsoleModeRef.current = mode;
+    consoleCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    if (mode === "annual") {
+      window.setTimeout(() => {
+        const annualReturnInput = document.getElementById("demographics-annual-return") as HTMLInputElement | null;
+        annualReturnInput?.focus({ preventScroll: true });
+        annualReturnInput?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 500);
+    }
+  }, [
+    active,
+    annualReturnWarningText,
+    inputStep,
+    residencyBlocking,
+    showFscQuestionnaire,
+    showWelcome,
+  ]);
+
   const handleWelcomeContinue = () => {
     sessionStorage.setItem(WELCOME_KEY, "true");
     setShowWelcome(false);
@@ -1145,6 +1196,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       setFscStatus(eligible ? "eligible" : "ineligible");
       fscPassedRef.current = eligible;
       setMessagesMode("intro");
+      if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+        window.setTimeout(() => {
+          inputsColumnRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 0);
+      }
     };
 
     const updateAnswer = (key: keyof FscAnswers, value: boolean) => {
@@ -1232,10 +1288,20 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const changeResidencyToPlan = () => {
       setBeneficiaryStateOfResidence(planState);
       setNonResidentProceedAck(false);
+      if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+        window.setTimeout(() => {
+          inputsColumnRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 0);
+      }
     };
 
     const acknowledgeNonResident = () => {
       setNonResidentProceedAck(true);
+      if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+        window.setTimeout(() => {
+          inputsColumnRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 0);
+      }
     };
 
     const showResidencyWarning =
@@ -1902,7 +1968,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           </div>
         </div>
         <div className="grid grid-cols-1 gap-6 items-stretch md:grid-cols-2">
-          <div className="flex-1">
+          <div ref={inputsColumnRef} className="flex-1">
             {inputStep === 1 ? (
               <DemographicsForm
                 beneficiaryName={beneficiaryName}
@@ -2041,7 +2107,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           </div>
           <div className="flex-1">
             <div className="h-full">
-              <div className="h-full rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
+              <div ref={consoleCardRef} className="h-full rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
                 <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
                   {copy?.labels?.inputs?.plannerConsoleTitle ?? ""}
                 </h2>
