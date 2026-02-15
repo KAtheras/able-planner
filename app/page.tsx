@@ -13,6 +13,7 @@ import federalSaversContributionLimits from "@/config/rules/federalSaversContrib
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
 import stateTaxRates from "@/config/rules/stateTaxRates.json";
+import { buildAccountGrowthNarrative } from "@/lib/report/buildAccountGrowthNarrative";
 
 // TAX LIABILITY HELPERS (PROGRESSIVE BRACKETS)
 type TaxBracket = { min: number; max?: number; rate: number };
@@ -1724,6 +1725,75 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       );
     };
 
+    const fscCreditPercent = getFederalSaverCreditPercent(
+      plannerFilingStatus,
+      agiValid ? agiValue : 0,
+    );
+    const fscContributionLimit =
+      (federalSaversContributionLimits as Record<string, number>)[plannerFilingStatus] ?? 0;
+    const showFederalSaverCredit =
+      fscStatus === "eligible" &&
+      agiGateEligible === true &&
+      Number.isFinite(fscCreditPercent) &&
+      fscCreditPercent > 0 &&
+      fscContributionLimit > 0;
+    const benefitStateCode = (beneficiaryStateOfResidence || planState || "").toUpperCase();
+    const stateBenefitConfig = getStateTaxBenefitConfig(benefitStateCode, plannerFilingStatus);
+    const scheduleRowsWithBenefits = scheduleRows.map((yearRow) => {
+      const contributionsForYear = Math.max(0, yearRow.contribution);
+      const federalTaxLiability = showFederalSaverCredit
+        ? getFederalIncomeTaxLiability(plannerFilingStatus, agiValid ? agiValue : 0)
+        : 0;
+      const federalCreditRaw = showFederalSaverCredit
+        ? Math.min(contributionsForYear, fscContributionLimit) * fscCreditPercent
+        : 0;
+      const federalCredit = showFederalSaverCredit
+        ? Math.min(federalCreditRaw, federalTaxLiability)
+        : 0;
+      const stateBenefitAmount = computeStateBenefitCapped(
+        stateBenefitConfig,
+        contributionsForYear,
+        agiValid ? agiValue : 0,
+        plannerFilingStatus,
+        benefitStateCode,
+      );
+      const months = yearRow.months.map((monthRow) => {
+        const monthNumber = (monthRow.monthIndex % 12) + 1;
+        const isDecember = monthNumber === 12;
+        return {
+          ...monthRow,
+          saversCredit: isDecember ? federalCredit : 0,
+          stateBenefit: isDecember ? stateBenefitAmount : 0,
+        };
+      });
+      return {
+        ...yearRow,
+        saversCredit: federalCredit,
+        stateBenefit: stateBenefitAmount,
+        months,
+      };
+    });
+    const accountGrowthNarrative = buildAccountGrowthNarrative({
+      language,
+      ableRows: scheduleRowsWithBenefits,
+      taxableRows,
+    });
+
+    if (active === "account_growth") {
+      return (
+        <div className="space-y-6">
+          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
+            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              {copy?.ui?.sidebar?.account_growth ?? "Account Growth"}
+            </h1>
+            <p className="mt-4 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+              {accountGrowthNarrative}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     if (active === "schedule") {
       if (!hasTimeHorizon) {
         return (
@@ -1739,55 +1809,6 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           </div>
         );
       }
-
-      const fscCreditPercent = getFederalSaverCreditPercent(
-        plannerFilingStatus,
-        agiValid ? agiValue : 0,
-      );
-      const fscContributionLimit =
-        (federalSaversContributionLimits as Record<string, number>)[plannerFilingStatus] ?? 0;
-      const showFederalSaverCredit =
-        fscStatus === "eligible" &&
-        agiGateEligible === true &&
-        Number.isFinite(fscCreditPercent) &&
-        fscCreditPercent > 0 &&
-        fscContributionLimit > 0;
-      const benefitStateCode = (beneficiaryStateOfResidence || planState || "").toUpperCase();
-      const stateBenefitConfig = getStateTaxBenefitConfig(benefitStateCode, plannerFilingStatus);
-      const scheduleRowsWithBenefits = scheduleRows.map((yearRow) => {
-        const contributionsForYear = Math.max(0, yearRow.contribution);
-        const federalTaxLiability = showFederalSaverCredit
-          ? getFederalIncomeTaxLiability(plannerFilingStatus, agiValid ? agiValue : 0)
-          : 0;
-        const federalCreditRaw = showFederalSaverCredit
-          ? Math.min(contributionsForYear, fscContributionLimit) * fscCreditPercent
-          : 0;
-        const federalCredit = showFederalSaverCredit
-          ? Math.min(federalCreditRaw, federalTaxLiability)
-          : 0;
-        const stateBenefitAmount = computeStateBenefitCapped(
-          stateBenefitConfig,
-          contributionsForYear,
-          agiValid ? agiValue : 0,
-          plannerFilingStatus,
-          benefitStateCode,
-        );
-        const months = yearRow.months.map((monthRow) => {
-          const monthNumber = (monthRow.monthIndex % 12) + 1;
-          const isDecember = monthNumber === 12;
-          return {
-            ...monthRow,
-            saversCredit: isDecember ? federalCredit : 0,
-            stateBenefit: isDecember ? stateBenefitAmount : 0,
-          };
-        });
-        return {
-          ...yearRow,
-          saversCredit: federalCredit,
-          stateBenefit: stateBenefitAmount,
-          months,
-        };
-      });
 
       return (
         <div className="space-y-6">
