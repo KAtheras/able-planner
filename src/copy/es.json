@@ -53,7 +53,9 @@
     "inputs": {
       "accountActivityTitle": "Actividad de la cuenta",
       "agiLabel": "Ingreso imponible",
+      "agiCallout": "El ingreso imponible ayuda a determinar los beneficios fiscales federales y, cuando corresponda, estatales proyectados.",
       "annualReturnLabel": "Suposición de rendimiento anual de la inversión (%)",
+      "annualReturnCallout": "Este es el rendimiento anual de inversión supuesto que se usa en las proyecciones. Puede cambiarlo para explorar diferentes escenarios.",
       "checkEligibility": "Verificar elegibilidad",
       "contributionEndLabel": "Fin de contribución",
       "contributionIncreaseLabel": "Aumento anual de contribución (%)",
@@ -66,21 +68,26 @@
         "single": "Soltero"
       },
       "filingStatusLabel": "Estado civil para impuestos",
+      "filingStatusCallout": "Su estado civil para impuestos ayuda a determinar los beneficios fiscales federales y, cuando corresponda, estatales proyectados.",
       "fscAge18": "¿Tiene 18 años o más?",
       "fscEligibilityTitle": "Elegibilidad para el Crédito del Ahorrista Federal",
       "fscEligibleLabel": "Elegible para evaluar",
       "fscHeading": "Elegibilidad para el Crédito Federal del Ahorrista",
+      "fscHeadingCallout": "El Crédito Federal del Ahorrista es un crédito fiscal no reembolsable que puede reducir su impuesto federal sobre la renta si realiza contribuciones elegibles a cuentas de jubilación o ABLE y cumple con los límites de ingresos. El porcentaje del crédito depende de su ingreso bruto ajustado (AGI) y estado civil para impuestos, y no puede exceder su obligación tributaria federal total.",
       "fscIntro": "Responda estas preguntas para estimar su elegibilidad.",
       "fscTaxLiability": "¿Tiene obligación de pagar impuestos federales sobre la renta?",
       "monthlyContributionLabel": "Contribución mensual",
       "monthlyWithdrawalLabel": "Retiro mensual",
       "monthPlaceholder": "Mes",
       "nameLabel": "Nombre del beneficiario",
+      "plannerConsoleTitle": "CONSOLA DEL PLANIFICADOR",
       "selectState": "Seleccione un estado",
       "ssiEligibilityLabel": "El beneficiario es elegible para SSI",
+      "ssiEligibilityCallout": "El Ingreso Suplementario de Seguridad (SSI) es un programa federal basado en necesidades que proporciona asistencia mensual en efectivo a personas con discapacidades y con ingresos y recursos limitados. Los saldos de la cuenta ABLE de hasta $100,000 están excluidos del límite de recursos de SSI, pero los montos por encima de ese umbral pueden afectar la elegibilidad. Marcar esta casilla instruirá al planificador a detener las contribuciones e implementar retiros cuando sea necesario para mantener el saldo proyectado de su cuenta por debajo de $100,000.",
       "ssiEligibleLabel": "El beneficiario es elegible para SSI",
       "startingBalanceLabel": "Saldo inicial",
       "stateOfResidenceLabel": "Estado de residencia",
+      "stateOfResidenceCallout": "Su estado de residencia se utiliza para determinar la elegibilidad del plan y ciertos beneficios fiscales estatales.",
       "timeHorizonYearsFallback": "Horizonte de tiempo (años)",
       "withdrawalIncreaseLabel": "Aumento anual de retiro (%)",
       "withdrawalStartLabel": "Inicio del retiro",
@@ -147,10 +154,7 @@
   "flows": {
     "screen1": {
       "defaultMessages": [
-        "Bienvenido a nuestra herramienta interactiva de planificación ABLE. Comience proporcionando información demográfica básica en la pantalla de entradas de la izquierda. Podrá navegar a cualquiera de las pantallas de entrada para editar toda esta información.",
-        "Su estado de residencia se utiliza para determinar la elegibilidad del plan y también para calcular ciertos beneficios fiscales estatales.",
-        "De manera similar, su estado civil para impuestos y su ingreso imponible nos ayudarán a determinar y proyectar beneficios fiscales federales y, cuando corresponda, estatales de invertir en una cuenta ABLE. Recuerde que su ingreso imponible no es lo mismo que su salario. Puede ser mayor que su ingreso del trabajo debido a otras fuentes de ingresos. Por el contrario, para la mayoría de los contribuyentes, a menudo es menor que su ingreso del trabajo debido a deducciones o exenciones. Puede encontrar su ingreso imponible en su declaración de impuestos más reciente si presentó una. Si no está seguro de cuál es su ingreso imponible actual, simplemente ingrese su salario y sueldos.",
-        "Finalmente, propusimos una suposición predeterminada de rendimiento de inversión. Siéntase libre de cambiar la suposición de rendimiento de inversión para probar diferentes escenarios."
+        "Aqui es donde el planificador ABLE comparte actualizaciones, alertas y orientacion basadas en sus entradas, y puede solicitar informacion adicional."
       ]
     },
     "screen2": {

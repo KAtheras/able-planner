@@ -2042,14 +2042,20 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           <div className="flex-1">
             <div className="h-full">
               <div className="h-full rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
+                <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
+                  {copy?.labels?.inputs?.plannerConsoleTitle ?? ""}
+                </h2>
+                <div className="mb-4 mt-2 border-b border-zinc-200 dark:border-zinc-800" />
                 {inputStep === 1 ? (
                   <>
                     {annualReturnWarningText ? (
-                      <div className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
+                      <div
+                        className="rounded-2xl border border-[var(--brand-primary)] p-3 text-xs text-zinc-900 dark:text-zinc-100"
+                        style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                      >
                         {annualReturnWarningText}
                       </div>
-                    ) : null}
-                    {showResidencyWarning ? (
+                    ) : showResidencyWarning ? (
                       renderResidencyWarning()
                     ) : showQuestionnaire ? (
                       <div className="space-y-4">

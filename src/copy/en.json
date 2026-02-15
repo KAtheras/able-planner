@@ -53,7 +53,9 @@
     "inputs": {
       "accountActivityTitle": "Account Activity",
       "agiLabel": "Taxable Income",
+      "agiCallout": "Taxable income helps determine projected federal and, where applicable, state tax benefits.\n\nRemember that your taxable income is not the same as your salary. It may be more than your earned income due to other sources of income. Conversely, for most taxpayers, it often is less than your earned income due to deductions or exemptions. You can find your taxable income in your most recent tax return if you filed one. If you are not sure what your current taxable income is, simply put your salary and wages.",
       "annualReturnLabel": "Annual Investment Return Assumption (%)",
+      "annualReturnCallout": "This is the assumed annual investment return used in projections. You can change it to explore different scenarios.",
       "checkEligibility": "Check eligibility",
       "contributionEndLabel": "Contribution End",
       "contributionIncreaseLabel": "Annual contribution increase (%)",
@@ -66,21 +68,26 @@
         "single": "Single"
       },
       "filingStatusLabel": "Filing status",
+      "filingStatusCallout": "Your filing status helps determine projected federal and, where applicable, state tax benefits.",
       "fscAge18": "Are you age 18 or older?",
       "fscEligibilityTitle": "Federal Saver’s Credit Eligibility",
       "fscEligibleLabel": "Eligible to evaluate",
       "fscHeading": "Federal Saver’s Credit Eligibility",
+      "fscHeadingCallout": "The Federal Saver’s Credit is a non-refundable tax credit that may reduce your federal income tax if you make eligible contributions to retirement or ABLE accounts and meet income limits. The credit percentage depends on your Adjusted Gross Income (AGI) and filing status, and it cannot exceed your total federal tax liability.",
       "fscIntro": "Answer these questions to estimate eligibility.",
       "fscTaxLiability": "Do you have federal income tax liability?",
       "monthlyContributionLabel": "Monthly Contribution",
       "monthlyWithdrawalLabel": "Monthly Withdrawal",
       "monthPlaceholder": "Month",
       "nameLabel": "Beneficiary Name",
+      "plannerConsoleTitle": "PLANNER CONSOLE",
       "selectState": "Select a state",
       "ssiEligibilityLabel": "Beneficiary is eligible for SSI",
+      "ssiEligibilityCallout": "Supplemental Security Income (SSI) is a needs-based federal program that provides monthly cash assistance to individuals with disabilities and limited income and resources. ABLE account balances up to $100,000 are excluded from the SSI resource limit, but amounts above that threshold may affect eligibility. Checking this box will instructs the planner to stop contributions and implement withdrawals where necessary, to keep your projected account balance under $100,000",
       "ssiEligibleLabel": "Beneficiary is eligible for SSI",
       "startingBalanceLabel": "Starting Balance",
       "stateOfResidenceLabel": "State of residence",
+      "stateOfResidenceCallout": "Your state of residence is used to determine plan eligibility and certain state tax benefits.",
       "timeHorizonYearsFallback": "Time Horizon (years)",
       "withdrawalIncreaseLabel": "Annual withdrawal increase (%)",
       "withdrawalStartLabel": "Withdrawal Start",
@@ -147,10 +154,7 @@
   "flows": {
     "screen1": {
       "defaultMessages": [
-        "Welcome to our interactive ABLE planning tool. Start by providing basic demographic information on the left input screen. You will be able to navigate to any of the input screens to edit all this information.",
-        "Your state of residence is used to determine plan eligibility as well as to calculate certain state tax benefits.",
-        "Similarly, your tax filing status and Taxable Income will help us determine and project federal and, where applicable, state tax benefits of investing in an ABLE account. Remember that your taxable income is not the same as your salary. It may be more than your earned income due to other sources of income. Conversely, for most taxpayers, it often is less than your earned income due to deductions or exemptions. You can find your taxable income in your most recent tax return if you filed one. If you are not sure what your current taxable income is, simply put your salary and wages.",
-        "Finally, we proposed a default investment return assumption. Feel free to change the investment return assumption to try out different scenarios."
+        "This is where the ABLE planner shares updates, alerts, and guidance based on your inputs and may ask for additional information."
       ]
     },
     "screen2": {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 
 type DemographicsCopy = {
@@ -7,11 +8,17 @@ type DemographicsCopy = {
   labels?: {
     nameLabel?: string;
     stateOfResidenceLabel?: string;
+    stateOfResidenceCallout?: string;
     filingStatusLabel?: string;
+    filingStatusCallout?: string;
     agiLabel?: string;
+    agiCallout?: string;
     annualReturnLabel?: string;
+    annualReturnCallout?: string;
     ssiEligibilityLabel?: string;
+    ssiEligibilityCallout?: string;
     fscHeading?: string;
+    fscHeadingCallout?: string;
     selectState?: string;
     checkEligibility?: string;
     filing?: {
@@ -57,6 +64,51 @@ export default function DemographicsForm({
   onFscClick,
   copy,
 }: DemographicsFormProps) {
+  const [showStateCallout, setShowStateCallout] = useState(false);
+  const [showFilingCallout, setShowFilingCallout] = useState(false);
+  const [showAgiCallout, setShowAgiCallout] = useState(false);
+  const [showAnnualReturnCallout, setShowAnnualReturnCallout] = useState(false);
+  const [showSsiCallout, setShowSsiCallout] = useState(false);
+  const [showFscCallout, setShowFscCallout] = useState(false);
+  const stateCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
+  const filingCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
+  const agiCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
+  const annualReturnCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
+  const ssiCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
+  const fscCalloutAnchorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!showStateCallout && !showFilingCallout && !showAgiCallout && !showAnnualReturnCallout && !showSsiCallout && !showFscCallout) {
+      return;
+    }
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      const clickedStateAnchor = Boolean(stateCalloutAnchorRef.current?.contains(target));
+      const clickedFilingAnchor = Boolean(filingCalloutAnchorRef.current?.contains(target));
+      const clickedAgiAnchor = Boolean(agiCalloutAnchorRef.current?.contains(target));
+      const clickedAnnualReturnAnchor = Boolean(annualReturnCalloutAnchorRef.current?.contains(target));
+      const clickedSsiAnchor = Boolean(ssiCalloutAnchorRef.current?.contains(target));
+      const clickedFscAnchor = Boolean(fscCalloutAnchorRef.current?.contains(target));
+      if (clickedStateAnchor || clickedFilingAnchor || clickedAgiAnchor || clickedAnnualReturnAnchor || clickedSsiAnchor || clickedFscAnchor) {
+        return;
+      }
+      setShowStateCallout(false);
+      setShowFilingCallout(false);
+      setShowAgiCallout(false);
+      setShowAnnualReturnCallout(false);
+      setShowSsiCallout(false);
+      setShowFscCallout(false);
+    };
+
+    window.addEventListener("mousedown", handlePointerDown);
+    window.addEventListener("touchstart", handlePointerDown);
+    return () => {
+      window.removeEventListener("mousedown", handlePointerDown);
+      window.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, [showStateCallout, showFilingCallout, showAgiCallout, showAnnualReturnCallout, showSsiCallout, showFscCallout]);
+
   const defaultButtonLabel =
     fscStatus === "idle"
       ? copy?.labels?.checkEligibility ?? "Check eligibility"
@@ -87,12 +139,41 @@ export default function DemographicsForm({
           />
         </div>
         <div>
-          <label
-            htmlFor="demographics-residence"
-            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
-          >
-            {copy?.labels?.stateOfResidenceLabel ?? "State of Residence"}
-          </label>
+          <div ref={stateCalloutAnchorRef} className="relative flex items-center gap-1">
+            <label
+              htmlFor="demographics-residence"
+              className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+            >
+              {copy?.labels?.stateOfResidenceLabel ?? "State of Residence"}
+            </label>
+            {copy?.labels?.stateOfResidenceCallout ? (
+              <button
+                type="button"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                aria-label="State of residence information"
+                aria-expanded={showStateCallout}
+                onClick={() => {
+                  const next = !showStateCallout;
+                  setShowStateCallout(next);
+                  setShowFilingCallout(false);
+                  setShowAgiCallout(false);
+                  setShowAnnualReturnCallout(false);
+                  setShowSsiCallout(false);
+                  setShowFscCallout(false);
+                }}
+              >
+                i
+              </button>
+            ) : null}
+            {showStateCallout && copy?.labels?.stateOfResidenceCallout ? (
+              <div
+                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
+                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+              >
+                {copy.labels.stateOfResidenceCallout}
+              </div>
+            ) : null}
+          </div>
           <select
             id="demographics-residence"
             value={stateOfResidence}
@@ -110,12 +191,41 @@ export default function DemographicsForm({
           </select>
         </div>
         <div>
-          <label
-            htmlFor="demographics-filing-status"
-            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
-          >
-            {copy?.labels?.filingStatusLabel ?? "Filing Status"}
-          </label>
+          <div ref={filingCalloutAnchorRef} className="relative flex items-center gap-1">
+            <label
+              htmlFor="demographics-filing-status"
+              className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+            >
+              {copy?.labels?.filingStatusLabel ?? "Filing Status"}
+            </label>
+            {copy?.labels?.filingStatusCallout ? (
+              <button
+                type="button"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                aria-label="Filing status information"
+                aria-expanded={showFilingCallout}
+                onClick={() => {
+                  const next = !showFilingCallout;
+                  setShowFilingCallout(next);
+                  setShowStateCallout(false);
+                  setShowAgiCallout(false);
+                  setShowAnnualReturnCallout(false);
+                  setShowSsiCallout(false);
+                  setShowFscCallout(false);
+                }}
+              >
+                i
+              </button>
+            ) : null}
+            {showFilingCallout && copy?.labels?.filingStatusCallout ? (
+              <div
+                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
+                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+              >
+                {copy.labels.filingStatusCallout}
+              </div>
+            ) : null}
+          </div>
           <select
             id="demographics-filing-status"
             value={filingStatus}
@@ -137,12 +247,41 @@ export default function DemographicsForm({
           </select>
         </div>
         <div>
-          <label
-            htmlFor="demographics-agi"
-            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
-          >
-            {copy?.labels?.agiLabel ?? "Adjusted Gross Income (AGI)"}
-          </label>
+          <div ref={agiCalloutAnchorRef} className="relative flex items-center gap-1">
+            <label
+              htmlFor="demographics-agi"
+              className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+            >
+              {copy?.labels?.agiLabel ?? "Adjusted Gross Income (AGI)"}
+            </label>
+            {copy?.labels?.agiCallout ? (
+              <button
+                type="button"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                aria-label="Taxable income information"
+                aria-expanded={showAgiCallout}
+                onClick={() => {
+                  const next = !showAgiCallout;
+                  setShowAgiCallout(next);
+                  setShowStateCallout(false);
+                  setShowFilingCallout(false);
+                  setShowAnnualReturnCallout(false);
+                  setShowSsiCallout(false);
+                  setShowFscCallout(false);
+                }}
+              >
+                i
+              </button>
+            ) : null}
+            {showAgiCallout && copy?.labels?.agiCallout ? (
+              <div
+                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
+                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+              >
+                {copy.labels.agiCallout}
+              </div>
+            ) : null}
+          </div>
           <input
             id="demographics-agi"
             type="number"
@@ -168,10 +307,39 @@ export default function DemographicsForm({
           />
         </div>
         <div className="md:col-span-2">
-          <label
-            htmlFor="demographics-annual-return"
-            className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
-          >{copy?.labels?.annualReturnLabel ?? "Annual Investment Return Assumption (%)"}</label>
+          <div ref={annualReturnCalloutAnchorRef} className="relative flex items-center gap-1">
+            <label
+              htmlFor="demographics-annual-return"
+              className="block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+            >{copy?.labels?.annualReturnLabel ?? "Annual Investment Return Assumption (%)"}</label>
+            {copy?.labels?.annualReturnCallout ? (
+              <button
+                type="button"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                aria-label="Annual return assumption information"
+                aria-expanded={showAnnualReturnCallout}
+                onClick={() => {
+                  const next = !showAnnualReturnCallout;
+                  setShowAnnualReturnCallout(next);
+                  setShowStateCallout(false);
+                  setShowFilingCallout(false);
+                  setShowAgiCallout(false);
+                  setShowSsiCallout(false);
+                  setShowFscCallout(false);
+                }}
+              >
+                i
+              </button>
+            ) : null}
+            {showAnnualReturnCallout && copy?.labels?.annualReturnCallout ? (
+              <div
+                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
+                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+              >
+                {copy.labels.annualReturnCallout}
+              </div>
+            ) : null}
+          </div>
           <input
             id="demographics-annual-return"
             type="number"
@@ -197,21 +365,81 @@ export default function DemographicsForm({
           />
         </div>
         <div className="md:col-span-2">
-          <label
-            htmlFor="demographics-ssi"
-            className="flex items-center gap-3 text-sm"
-          >
-            <input
-              id="demographics-ssi"
-              type="checkbox"
-              checked={isSsiEligible}
-              onChange={(e) => onChange?.({ isSsiEligible: e.target.checked })}
-              className="h-4 w-4 rounded border-zinc-300"
-            />{copy?.labels?.ssiEligibilityLabel ?? "Beneficiary is eligible for SSI"}</label>
+          <div ref={ssiCalloutAnchorRef} className="relative inline-flex items-center gap-1">
+            <label
+              htmlFor="demographics-ssi"
+              className="flex items-center gap-3 text-sm"
+            >
+              <input
+                id="demographics-ssi"
+                type="checkbox"
+                checked={isSsiEligible}
+                onChange={(e) => onChange?.({ isSsiEligible: e.target.checked })}
+                className="h-4 w-4 rounded border-zinc-300"
+              />
+              {copy?.labels?.ssiEligibilityLabel ?? "Beneficiary is eligible for SSI"}
+            </label>
+            {copy?.labels?.ssiEligibilityCallout ? (
+              <button
+                type="button"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                aria-label="SSI eligibility information"
+                aria-expanded={showSsiCallout}
+                onClick={() => {
+                  const next = !showSsiCallout;
+                  setShowSsiCallout(next);
+                  setShowStateCallout(false);
+                  setShowFilingCallout(false);
+                  setShowAgiCallout(false);
+                  setShowAnnualReturnCallout(false);
+                  setShowFscCallout(false);
+                }}
+              >
+                i
+              </button>
+            ) : null}
+            {showSsiCallout && copy?.labels?.ssiEligibilityCallout ? (
+              <div
+                className="absolute left-0 top-full z-20 mt-1 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
+                style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+              >
+                {copy.labels.ssiEligibilityCallout}
+              </div>
+            ) : null}
+          </div>
         </div>
         <div className="md:col-span-2">
           <div className="space-y-2 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{copy?.labels?.fscHeading ?? "Federal Saver’s Credit Eligibility"}</p>
+            <div ref={fscCalloutAnchorRef} className="relative inline-flex items-center gap-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{copy?.labels?.fscHeading ?? "Federal Saver’s Credit Eligibility"}</p>
+              {copy?.labels?.fscHeadingCallout ? (
+                <button
+                  type="button"
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[10px] font-bold text-white hover:opacity-90"
+                  aria-label="Federal Saver's Credit information"
+                  aria-expanded={showFscCallout}
+                  onClick={() => {
+                    const next = !showFscCallout;
+                    setShowFscCallout(next);
+                    setShowStateCallout(false);
+                    setShowFilingCallout(false);
+                    setShowAgiCallout(false);
+                    setShowAnnualReturnCallout(false);
+                    setShowSsiCallout(false);
+                  }}
+                >
+                  i
+                </button>
+              ) : null}
+              {showFscCallout && copy?.labels?.fscHeadingCallout ? (
+                <div
+                  className="absolute left-0 top-full z-20 mt-1 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--brand-primary)] px-3 py-2 text-xs leading-relaxed text-zinc-900 shadow-sm dark:text-zinc-100"
+                  style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 12%, white)" }}
+                >
+                  {copy.labels.fscHeadingCallout}
+                </div>
+              ) : null}
+            </div>
             <button
               type="button"
               disabled={fscDisabled}
