@@ -2050,11 +2050,11 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
               </div>
               <div className="md:hidden">{languageToggle}</div>
             </div>
-            <div className="inline-flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <div className="inline-flex flex-nowrap items-center gap-1.5 overflow-x-auto">
+              <span className="hidden text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 md:inline">
                 {reportWindowLabel}
               </span>
-              <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
+              <div className="inline-flex flex-nowrap rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
                 {(() => {
                   const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
                     (option) => option !== "max" && option === horizonConfig.safeYears,
@@ -2075,8 +2075,8 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                       option === horizonConfig.safeYears);
                   const label = isMax
                     ? language === "es"
-                      ? `MAX (${horizonConfig.safeYears}A)`
-                      : `MAX (${horizonConfig.safeYears}Y)`
+                      ? `${horizonConfig.safeYears}A`
+                      : `${horizonConfig.safeYears}Y`
                     : language === "es"
                       ? `${optionYears}A`
                       : `${optionYears}Y`;
@@ -2087,7 +2087,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                       disabled={disabled}
                       aria-pressed={isActive}
                       className={[
-                        "rounded-full px-3 py-1 text-xs font-semibold transition",
+                        "rounded-full px-2 py-1 text-[11px] font-semibold leading-none whitespace-nowrap transition md:px-3 md:text-xs",
                         isActive
                           ? "bg-[var(--brand-primary)] text-white shadow-sm"
                           : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
