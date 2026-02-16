@@ -429,13 +429,14 @@ export default function Home() {
     !Number.isNaN(agiValueForSsiWarning) &&
     (agiValueForSsiWarning > 0 || agiValueForSsiWarning === 0);
   const canAccessProjectionViews =
+    agiValidForSsiWarning &&
     !residencyBlocking &&
     hasProjectionDriver;
   const handleSidebarChange = (next: NavKey) => {
     if ((next === "reports" || next === "schedule") && !canAccessProjectionViews) {
       setActive("inputs");
       setMessagesMode("intro");
-      if (residencyBlocking) {
+      if (!agiValidForSsiWarning || residencyBlocking) {
         setInputStep(1);
       } else {
         setInputStep(2);
@@ -1284,6 +1285,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const contributionIncreaseDisabledNow = baseMeetsOrExceedsLimitNow;
     const hasContributionIssue =
       inputStep === 2 && (breachNow || breachFuture);
+    const startingBalanceNumber = startingBalance === "" ? 0 : Number(startingBalance);
+    const hasDriverForProjection =
+      (Number.isFinite(startingBalanceNumber) && startingBalanceNumber > 0) ||
+      (Number.isFinite(monthlyContributionNumber) && monthlyContributionNumber > 0);
     const residencyMismatch =
       beneficiaryStateOfResidence &&
       planState &&
@@ -1293,7 +1298,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       (planResidencyRequired || !nonResidentProceedAck);
     const isNextDisabled =
       (inputStep === 1 && (!agiValid || residencyBlocking)) ||
-      (inputStep === 2 && hasContributionIssue);
+      (inputStep === 2 && (hasContributionIssue || !hasDriverForProjection));
 
     const deriveMonthlyCaps = (limit: number) => {
       const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(horizonConfig.startIndex);
@@ -1333,10 +1338,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         setInputStep(2);
         return;
       }
-      const startingBalanceNumber = startingBalance === "" ? 0 : Number(startingBalance);
-      const hasDriverForProjection =
-        (Number.isFinite(startingBalanceNumber) && startingBalanceNumber > 0) ||
-        (Number.isFinite(monthlyContributionNumber) && monthlyContributionNumber > 0);
       if (hasContributionIssue || !hasDriverForProjection) return;
       enforceTimeHorizonLimits();
       setActive("reports");
@@ -2122,7 +2123,10 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                       </div>
                     )}
                     {showQuestionnaire && !showResidencyWarning && (
-                      <div ref={fscQuestionnaireRef} className="space-y-4">
+                      <div
+                        ref={fscQuestionnaireRef}
+                        className="space-y-4 rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_10%,white)] p-4 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_20%,black)]"
+                      >
                         <div>
                           <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">{copy?.labels?.inputs?.fscEligibilityTitle ?? ""}</h2>
                           <p className="text-xs text-zinc-500">

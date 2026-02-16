@@ -92,7 +92,7 @@ export default function Screen2WtaPanel({
             type="button"
             className={[
               buttonBase,
-              "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
+              "border-zinc-200 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-white dark:text-zinc-700",
             ].join(" ")}
             onClick={onOverLimitNo}
           >
@@ -110,7 +110,7 @@ export default function Screen2WtaPanel({
       <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
         {accountEndingNode}
         {depletionNoticeNode}
-        <div className="space-y-3">
+        <div className="space-y-3 rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_10%,white)] p-4 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_20%,black)]">
           <div className="space-y-1">
             <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
               {earnedIncomeQuestionLabel}
@@ -122,7 +122,7 @@ export default function Screen2WtaPanel({
                   buttonBase,
                   wtaHasEarnedIncome === true
                     ? "border-transparent bg-[var(--brand-primary)] text-white"
-                    : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
+                    : "border-zinc-200 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-white dark:text-zinc-700",
                 ].join(" ")}
                 onClick={() => onEarnedIncomeAnswer(true)}
               >
@@ -134,7 +134,7 @@ export default function Screen2WtaPanel({
                   buttonBase,
                   wtaHasEarnedIncome === false
                     ? "border-transparent bg-[var(--brand-primary)] text-white"
-                    : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
+                    : "border-zinc-200 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-white dark:text-zinc-700",
                 ].join(" ")}
                 onClick={() => onEarnedIncomeAnswer(false)}
               >
@@ -152,7 +152,7 @@ export default function Screen2WtaPanel({
                 inputMode="decimal"
                 value={wtaEarnedIncome}
                 onChange={(e) => onEarnedIncomeChange(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)] focus-visible:ring-inset md:text-sm dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+                className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-base text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)] focus-visible:ring-inset md:text-sm dark:border-zinc-700 dark:bg-white dark:text-zinc-900"
               />
             </div>
           )}
@@ -168,7 +168,7 @@ export default function Screen2WtaPanel({
                     buttonBase,
                     wtaRetirementPlan === true
                       ? "border-transparent bg-[var(--brand-primary)] text-white"
-                      : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
+                      : "border-zinc-200 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-white dark:text-zinc-700",
                   ].join(" ")}
                   onClick={() => onEvaluateWta(true)}
                 >
@@ -180,7 +180,7 @@ export default function Screen2WtaPanel({
                     buttonBase,
                     wtaRetirementPlan === false
                       ? "border-transparent bg-[var(--brand-primary)] text-white"
-                      : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
+                      : "border-zinc-200 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-white dark:text-zinc-700",
                   ].join(" ")}
                   onClick={() => onEvaluateWta(false)}
                 >
