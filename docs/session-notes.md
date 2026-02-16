@@ -65,25 +65,39 @@ Use this file to preserve working context between editor sessions.
 
 ## Session Log
 ### 2026-02-16
-- Implemented and refined withdrawal-capping behavior:
-- First overdraw month now drains available balance (up to user-entered withdrawal), then ongoing months limit withdrawals to available funds.
-- Added/smoothed planner messaging for withdrawal-limited scenarios and removed conflicting duplicate notices.
-- Added navigation guardrails for `Summary`/`Amortization` based on residency conflict resolution and projection drivers (starting balance or contribution).
-- Continued architecture cleanup:
-- Extracted CSV export logic to `src/lib/report/exportScheduleCsv.ts`.
-- Extracted planner message derivation to `src/lib/planner/messages.ts`.
-- Extracted reusable UI components:
+- Implemented/refined withdrawal capping and message behavior:
+- First overdraw month now drains available balance (up to planned withdrawal), then ongoing months are limited by available funds.
+- Removed duplicate/conflicting depletion vs withdrawal-limited messages and fixed placeholder replacement issues.
+- Added guardrails for `Summary`/`Amortization` navigation:
+- Require residency conflicts resolved.
+- Require projection driver (`starting balance > 0` or `monthly contribution > 0`).
+- Require taxable income field to be explicitly entered/valid (including `0`).
+- Continued `app/page.tsx` extraction into reusable modules/components:
+- `src/lib/report/exportScheduleCsv.ts`
+- `src/lib/planner/messages.ts`
+- `src/components/reports/ReportsHeader.tsx`
+- `src/components/reports/SummaryView.tsx`
+- `src/components/schedule/ScheduleHeader.tsx`
+- `src/components/schedule/ScheduleView.tsx`
 - `src/components/inputs/AccountEndingValueCard.tsx`
 - `src/components/inputs/PlannerNoticeCard.tsx`
 - `src/components/inputs/Screen2MessagesPanel.tsx`
 - `src/components/inputs/Screen2WtaPanel.tsx`
 - `src/components/inputs/ResidencyWarningCard.tsx`
-- `src/components/reports/SummaryView.tsx`
-- `src/components/schedule/ScheduleView.tsx`
 - `src/components/inputs/DisclosuresView.tsx`
+- Demographics right-column styling updates:
+- FSC panel wrapped in card.
+- WTA panel wrapped in card.
+- WTA unselected buttons and earned-income field background set to white.
+- Commits pushed in this batch:
+- `3e918cc` refactor: extract report and schedule headers plus csv export helpers
+- `dee8610` fix: align withdrawal capping and planner messaging
+- `f0e8076` refactor: extract planner views and messaging components
+- `d2c773d` fix: tighten projection gating and wta panel styling
 - Current pause state:
-- `app/page.tsx` reduced to ~2309 lines.
-- Working tree contains additional uncommitted refactor files from the latest extraction batch; review with `git status` before next commit.
+- Branch: `refactor/extract-calc`
+- Working tree is clean.
+- Next reminder: continue shrinking `app/page.tsx` by extracting remaining Inputs page orchestration (container/layout state wiring only, no behavior changes).
 
 ### 2026-02-15
 - Created persistent session notes file.

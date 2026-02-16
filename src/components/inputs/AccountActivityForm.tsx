@@ -43,6 +43,7 @@ type AccountActivityFormProps = {
   contributionIncreasePct?: string;
   withdrawalIncreasePct?: string;
   monthOptions: Option[];
+  contributionMonthOptions?: Option[];
   contributionYearOptions: string[];
   withdrawalYearOptions: string[];
   onChange?: (updates: Partial<AccountActivityFormProps>) => void;
@@ -87,6 +88,7 @@ export default function AccountActivityForm({
   contributionIncreaseHelperText,
   contributionIncreaseStopYear,
   monthOptions,
+  contributionMonthOptions,
   contributionYearOptions,
   withdrawalYearOptions,
   onChange,
@@ -441,7 +443,7 @@ export default function AccountActivityForm({
                 <option value="">
                   {copy?.labels?.monthPlaceholder ?? "Month"}
                 </option>
-                {monthOptions.map((option) => (
+                {(contributionMonthOptions ?? monthOptions).map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>

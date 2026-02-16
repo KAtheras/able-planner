@@ -593,6 +593,105 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     };
   }, [getTimeHorizonLimits, timeHorizonYears]);
 
+  const contributionConstraintHorizon = getHorizonConfig();
+  const enforcedContributionStopIndex = (() => {
+    const startIndex = contributionConstraintHorizon.startIndex;
+    const horizonEndIndex = contributionConstraintHorizon.horizonEndIndex;
+    const totalMonths = contributionConstraintHorizon.safeYears * 12;
+    if (totalMonths <= 0) return null;
+
+    const parseAmount = (value: string) => {
+      const cleaned = sanitizeAmountInput(value);
+      const numeric = Number(cleaned || "0");
+      if (!Number.isFinite(numeric)) return 0;
+      return Math.max(0, numeric);
+    };
+
+    const startingBalanceValue = parseAmount(startingBalance);
+    const monthlyContributionValue = parseAmount(monthlyContribution);
+    const monthlyContributionFutureValue =
+      monthlyContributionFuture !== ""
+        ? parseAmount(monthlyContributionFuture)
+        : monthlyContributionValue;
+    const monthlyWithdrawalValue = parseAmount(monthlyWithdrawal);
+    const contributionIncreaseValue = Number(contributionIncreasePct);
+    const withdrawalIncreaseValue = Number(withdrawalIncreasePct);
+
+    const computedStopContributionIncreasesAfterYear = (() => {
+      const pctRaw = Number(contributionIncreasePct);
+      if (monthlyContributionNum <= 0 || !Number.isFinite(pctRaw) || pctRaw <= 0) return null;
+      const horizonInput = Number(timeHorizonYears);
+      if (!Number.isFinite(horizonInput) || horizonInput <= 0) return null;
+      const limit = annualContributionLimit;
+      if (!Number.isFinite(limit) || limit <= 0) return null;
+
+      const baseAnnual = monthlyContributionNum * 12;
+      if (baseAnnual >= limit) return 0;
+
+      const pctDecimal = pctRaw / 100;
+      const maxYearsToCheck = Math.floor(horizonInput);
+      for (let year = 1; year <= maxYearsToCheck; year += 1) {
+        const projectedAnnual = baseAnnual * Math.pow(1 + pctDecimal, year - 1);
+        if (projectedAnnual > limit) {
+          return year - 1;
+        }
+      }
+      return null;
+    })();
+
+    const agiValue = Number(plannerAgi);
+    const agiIsValid =
+      plannerAgi !== "" && !Number.isNaN(agiValue) && (agiValue > 0 || agiValue === 0);
+
+    const { scheduleRows: unconstrainedContributionRows } = buildPlannerSchedule({
+      startMonthIndex: startIndex,
+      totalMonths,
+      horizonEndIndex,
+      startingBalance: startingBalanceValue,
+      monthlyContribution: monthlyContributionValue,
+      monthlyContributionCurrentYear: monthlyContributionValue,
+      monthlyContributionFutureYears: monthlyContributionFutureValue,
+      monthlyWithdrawal: monthlyWithdrawalValue,
+      contributionIncreasePct: Number.isFinite(contributionIncreaseValue)
+        ? Math.max(0, contributionIncreaseValue)
+        : 0,
+      stopContributionIncreasesAfterYear: computedStopContributionIncreasesAfterYear,
+      withdrawalIncreasePct: Number.isFinite(withdrawalIncreaseValue)
+        ? Math.max(0, withdrawalIncreaseValue)
+        : 0,
+      contributionEndIndex: horizonEndIndex,
+      withdrawalStartIndex: startIndex,
+      annualReturnDecimal: parsePercentStringToDecimal(annualReturn) ?? 0,
+      isSsiEligible,
+      agi: agiIsValid ? agiValue : null,
+      filingStatus: plannerFilingStatus,
+      stateOfResidence: beneficiaryStateOfResidence || null,
+      enabled: true,
+      planMaxBalance,
+    });
+
+    for (const yearRow of unconstrainedContributionRows) {
+      for (const monthRow of yearRow.months) {
+        const hitSsiStop = monthRow.ssiCodes?.includes("SSI_CONTRIBUTIONS_STOPPED") ?? false;
+        const hitPlanStop = monthRow.planCodes?.includes("PLAN_MAX_CONTRIBUTIONS_STOPPED") ?? false;
+        if (hitSsiStop || hitPlanStop) {
+          return monthRow.monthIndex;
+        }
+      }
+    }
+
+    return null;
+  })();
+  const contributionEndMaxIndex = (() => {
+    const startIndex = contributionConstraintHorizon.startIndex;
+    const horizonEndIndex = contributionConstraintHorizon.horizonEndIndex;
+    const cappedMax =
+      enforcedContributionStopIndex !== null
+        ? enforcedContributionStopIndex - 1
+        : horizonEndIndex;
+    return clampNumber(cappedMax, startIndex, horizonEndIndex);
+  })();
+
   useEffect(() => {
     if (messagesMode !== "intro") {
       return;
@@ -905,7 +1004,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   useEffect(() => {
     const { startIndex, horizonEndIndex } = getHorizonConfig();
     const minIndex = startIndex;
-    const maxIndex = Math.max(startIndex, horizonEndIndex);
+    const contributionMaxIndex = Math.max(startIndex, contributionEndMaxIndex);
+    const withdrawalMaxIndex = Math.max(startIndex, horizonEndIndex);
 
     const setContributionFromIndex = (index: number) => {
       const { year, month } = monthIndexToParts(index);
@@ -921,9 +1021,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
     const contributionIndex = parseMonthYearToIndex(contributionEndYear, contributionEndMonth);
     if (!contributionEndTouched || contributionIndex === null) {
-      setContributionFromIndex(maxIndex);
+      setContributionFromIndex(contributionMaxIndex);
     } else {
-      const clamped = clampNumber(contributionIndex, minIndex, maxIndex);
+      const clamped = clampNumber(contributionIndex, minIndex, contributionMaxIndex);
       if (clamped !== contributionIndex) {
         setContributionFromIndex(clamped);
       }
@@ -933,7 +1033,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     if (!withdrawalStartTouched || withdrawalIndex === null) {
       setWithdrawalFromIndex(minIndex);
     } else {
-      const clamped = clampNumber(withdrawalIndex, minIndex, maxIndex);
+      const clamped = clampNumber(withdrawalIndex, minIndex, withdrawalMaxIndex);
       if (clamped !== withdrawalIndex) {
         setWithdrawalFromIndex(clamped);
       }
@@ -948,6 +1048,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     withdrawalStartMonth,
     withdrawalStartYear,
     getHorizonConfig,
+    contributionEndMaxIndex,
   ]);
 
   useEffect(() => {
@@ -1392,6 +1493,28 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       horizonConfig.startIndex,
       horizonConfig.horizonEndIndex,
     );
+    const contributionYearOptions = getYearOptions(
+      horizonConfig.startIndex,
+      contributionEndMaxIndex,
+    );
+    const contributionMonthOptions = (() => {
+      const selectedYear = Number(contributionEndYear);
+      if (!Number.isFinite(selectedYear)) {
+        return monthOptions;
+      }
+
+      const minYear = Math.floor(horizonConfig.startIndex / 12);
+      const maxYear = Math.floor(contributionEndMaxIndex / 12);
+      const minMonthForYear =
+        selectedYear === minYear ? (horizonConfig.startIndex % 12) + 1 : 1;
+      const maxMonthForYear =
+        selectedYear === maxYear ? (contributionEndMaxIndex % 12) + 1 : 12;
+
+      return monthOptions.filter((option) => {
+        const month = Number(option.value);
+        return Number.isFinite(month) && month >= minMonthForYear && month <= maxMonthForYear;
+      });
+    })();
 
     const promptlyStartWta = () => {
       setWtaMode("wtaQuestion");
@@ -2029,7 +2152,8 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
               withdrawalIncreasePct={withdrawalIncreasePct}
               contributionIncreaseStopYear={stopContributionIncreasesAfterYear}
               monthOptions={monthOptions}
-              contributionYearOptions={horizonYearOptions}
+              contributionMonthOptions={contributionMonthOptions}
+              contributionYearOptions={contributionYearOptions}
               withdrawalYearOptions={horizonYearOptions}
               onChange={(updates) => {
                 if ("timeHorizonYears" in updates) {
