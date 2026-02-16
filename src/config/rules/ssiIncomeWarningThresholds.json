@@ -1,0 +1,9 @@
+{
+  "notes": "Heuristic taxable-income warning thresholds for potential SSI ineligibility. These are intentionally conservative and are not an eligibility determination.",
+  "thresholds": {
+    "single": 11500,
+    "married_joint": 17000,
+    "married_separate": 11500,
+    "head_of_household": 11500
+  }
+}

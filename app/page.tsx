@@ -11,6 +11,7 @@ import DemographicsForm from "@/components/inputs/DemographicsForm";
 import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrackets.json";
 import federalSaversContributionLimits from "@/config/rules/federalSaversContributionLimits.json";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
+import ssiIncomeWarningThresholds from "@/config/rules/ssiIncomeWarningThresholds.json";
 import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
 import stateTaxRates from "@/config/rules/stateTaxRates.json";
 import { buildAccountGrowthNarrative } from "@/lib/report/buildAccountGrowthNarrative";
@@ -314,7 +315,7 @@ export default function Home() {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const inputsColumnRef = useRef<HTMLDivElement | null>(null);
   const consoleCardRef = useRef<HTMLDivElement | null>(null);
-  const lastMobileConsoleModeRef = useRef<"annual" | "residency" | "fsc" | null>(null);
+  const lastMobileConsoleModeRef = useRef<"annual" | "residency" | "fsc" | "ssi" | null>(null);
   const currentClientConfig = getClientConfig(plannerStateCode);
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
@@ -381,6 +382,9 @@ export default function Home() {
     string,
     { name?: string; residencyRequired?: boolean; maxAccountBalance?: number }
   >;
+  const ssiIncomeThresholdMap = (
+    ssiIncomeWarningThresholds as { thresholds?: Partial<Record<FilingStatusOption, number>> }
+  ).thresholds;
   const planInfoEntry = planInfoMap[planState];
   const planName = planInfoEntry?.name ?? planState;
   const planLabel = `${planName} Able`;
@@ -396,6 +400,21 @@ export default function Home() {
     Number((monthlyContribution ?? "").replace(".00","")) || 0;
   const annualContributionLimit =
     wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
+  const agiValueForSsiWarning = Number(plannerAgi);
+  const agiValidForSsiWarning =
+    plannerAgi !== "" &&
+    !Number.isNaN(agiValueForSsiWarning) &&
+    (agiValueForSsiWarning > 0 || agiValueForSsiWarning === 0);
+  const ssiWarningThreshold = ssiIncomeThresholdMap?.[plannerFilingStatus];
+  const showSsiIncomeEligibilityWarning =
+    isSsiEligible &&
+    agiValidForSsiWarning &&
+    Number.isFinite(ssiWarningThreshold ?? NaN) &&
+    agiValueForSsiWarning > Number(ssiWarningThreshold);
+  const ssiIncomeEligibilityWarningText = showSsiIncomeEligibilityWarning
+    ? (copy?.messages?.ssiIncomeEligibilityWarning ??
+      "Based on your taxable income and filing status, you may not be eligible for SSI benefits. However, the ABLE planner will assume the beneficiary is eligible for SSI benefits based on your selection. Accordingly, the ABLE planner will implement logic that will keep the account balances below the SSI limit by stopping contributions and enforcing required distributions, where necessary.")
+    : "";
 
   const landingWelcomeOverride = getClientBlock("landingWelcome");
   const useLegacyLandingWelcomeOverride = Boolean(landingWelcomeOverride) && !hasLandingOverride;
@@ -963,8 +982,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return;
     }
 
-    const mode: "annual" | "residency" | "fsc" | null = residencyBlocking
+    const mode: "annual" | "residency" | "fsc" | "ssi" | null = residencyBlocking
       ? "residency"
+      : showSsiIncomeEligibilityWarning
+        ? "ssi"
       : showFscQuestionnaire
         ? "fsc"
         : annualReturnWarningText
@@ -993,6 +1014,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     annualReturnWarningText,
     inputStep,
     residencyBlocking,
+    showSsiIncomeEligibilityWarning,
     showFscQuestionnaire,
     showWelcome,
   ]);
@@ -2243,6 +2265,14 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                     {showResidencyWarning ? (
                       <div role="status" aria-live="polite">
                         {renderResidencyWarning()}
+                      </div>
+                    ) : ssiIncomeEligibilityWarningText ? (
+                      <div
+                        role="status"
+                        aria-live="polite"
+                        className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-xs text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100"
+                      >
+                        {ssiIncomeEligibilityWarningText}
                       </div>
                     ) : showQuestionnaire ? (
                       <div className="space-y-4">
