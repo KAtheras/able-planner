@@ -2050,23 +2050,25 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
               </div>
               <div className="md:hidden">{languageToggle}</div>
             </div>
-            <div className="flex w-full items-center justify-between gap-2 md:inline-flex md:w-auto md:justify-start">
-              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <div className="flex w-full items-center justify-between gap-1 md:inline-flex md:w-auto md:justify-start">
+              <span className="whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                 {reportWindowLabel}
               </span>
-              <div className="ml-auto inline-flex flex-nowrap rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
+              <div className="ml-auto inline-flex flex-nowrap rounded-full border border-zinc-200 bg-white p-0.5 dark:border-zinc-700 dark:bg-zinc-900">
                 {(() => {
                   const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
                     (option) => option !== "max" && option === horizonConfig.safeYears,
                   );
                   const showMaxOption = !hasPresetMatchingHorizon;
                   const optionsToRender = REPORT_WINDOW_OPTIONS.filter(
-                    (option) => option !== "max" || showMaxOption,
+                    (option) =>
+                      option === "max"
+                        ? showMaxOption
+                        : option <= horizonConfig.safeYears,
                   );
                   return optionsToRender.map((option) => {
                   const isMax = option === "max";
                   const optionYears = isMax ? horizonLimits.maxYears : option;
-                  const disabled = !isMax && horizonConfig.safeYears > 0 && option > horizonConfig.safeYears;
                   const isActive =
                     reportWindowYears === option ||
                     (!showMaxOption &&
@@ -2084,14 +2086,12 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                     <button
                       key={`report-window-${option}`}
                       type="button"
-                      disabled={disabled}
                       aria-pressed={isActive}
                       className={[
-                        "rounded-full px-2.5 py-1.5 text-xs font-semibold leading-none whitespace-nowrap transition md:px-3 md:py-1 md:text-xs",
+                        "rounded-full px-2 py-1.5 text-xs font-semibold leading-none whitespace-nowrap transition md:px-3 md:py-1 md:text-xs",
                         isActive
                           ? "bg-[var(--brand-primary)] text-white shadow-sm"
                           : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-                        disabled ? "cursor-not-allowed opacity-40 hover:bg-transparent" : "",
                       ].join(" ")}
                       onClick={() => setReportWindowYears(option)}
                     >
