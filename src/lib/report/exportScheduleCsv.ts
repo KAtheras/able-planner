@@ -1,4 +1,5 @@
 import type { TaxableYearRow, YearRow } from "@/lib/amortization";
+import { formatMonthYearFromIndex, type MonthYearLanguage } from "@/lib/date/formatMonthYear";
 
 type ScheduleLabels = {
   monthYear?: string;
@@ -41,7 +42,11 @@ const downloadCsvFile = (filename: string, headers: string[], rows: Array<Array<
   URL.revokeObjectURL(link.href);
 };
 
-const buildAbleScheduleCsvRows = (rows: YearRow[], labels?: ScheduleLabels) => {
+const buildAbleScheduleCsvRows = (
+  rows: YearRow[],
+  language: MonthYearLanguage,
+  labels?: ScheduleLabels,
+) => {
   const validRows = rows.filter((row) => row.year !== -1);
   const totals = validRows.reduce(
     (acc, row) => ({
@@ -82,7 +87,7 @@ const buildAbleScheduleCsvRows = (rows: YearRow[], labels?: ScheduleLabels) => {
     ]);
     for (const monthRow of yearRow.months) {
       csvRows.push([
-        monthRow.monthLabel,
+        formatMonthYearFromIndex(monthRow.monthIndex, language, { monthStyle: "long" }),
         formatNumberForCsv(monthRow.contribution),
         formatNumberForCsv(monthRow.withdrawal),
         formatNumberForCsv(monthRow.earnings),
@@ -96,7 +101,11 @@ const buildAbleScheduleCsvRows = (rows: YearRow[], labels?: ScheduleLabels) => {
   return csvRows;
 };
 
-const buildTaxableScheduleCsvRows = (rows: TaxableYearRow[], labels?: ScheduleLabels) => {
+const buildTaxableScheduleCsvRows = (
+  rows: TaxableYearRow[],
+  language: MonthYearLanguage,
+  labels?: ScheduleLabels,
+) => {
   const validRows = rows.filter((row) => row.year !== -1);
   const totals = validRows.reduce(
     (acc, row) => ({
@@ -146,7 +155,7 @@ const buildTaxableScheduleCsvRows = (rows: TaxableYearRow[], labels?: ScheduleLa
     ]);
     for (const monthRow of yearRow.months) {
       csvRows.push([
-        monthRow.monthLabel,
+        formatMonthYearFromIndex(monthRow.monthIndex, language, { monthStyle: "long" }),
         formatNumberForCsv(monthRow.contribution),
         formatNumberForCsv(monthRow.withdrawal),
         formatNumberForCsv(monthRow.investmentReturn),
@@ -160,7 +169,11 @@ const buildTaxableScheduleCsvRows = (rows: TaxableYearRow[], labels?: ScheduleLa
   return csvRows;
 };
 
-export function downloadAbleScheduleCsv(rows: YearRow[], labels?: ScheduleLabels) {
+export function downloadAbleScheduleCsv(
+  rows: YearRow[],
+  labels?: ScheduleLabels,
+  language: MonthYearLanguage = "en",
+) {
   const headers = [
     labels?.monthYear ?? "",
     labels?.contributions ?? "",
@@ -170,11 +183,15 @@ export function downloadAbleScheduleCsv(rows: YearRow[], labels?: ScheduleLabels
     labels?.federalSaversCredit ?? "",
     labels?.stateTaxBenefit ?? "",
   ];
-  const csvRows = buildAbleScheduleCsvRows(rows, labels);
+  const csvRows = buildAbleScheduleCsvRows(rows, language, labels);
   downloadCsvFile("able-amortization-schedule.csv", headers, csvRows);
 }
 
-export function downloadTaxableScheduleCsv(rows: TaxableYearRow[], labels?: ScheduleLabels) {
+export function downloadTaxableScheduleCsv(
+  rows: TaxableYearRow[],
+  labels?: ScheduleLabels,
+  language: MonthYearLanguage = "en",
+) {
   const headers = [
     labels?.monthYear ?? "",
     labels?.contributions ?? "",
@@ -184,6 +201,6 @@ export function downloadTaxableScheduleCsv(rows: TaxableYearRow[], labels?: Sche
     labels?.stateTaxes ?? "",
     labels?.accountBalance ?? "",
   ];
-  const csvRows = buildTaxableScheduleCsvRows(rows, labels);
+  const csvRows = buildTaxableScheduleCsvRows(rows, language, labels);
   downloadCsvFile("taxable-amortization-schedule.csv", headers, csvRows);
 }

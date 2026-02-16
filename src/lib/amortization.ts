@@ -1,3 +1,5 @@
+import { isDecemberMonthIndex } from "@/lib/date/formatMonthYear";
+
 export type MonthlyRow = {
   monthLabel: string;
   year: number;
@@ -92,12 +94,12 @@ const WITHDRAWAL_LIMITED_CODE = "WITHDRAWALS_LIMITED_TO_AVAILABLE_BALANCE";
 
 export type SsiMessage = {
   code: string;
-  data: { monthLabel: string };
+  data: { monthIndex: number };
 };
 
 export type PlanMessage = {
   code: typeof PLAN_STOP_CODE;
-  data: { monthLabel: string; planMax: number };
+  data: { monthIndex: number; planMax: number };
 };
 
 export function extractSsiMessages(rows: YearRow[]): SsiMessage[] {
@@ -110,9 +112,7 @@ export function extractSsiMessages(rows: YearRow[]): SsiMessage[] {
       for (const code of monthRow.ssiCodes) {
         if (seen[code]) continue;
         seen[code] = true;
-        let label = monthRow.monthLabel;
-        label = label.replace(/^[-–—]+\s*/, "");
-        out.push({ code, data: { monthLabel: label } });
+        out.push({ code, data: { monthIndex: monthRow.monthIndex } });
       }
     }
   }
@@ -134,9 +134,10 @@ export function extractPlanMessages(rows: YearRow[], planMaxBalance: number | nu
         if (seen[code]) continue;
         if (code !== PLAN_STOP_CODE) continue;
         seen[code] = true;
-        let label = monthRow.monthLabel;
-        label = label.replace(/^[-–—]+\s*/, "");
-        out.push({ code: PLAN_STOP_CODE, data: { monthLabel: label, planMax: planMaxBalance } });
+        out.push({
+          code: PLAN_STOP_CODE,
+          data: { monthIndex: monthRow.monthIndex, planMax: planMaxBalance },
+        });
       }
     }
   }
@@ -431,8 +432,7 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
       const contribution = Number.isFinite(ableMonth.contribution) ? Math.max(0, ableMonth.contribution) : 0;
       const withdrawal = Number.isFinite(ableMonth.withdrawal) ? Math.max(0, ableMonth.withdrawal) : 0;
       const availableBalance = prevBalance + contribution;
-      const normalizedLabel = ableMonth.monthLabel.replace(/^[-–—]+\s*/, "");
-      const isDecember = normalizedLabel.startsWith("Dec ");
+      const isDecember = isDecemberMonthIndex(ableMonth.monthIndex);
 
       let federalTaxOnEarnings = 0;
       let stateTaxOnEarnings = 0;

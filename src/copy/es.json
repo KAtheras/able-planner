@@ -173,7 +173,7 @@
     "wtaAmountOverCombinedTitle": "MONTO POR ENCIMA DEL LÍMITE COMBINADO:",
     "wtaAmountOverTitle": "MONTO POR ENCIMA DEL LÍMITE ANUAL:",
     "wtaAutoAppliedAdjustedLine": "Ajustamos sus contribuciones planificadas para mantenerlas por debajo del límite anual de contribución.",
-    "wtaAutoAppliedMonthlyCapHint": "(Este año: {{current}}/mes hasta dic.; a partir de ene.: {{future}}/mes.)",
+    "wtaAutoAppliedMonthlyCapHint": "(Este año: {{current}}/mes hasta diciembre; a partir de enero: {{future}}/mes.)",
     "wtaEarnedIncomeInput": "Por favor ingrese el ingreso estimado del trabajo:",
     "wtaEarnedIncomeQuestion": "¿El beneficiario tiene ingresos del trabajo?",
     "wtaEligibleOverCombinedLine1": "Califica para contribuciones adicionales de {{additional}}, pero sus contribuciones totales exceden el límite combinado de {{combined}}.",

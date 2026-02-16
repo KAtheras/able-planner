@@ -5,6 +5,7 @@ import {
   type YearRow,
   type TaxableYearRow,
 } from "@/lib/amortization";
+import { formatMonthYearFromIndex } from "@/lib/date/formatMonthYear";
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", {
@@ -37,6 +38,7 @@ type Props = {
   rows: YearRow[];
   taxableRows?: TaxableYearRow[];
   view: ViewMode;
+  language: "en" | "es";
   labels?: {
     monthYear?: string;
     accountTotals?: string;
@@ -51,7 +53,13 @@ type Props = {
   };
 };
 
-export default function AmortizationScheduleTable({ rows, taxableRows = [], view, labels }: Props) {
+export default function AmortizationScheduleTable({
+  rows,
+  taxableRows = [],
+  view,
+  language,
+  labels,
+}: Props) {
   const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
 
   const baseAbleRows = rows.filter((row) => row.year !== -1);
@@ -191,7 +199,12 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
                           key={`${yearRow.year}-${monthRow.monthIndex}`}
                           className="bg-white text-[13px] text-slate-600"
                         >
-                          <td className="border-b border-sky-100 px-3 py-2 pl-8 whitespace-nowrap">{monthRow.monthLabel}</td>
+                          <td className="border-b border-sky-100 px-3 py-2 pl-8 whitespace-nowrap">
+                            {formatMonthYearFromIndex(monthRow.monthIndex, language, {
+                              monthStyle: "long",
+                              withPrefixDash: true,
+                            })}
+                          </td>
                           <td className="border-b border-sky-100 px-3 py-2 text-right">
                             {formatCurrencyDisplay(monthRow.contribution)}
                           </td>
@@ -312,7 +325,12 @@ export default function AmortizationScheduleTable({ rows, taxableRows = [], view
                           key={`taxable-${yearRow.year}-${monthRow.monthIndex}`}
                           className="bg-white text-[13px] text-slate-600"
                         >
-                          <td className="border-b border-sky-100 px-3 py-2 pl-8 whitespace-nowrap">{monthRow.monthLabel}</td>
+                          <td className="border-b border-sky-100 px-3 py-2 pl-8 whitespace-nowrap">
+                            {formatMonthYearFromIndex(monthRow.monthIndex, language, {
+                              monthStyle: "long",
+                              withPrefixDash: true,
+                            })}
+                          </td>
                           <td className="border-b border-sky-100 px-3 py-2 text-right">
                             {formatCurrencyDisplay(monthRow.contribution)}
                           </td>

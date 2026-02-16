@@ -1,4 +1,5 @@
 import type { TaxableYearRow, YearRow } from "@/lib/amortization";
+import { formatMonthYearFromIndex } from "@/lib/date/formatMonthYear";
 
 type SupportedLanguage = "en" | "es";
 
@@ -94,7 +95,9 @@ export function buildAccountGrowthNarrative({
     for (const monthRow of yearRow.months) {
       if (!Number.isFinite(monthRow.endingBalance)) continue;
       if (monthRow.endingBalance <= 0.01) {
-        taxableDepletionLabel = monthRow.monthLabel;
+        taxableDepletionLabel = formatMonthYearFromIndex(monthRow.monthIndex, language, {
+          monthStyle: "long",
+        });
         break;
       }
     }

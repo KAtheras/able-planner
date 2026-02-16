@@ -29,6 +29,7 @@ type ScheduleLabels = {
 
 type Props = {
   hasTimeHorizon: boolean;
+  language: "en" | "es";
   labels?: ScheduleLabels;
   view: ViewMode;
   onViewChange: (view: ViewMode) => void;
@@ -41,6 +42,7 @@ type Props = {
 
 export default function ScheduleView({
   hasTimeHorizon,
+  language,
   labels,
   view,
   onViewChange,
@@ -86,6 +88,7 @@ export default function ScheduleView({
             rows={rows}
             taxableRows={taxableRows}
             view={view}
+            language={language}
             labels={labels}
           />
         </div>

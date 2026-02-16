@@ -23,6 +23,7 @@ import ssiIncomeWarningThresholds from "@/config/rules/ssiIncomeWarningThreshold
 import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
 import stateTaxRates from "@/config/rules/stateTaxRates.json";
 import { buildAccountGrowthNarrative } from "@/lib/report/buildAccountGrowthNarrative";
+import { formatMonthYearFromIndex } from "@/lib/date/formatMonthYear";
 import {
   downloadAbleScheduleCsv as exportAbleScheduleCsv,
   downloadTaxableScheduleCsv as exportTaxableScheduleCsv,
@@ -540,12 +541,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   });
 
   const formatMonthYearLabel = (index: number) => {
-    const { year, month } = monthIndexToParts(index);
-    const date = new Date(year, month - 1, 1);
-    return new Intl.DateTimeFormat(language === "es" ? "es" : "en", {
-      month: "short",
-      year: "numeric",
-    }).format(date);
+    return formatMonthYearFromIndex(index, language, { monthStyle: "long" });
   };
 
   const parseMonthYearToIndex = (yearStr: string, monthStr: string): number | null => {
@@ -1656,7 +1652,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       const planMaxNoticeText =
         planMessages.length > 0
           ? (copy?.messages?.planMaxReached ?? "")
-              .replace("{{month}}", planMessages[0].data.monthLabel)
+              .replace(
+                "{{month}}",
+                formatMonthYearLabel(planMessages[0].data.monthIndex),
+              )
               .replace("{{cap}}", formatCurrency(planMessages[0].data.planMax).replace(".00", ""))
           : null;
       const ssiBalanceCapWarningText =
@@ -1665,19 +1664,27 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               .split("{{cap}}").join("$100,000")
               .replace(
                 "{{breach}}",
-                contributionStopMsg?.data?.monthLabel ?? forcedMsg?.data?.monthLabel ?? "",
+                contributionStopMsg?.data?.monthIndex != null
+                  ? formatMonthYearLabel(contributionStopMsg.data.monthIndex)
+                  : forcedMsg?.data?.monthIndex != null
+                    ? formatMonthYearLabel(forcedMsg.data.monthIndex)
+                    : "",
               )
               .replace(
                 "{{stop}}",
-                planMessages[0]?.data?.monthLabel ??
-                  contributionStopMsg?.data?.monthLabel ??
-                  "",
+                planMessages[0]?.data?.monthIndex != null
+                  ? formatMonthYearLabel(planMessages[0].data.monthIndex)
+                  : contributionStopMsg?.data?.monthIndex != null
+                    ? formatMonthYearLabel(contributionStopMsg.data.monthIndex)
+                    : "",
               )
               .replace(
                 "{{withdrawStart}}",
-                forcedMsg?.data?.monthLabel ??
-                  contributionStopMsg?.data?.monthLabel ??
-                  "",
+                forcedMsg?.data?.monthIndex != null
+                  ? formatMonthYearLabel(forcedMsg.data.monthIndex)
+                  : contributionStopMsg?.data?.monthIndex != null
+                    ? formatMonthYearLabel(contributionStopMsg.data.monthIndex)
+                    : "",
               )
           : null;
       return (
@@ -2005,10 +2012,10 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       .map((paragraph) => paragraph.trim())
       .filter(Boolean);
     const downloadAbleScheduleCsv = () => {
-      exportAbleScheduleCsv(scheduleRowsWithBenefits, copy?.labels?.schedule);
+      exportAbleScheduleCsv(scheduleRowsWithBenefits, copy?.labels?.schedule, language);
     };
     const downloadTaxableScheduleCsv = () => {
-      exportTaxableScheduleCsv(taxableRows, copy?.labels?.schedule);
+      exportTaxableScheduleCsv(taxableRows, copy?.labels?.schedule, language);
     };
 
     if (active === "reports") {
@@ -2069,6 +2076,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       return (
         <ScheduleView
           hasTimeHorizon={hasTimeHorizon}
+          language={language}
           labels={copy?.labels?.schedule}
           view={amortizationView}
           onViewChange={setAmortizationView}
