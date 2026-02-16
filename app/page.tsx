@@ -702,7 +702,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const horizonEndIndex = contributionConstraintHorizon.horizonEndIndex;
     const cappedMax =
       enforcedContributionStopIndex !== null
-        ? enforcedContributionStopIndex - 1
+        ? enforcedContributionStopIndex
         : horizonEndIndex;
     return clampNumber(cappedMax, startIndex, horizonEndIndex);
   })();
@@ -1643,6 +1643,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         ssiMessages.find((message) => message.code === "SSI_FORCED_WITHDRAWALS_APPLIED") ?? null;
       const contributionStopMsg =
         ssiMessages.find((message) => message.code === "SSI_CONTRIBUTIONS_STOPPED") ?? null;
+      const ssiContributionStopIndex =
+        isSsiEligible && enforcedContributionStopIndex !== null
+          ? enforcedContributionStopIndex
+          : contributionStopMsg?.data?.monthIndex ?? null;
       const showStandaloneWithdrawalLimitedMessage =
         shouldShowStandaloneWithdrawalLimitedMessage({
           hasConfiguredWithdrawals,
@@ -1674,8 +1678,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 "{{stop}}",
                 planMessages[0]?.data?.monthIndex != null
                   ? formatMonthYearLabel(planMessages[0].data.monthIndex)
-                  : contributionStopMsg?.data?.monthIndex != null
-                    ? formatMonthYearLabel(contributionStopMsg.data.monthIndex)
+                  : ssiContributionStopIndex != null
+                    ? formatMonthYearLabel(ssiContributionStopIndex)
                     : "",
               )
               .replace(
