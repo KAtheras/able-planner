@@ -170,12 +170,14 @@
   "flows": {
     "screen1": {
       "defaultMessages": [
-        "Aqui es donde el planificador ABLE comparte actualizaciones, alertas y orientacion basadas en sus entradas, y puede solicitar informacion adicional."
+        "Aqui es donde el planificador ABLE comparte actualizaciones, alertas y orientacion basadas en sus entradas, y puede solicitar informacion adicional.",
+        "Use los campos de entrada para proporcionar la informacion solicitada para el planificador ABLE.",
+        "Use los iconos de informacion junto a cada campo para orientacion especifica."
       ]
     },
     "screen2": {
       "defaultMessages": [
-        "Use los campos de Actividad de la cuenta a la izquierda para definir sus supuestos de planificación.",
+        "Use los campos de Actividad de la cuenta para definir sus supuestos de planificacion.",
         "Use los íconos de información junto a cada campo para ver orientación específica."
       ]
     }

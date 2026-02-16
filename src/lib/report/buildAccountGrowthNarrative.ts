@@ -79,6 +79,15 @@ export function buildAccountGrowthNarrative({
   const taxableEndingBalanceRaw = taxableRows.at(-1)?.endingBalance;
   const ableEndingBalance = Number.isFinite(ableEndingBalanceRaw) ? Number(ableEndingBalanceRaw) : 0;
   const taxableEndingBalance = Number.isFinite(taxableEndingBalanceRaw) ? Number(taxableEndingBalanceRaw) : 0;
+  const allMonthIndexes = ableDetailRows.flatMap((row) => row.months.map((month) => month.monthIndex));
+  const projectionYears = (() => {
+    if (!allMonthIndexes.length) return 0;
+    const minMonth = Math.min(...allMonthIndexes);
+    const maxMonth = Math.max(...allMonthIndexes);
+    const totalMonths = Math.max(0, maxMonth - minMonth + 1);
+    return Math.max(0, Math.round(totalMonths / 12));
+  })();
+  const projectionYearsLabel = projectionYears > 0 ? String(projectionYears) : "0";
 
   let taxableDepletionLabel: string | null = null;
   for (const yearRow of taxableDetailRows) {
@@ -100,7 +109,7 @@ export function buildAccountGrowthNarrative({
           ? `Los retiros totales son ${formatCurrencyLabel(ableWithdrawalTotal)} tanto para las cuentas ABLE como imponible.`
         : `Los retiros totales son ${formatCurrencyLabel(ableWithdrawalTotal)} en ABLE y ${formatCurrencyLabel(taxableWithdrawalTotal)} en imponible.`;
     const paragraphs: string[] = [
-      `En esta proyección, las contribuciones son ${formatCurrencyLabel(ableContributionTotal)} tanto en ABLE como en la cuenta imponible.`,
+      `En una proyeccion de ${projectionYearsLabel} anos, las contribuciones son ${formatCurrencyLabel(ableContributionTotal)} tanto en ABLE como en la cuenta imponible.`,
       `La cuenta ABLE genera ${formatCurrencyLabel(ableReturnTotal)} en rendimientos de inversión frente a ${formatCurrencyLabel(taxableReturnTotal)} en la cuenta imponible. ${buildSpanishTaxBalanceSentence(taxableFederalTaxTotal, taxableStateTaxTotal)}`,
       withdrawalsSentence,
       `Los saldos finales son ${formatCurrencyLabel(ableEndingBalance)} en ABLE y ${formatCurrencyLabel(taxableEndingBalance)} en imponible.`,
@@ -142,7 +151,7 @@ export function buildAccountGrowthNarrative({
       : `Ending account balances are projected to be ${formatCurrencyLabel(ableEndingBalance)} for ABLE account and ${formatCurrencyLabel(taxableEndingBalance)} for the taxable account.`;
 
   const paragraphs: string[] = [
-    `Over this projection, contributions are ${formatCurrencyLabel(ableContributionTotal)} in both ABLE and the taxable account.`,
+    `Over a ${projectionYearsLabel} year projection, contributions are ${formatCurrencyLabel(ableContributionTotal)} in both ABLE and the taxable account.`,
     `The ABLE account is projected to earn ${formatCurrencyLabel(ableReturnTotal)} in investment returns versus ${formatCurrencyLabel(taxableReturnTotal)} in the taxable account. ${buildEnglishTaxBalanceSentence(taxableFederalTaxTotal, taxableStateTaxTotal)}`,
     withdrawalsSentence,
     endingBalancesSentence,

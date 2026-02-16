@@ -36,6 +36,8 @@ type ClientLandingContent = Partial<{
   disclosuresBody: string;
 }>;
 type ClientLandingOverrides = Partial<Record<SupportedLanguage, ClientLandingContent>>;
+type ReportWindowOption = 3 | 5 | 10 | 20 | 40 | "max";
+const REPORT_WINDOW_OPTIONS: ReportWindowOption[] = [3, 5, 10, 20, 40, "max"];
 
 function resolveDefaultMessages(
   override: string,
@@ -250,6 +252,7 @@ export default function Home() {
   const [language, setLanguage] = useState<SupportedLanguage>("en");
   const [active, setActive] = useState<NavKey>("inputs");
   const [reportView, setReportView] = useState<"account_growth" | "tax_benefits">("account_growth");
+  const [reportWindowYears, setReportWindowYears] = useState<ReportWindowOption>("max");
   const [plannerStateCode, setPlannerStateCode] = useState<PlannerState>("default");
   const [inputStep, setInputStep] = useState<1 | 2>(1);
   const [plannerAgi, setPlannerAgi] = useState("");
@@ -1097,6 +1100,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       typeof candidateAnnualReturn === "number" && Number.isFinite(candidateAnnualReturn)
         ? formatDecimalToPercentString(candidateAnnualReturn)
         : "";
+    const candidateTimeHorizon = client?.defaults?.timeHorizonYears ?? null;
+    const defaultTimeHorizon =
+      typeof candidateTimeHorizon === "number" && Number.isFinite(candidateTimeHorizon)
+        ? String(Math.round(candidateTimeHorizon))
+        : "40";
     setAnnualReturn(defaultAnnualReturn);
     setAnnualReturnEdited(false);
     setAnnualReturnWarningMax(null);
@@ -1123,12 +1131,13 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setStopContributionIncreasesAfterYear(null);
     setWtaAutoPromptedForIncrease(false);
     setScreen2Messages([...screen2DefaultMessages]);
-    setTimeHorizonYears("");
+    setTimeHorizonYears(defaultTimeHorizon);
     setTimeHorizonEdited(false);
     setContributionEndTouched(false);
     setWithdrawalStartTouched(false);
     setWtaAutoApplied(false);
     setWtaDismissed(false);
+    setReportWindowYears("max");
   };
   useEffect(() => {
     const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
@@ -1464,6 +1473,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return (
         <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
           {renderAccountEndingBlock()}
+          {renderAbleDepletionNotice()}
           {planMessages.length > 0 && (
             <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
               <p className="text-sm leading-relaxed">
@@ -1509,6 +1519,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             {renderAccountEndingBlock()}
+            {renderAbleDepletionNotice()}
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               
               {(copy?.messages?.workToAblePrompt ?? "")
@@ -1542,6 +1553,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             {renderAccountEndingBlock()}
+            {renderAbleDepletionNotice()}
             <div className="space-y-3">
               <div className="space-y-1">
                 <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
@@ -1626,6 +1638,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             {renderAccountEndingBlock()}
+            {renderAbleDepletionNotice()}
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-line">
               {(() => {
                 const part1 = (copy?.messages?.wtaNotEligible ?? "").trim();
@@ -1658,6 +1671,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         return (
           <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
             {renderAccountEndingBlock()}
+            {renderAbleDepletionNotice()}
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-line">
               {(() => {
                 const firstPart = (copy?.messages?.wtaEligibleOverCombinedLine1 ?? "")
@@ -1823,19 +1837,6 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       };
     })();
     const renderAccountEndingBlock = () => {
-      if (endingValueInfo.depletionEligible) {
-        return (
-          <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
-            <p className="text-xs leading-relaxed">
-              {(copy?.messages?.ableDepletionNotice ??
-                "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.")
-                .replace("{{reachMonthYear}}", endingValueInfo.reachLabel || "")
-                .replace("{{stopMonthYear}}", endingValueInfo.stopLabel || "")}
-            </p>
-          </div>
-        );
-      }
-
       return (
         <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
           <div className="flex items-center justify-between gap-4">
@@ -1846,6 +1847,19 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
               {endingValueInfo.endingLabel}
             </div>
           </div>
+        </div>
+      );
+    };
+    const renderAbleDepletionNotice = () => {
+      if (!endingValueInfo.depletionEligible) return null;
+      return (
+        <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
+          <p className="text-sm leading-relaxed">
+            {(copy?.messages?.ableDepletionNotice ??
+              "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.")
+              .replace("{{reachMonthYear}}", endingValueInfo.reachLabel || "")
+              .replace("{{stopMonthYear}}", endingValueInfo.stopLabel || "")}
+          </p>
         </div>
       );
     };
@@ -1898,10 +1912,80 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         months,
       };
     });
+    const reportWindowYearsValue =
+      reportWindowYears === "max"
+        ? horizonConfig.safeYears
+        : Math.min(reportWindowYears, horizonConfig.safeYears);
+    const reportWindowEndIndex =
+      reportWindowYearsValue > 0 ? startIndex + reportWindowYearsValue * 12 - 1 : startIndex - 1;
+    const reportAbleRows = scheduleRowsWithBenefits
+      .filter((row) => row.year >= 0)
+      .map((row) => {
+        const months = row.months.filter((month) => month.monthIndex <= reportWindowEndIndex);
+        if (!months.length) return null;
+        let contribution = 0;
+        let withdrawal = 0;
+        let earnings = 0;
+        let fedTax = 0;
+        let stateTax = 0;
+        let saversCredit = 0;
+        let stateBenefit = 0;
+        for (const month of months) {
+          contribution += Number.isFinite(month.contribution) ? month.contribution : 0;
+          withdrawal += Number.isFinite(month.withdrawal) ? month.withdrawal : 0;
+          earnings += Number.isFinite(month.earnings) ? month.earnings : 0;
+          fedTax += Number.isFinite(month.fedTax) ? month.fedTax : 0;
+          stateTax += Number.isFinite(month.stateTax) ? month.stateTax : 0;
+          saversCredit += Number.isFinite(month.saversCredit) ? month.saversCredit : 0;
+          stateBenefit += Number.isFinite(month.stateBenefit) ? month.stateBenefit : 0;
+        }
+        return {
+          ...row,
+          months,
+          contribution,
+          withdrawal,
+          earnings,
+          fedTax,
+          stateTax,
+          saversCredit,
+          stateBenefit,
+          endingBalance: months[months.length - 1]?.endingBalance ?? row.endingBalance,
+        };
+      })
+      .filter(Boolean) as typeof scheduleRowsWithBenefits;
+    const reportTaxableRows = taxableRows
+      .filter((row) => row.year >= 0)
+      .map((row) => {
+        const months = row.months.filter((month) => month.monthIndex <= reportWindowEndIndex);
+        if (!months.length) return null;
+        let contribution = 0;
+        let withdrawal = 0;
+        let investmentReturn = 0;
+        let federalTaxOnEarnings = 0;
+        let stateTaxOnEarnings = 0;
+        for (const month of months) {
+          contribution += Number.isFinite(month.contribution) ? month.contribution : 0;
+          withdrawal += Number.isFinite(month.withdrawal) ? month.withdrawal : 0;
+          investmentReturn += Number.isFinite(month.investmentReturn) ? month.investmentReturn : 0;
+          federalTaxOnEarnings += Number.isFinite(month.federalTaxOnEarnings) ? month.federalTaxOnEarnings : 0;
+          stateTaxOnEarnings += Number.isFinite(month.stateTaxOnEarnings) ? month.stateTaxOnEarnings : 0;
+        }
+        return {
+          ...row,
+          months,
+          contribution,
+          withdrawal,
+          investmentReturn,
+          federalTaxOnEarnings,
+          stateTaxOnEarnings,
+          endingBalance: months[months.length - 1]?.endingBalance ?? row.endingBalance,
+        };
+      })
+      .filter(Boolean) as typeof taxableRows;
     const accountGrowthNarrative = buildAccountGrowthNarrative({
       language,
-      ableRows: scheduleRowsWithBenefits,
-      taxableRows,
+      ableRows: reportAbleRows,
+      taxableRows: reportTaxableRows,
     });
     const accountGrowthNarrativeParagraphs = accountGrowthNarrative
       .split("\n\n")
@@ -1912,42 +1996,84 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       const reportTitle = copy?.ui?.sidebar?.reports ?? "Reports";
       const accountGrowthTabLabel = copy?.labels?.reports?.accountGrowthTab ?? "Account Growth";
       const taxBenefitsTabLabel = copy?.labels?.reports?.taxBenefitsTab ?? "Tax Benefits";
+      const reportWindowLabel =
+        language === "es" ? "Ventana de reporte" : "Report Window";
       return (
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div
-              role="tablist"
-              aria-label={reportTitle}
-              className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
-            >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={reportView === "account_growth"}
-                className={[
-                  "rounded-full px-4 py-1 text-xs font-semibold transition",
-                  reportView === "account_growth"
-                    ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                    : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-                ].join(" ")}
-                onClick={() => setReportView("account_growth")}
+            <div className="flex flex-wrap items-center gap-3">
+              <div
+                role="tablist"
+                aria-label={reportTitle}
+                className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
               >
-                {accountGrowthTabLabel}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={reportView === "tax_benefits"}
-                className={[
-                  "rounded-full px-4 py-1 text-xs font-semibold transition",
-                  reportView === "tax_benefits"
-                    ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                    : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-                ].join(" ")}
-                onClick={() => setReportView("tax_benefits")}
-              >
-                {taxBenefitsTabLabel}
-              </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={reportView === "account_growth"}
+                  className={[
+                    "rounded-full px-4 py-1 text-xs font-semibold transition",
+                    reportView === "account_growth"
+                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                      : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+                  ].join(" ")}
+                  onClick={() => setReportView("account_growth")}
+                >
+                  {accountGrowthTabLabel}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={reportView === "tax_benefits"}
+                  className={[
+                    "rounded-full px-4 py-1 text-xs font-semibold transition",
+                    reportView === "tax_benefits"
+                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                      : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+                  ].join(" ")}
+                  onClick={() => setReportView("tax_benefits")}
+                >
+                  {taxBenefitsTabLabel}
+                </button>
+              </div>
+              <div className="inline-flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  {reportWindowLabel}
+                </span>
+                <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
+                  {REPORT_WINDOW_OPTIONS.map((option) => {
+                    const isMax = option === "max";
+                    const optionYears = isMax ? horizonLimits.maxYears : option;
+                    const disabled = !isMax && horizonConfig.safeYears > 0 && option > horizonConfig.safeYears;
+                    const isActive = reportWindowYears === option;
+                    const label = isMax
+                      ? language === "es"
+                        ? `MAX (${horizonLimits.maxYears})`
+                        : `MAX (${horizonLimits.maxYears})`
+                      : language === "es"
+                        ? `${optionYears}A`
+                        : `${optionYears}Y`;
+                    return (
+                      <button
+                        key={`report-window-${option}`}
+                        type="button"
+                        disabled={disabled}
+                        aria-pressed={isActive}
+                        className={[
+                          "rounded-full px-3 py-1 text-xs font-semibold transition",
+                          isActive
+                            ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                            : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+                          disabled ? "cursor-not-allowed opacity-40 hover:bg-transparent" : "",
+                        ].join(" ")}
+                        onClick={() => setReportWindowYears(option)}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
             <div>{languageToggle}</div>
           </div>
@@ -2269,26 +2395,37 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                 </h2>
                 <div className="mb-4 mt-2 border-b border-zinc-200 dark:border-zinc-800" />
                 {inputStep === 1 ? (
-                  <>
-                    {showResidencyWarning ? (
+                  <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+                    {showResidencyWarning && (
                       <div role="status" aria-live="polite">
                         {renderResidencyWarning()}
                       </div>
-                    ) : ssiIncomeEligibilityWarningText ? (
+                    )}
+                    {!showResidencyWarning && ssiIncomeEligibilityWarningText && (
                       <div
                         role="status"
                         aria-live="polite"
-                        className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-xs text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100"
+                        className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm leading-relaxed text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100"
                       >
                         {ssiIncomeEligibilityWarningText}
                       </div>
-                    ) : showQuestionnaire ? (
+                    )}
+                    {annualReturnWarningText && (
+                      <div
+                        role="status"
+                        aria-live="polite"
+                        className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm leading-relaxed text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100"
+                      >
+                        {annualReturnWarningText}
+                      </div>
+                    )}
+                    {ssiSelectionPlannerMessageText && (
+                      <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm leading-relaxed text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
+                        {ssiSelectionPlannerMessageText}
+                      </div>
+                    )}
+                    {showQuestionnaire && !showResidencyWarning && (
                       <div className="space-y-4">
-                        {ssiSelectionPlannerMessageText && (
-                          <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-xs text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
-                            {ssiSelectionPlannerMessageText}
-                          </div>
-                        )}
                         <div>
                           <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">{copy?.labels?.inputs?.fscEligibilityTitle ?? ""}</h2>
                           <p className="text-xs text-zinc-500">
@@ -2337,32 +2474,16 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                           })}
                         </div>
                       </div>
-                    ) : annualReturnWarningText ? (
-                      <div
-                        role="status"
-                        aria-live="polite"
-                        className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-xs text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100"
-                      >
-                        {annualReturnWarningText}
-                      </div>
-                    ) : (
-                      <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-                        {ssiSelectionPlannerMessageText && (
-                          <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-xs text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
-                            {ssiSelectionPlannerMessageText}
-                          </div>
-                        )}
-                        {screen1Messages.map((message, index) => (
-                          <p
-                            key={`${message}-${index}`}
-                            className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
-                          >
-                            {message}
-                          </p>
-                        ))}
-                      </div>
                     )}
-                  </>
+                    {screen1Messages.map((message, index) => (
+                      <p
+                        key={`${message}-${index}`}
+                        className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
+                      >
+                        {message}
+                      </p>
+                    ))}
+                  </div>
                 ) : (
                   renderScreen2Panel()
                 )}
