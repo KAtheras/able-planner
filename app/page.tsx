@@ -7,6 +7,8 @@ import { getCopy, type SupportedLanguage } from "@/copy";
 import { getClientConfig } from "@/config/clients";
 import AccountActivityForm from "@/components/inputs/AccountActivityForm";
 import AmortizationScheduleTable from "@/components/schedule/AmortizationScheduleTable";
+import ScheduleHeader from "@/components/schedule/ScheduleHeader";
+import ReportsHeader from "@/components/reports/ReportsHeader";
 import DemographicsForm from "@/components/inputs/DemographicsForm";
 import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrackets.json";
 import federalSaversContributionLimits from "@/config/rules/federalSaversContributionLimits.json";
@@ -15,6 +17,10 @@ import ssiIncomeWarningThresholds from "@/config/rules/ssiIncomeWarningThreshold
 import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
 import stateTaxRates from "@/config/rules/stateTaxRates.json";
 import { buildAccountGrowthNarrative } from "@/lib/report/buildAccountGrowthNarrative";
+import {
+  downloadAbleScheduleCsv as exportAbleScheduleCsv,
+  downloadTaxableScheduleCsv as exportTaxableScheduleCsv,
+} from "@/lib/report/exportScheduleCsv";
 
 // TAX LIABILITY HELPERS (PROGRESSIVE BRACKETS)
 type TaxBracket = { min: number; max?: number; rate: number };
@@ -2003,107 +2009,63 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       .split("\n\n")
       .map((paragraph) => paragraph.trim())
       .filter(Boolean);
+    const downloadAbleScheduleCsv = () => {
+      exportAbleScheduleCsv(scheduleRowsWithBenefits, copy?.labels?.schedule);
+    };
+    const downloadTaxableScheduleCsv = () => {
+      exportTaxableScheduleCsv(taxableRows, copy?.labels?.schedule);
+    };
 
     if (active === "reports") {
-      const reportTitle = copy?.ui?.sidebar?.reports ?? "Reports";
-      const accountGrowthTabLabel = copy?.labels?.reports?.accountGrowthTab ?? "Account Growth";
-      const taxBenefitsTabLabel = copy?.labels?.reports?.taxBenefitsTab ?? "Tax Benefits";
-      const reportWindowLabel =
-        language === "es" ? "Ventana de reporte" : "Report Window";
+      const reportTitle = copy?.labels?.reports?.title ?? "";
+      const accountGrowthTabLabel = copy?.labels?.reports?.accountGrowthTab ?? "";
+      const taxBenefitsTabLabel = copy?.labels?.reports?.taxBenefitsTab ?? "";
+      const reportWindowLabel = copy?.labels?.reports?.reportWindowLabel ?? "";
+      const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
+        (option) => option !== "max" && option === horizonConfig.safeYears,
+      );
+      const showMaxOption = !hasPresetMatchingHorizon;
+      const optionsToRender = REPORT_WINDOW_OPTIONS.filter(
+        (option) =>
+          option === "max"
+            ? showMaxOption
+            : option <= horizonConfig.safeYears,
+      );
+      const reportWindowOptions = optionsToRender.map((option) => {
+        const isMax = option === "max";
+        const optionYears = isMax ? horizonLimits.maxYears : option;
+        const isActive =
+          reportWindowYears === option ||
+          (!showMaxOption &&
+            reportWindowYears === "max" &&
+            option !== "max" &&
+            option === horizonConfig.safeYears);
+        const label = isMax
+          ? language === "es"
+            ? `${horizonConfig.safeYears}A`
+            : `${horizonConfig.safeYears}Y`
+          : language === "es"
+            ? `${optionYears}A`
+            : `${optionYears}Y`;
+        return {
+          key: `report-window-${option}`,
+          label,
+          isActive,
+          onClick: () => setReportWindowYears(option),
+        };
+      });
       return (
         <div className="space-y-6">
-          <div className="space-y-3 md:space-y-0 md:flex md:flex-wrap md:items-center md:justify-between md:gap-3">
-            <div className="flex items-center justify-between gap-3 md:justify-start">
-              <div
-                role="tablist"
-                aria-label={reportTitle}
-                className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
-              >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={reportView === "account_growth"}
-                  className={[
-                    "rounded-full px-4 py-1 text-xs font-semibold transition",
-                    reportView === "account_growth"
-                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                      : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-                  ].join(" ")}
-                  onClick={() => setReportView("account_growth")}
-                >
-                  {accountGrowthTabLabel}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={reportView === "tax_benefits"}
-                  className={[
-                    "rounded-full px-4 py-1 text-xs font-semibold transition",
-                    reportView === "tax_benefits"
-                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                      : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-                  ].join(" ")}
-                  onClick={() => setReportView("tax_benefits")}
-                >
-                  {taxBenefitsTabLabel}
-                </button>
-              </div>
-              <div className="md:hidden">{languageToggle}</div>
-            </div>
-            <div className="flex w-full items-center justify-between gap-1 md:inline-flex md:w-auto md:justify-start">
-              <span className="whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                {reportWindowLabel}
-              </span>
-              <div className="ml-auto inline-flex flex-nowrap rounded-full border border-zinc-200 bg-white p-0.5 dark:border-zinc-700 dark:bg-zinc-900">
-                {(() => {
-                  const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
-                    (option) => option !== "max" && option === horizonConfig.safeYears,
-                  );
-                  const showMaxOption = !hasPresetMatchingHorizon;
-                  const optionsToRender = REPORT_WINDOW_OPTIONS.filter(
-                    (option) =>
-                      option === "max"
-                        ? showMaxOption
-                        : option <= horizonConfig.safeYears,
-                  );
-                  return optionsToRender.map((option) => {
-                  const isMax = option === "max";
-                  const optionYears = isMax ? horizonLimits.maxYears : option;
-                  const isActive =
-                    reportWindowYears === option ||
-                    (!showMaxOption &&
-                      reportWindowYears === "max" &&
-                      option !== "max" &&
-                      option === horizonConfig.safeYears);
-                  const label = isMax
-                    ? language === "es"
-                      ? `${horizonConfig.safeYears}A`
-                      : `${horizonConfig.safeYears}Y`
-                    : language === "es"
-                      ? `${optionYears}A`
-                      : `${optionYears}Y`;
-                  return (
-                    <button
-                      key={`report-window-${option}`}
-                      type="button"
-                      aria-pressed={isActive}
-                      className={[
-                        "rounded-full px-2 py-1.5 text-xs font-semibold leading-none whitespace-nowrap transition md:px-3 md:py-1 md:text-xs",
-                        isActive
-                          ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                          : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-                      ].join(" ")}
-                      onClick={() => setReportWindowYears(option)}
-                    >
-                      {label}
-                    </button>
-                  );
-                  });
-                })()}
-              </div>
-            </div>
-            <div className="hidden md:block">{languageToggle}</div>
-          </div>
+          <ReportsHeader
+            title={reportTitle}
+            accountGrowthTabLabel={accountGrowthTabLabel}
+            taxBenefitsTabLabel={taxBenefitsTabLabel}
+            reportView={reportView}
+            onReportViewChange={setReportView}
+            reportWindowLabel={reportWindowLabel}
+            reportWindowOptions={reportWindowOptions}
+            languageToggle={languageToggle}
+          />
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
             <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
               {reportTitle}
@@ -2148,47 +2110,19 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       return (
         <div className="space-y-6">
           <div className="h-full text-sm text-zinc-600 dark:text-zinc-400">
-            <div className="flex flex-col items-center gap-3 md:flex-row md:items-center md:gap-4">
-              <h1 className="order-1 w-full text-center text-lg font-semibold text-zinc-900 dark:text-zinc-50 md:order-2 md:flex-1">
-                {copy?.labels?.schedule?.amortizationTitle ?? ""}
-              </h1>
-              <div className="order-2 flex w-full items-center justify-between md:order-1 md:w-auto md:justify-start">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    aria-pressed={amortizationView === "able"}
-                    className={[
-                      "rounded-full px-4 py-1 text-xs font-semibold transition",
-                      amortizationView === "able"
-                        ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                        : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800",
-                    ].join(" ")}
-                    onClick={() => setAmortizationView("able")}
-                  >
-                    {copy?.labels?.schedule?.ableAccountToggle ?? ""}
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={amortizationView === "taxable"}
-                    className={[
-                      "flex items-center gap-2 rounded-full px-4 py-1 text-xs font-semibold transition",
-                      amortizationView === "taxable"
-                        ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                        : "border border-zinc-200 bg-white/50 text-zinc-500 hover:border-slate-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800",
-                    ].join(" ")}
-                    onClick={() => setAmortizationView("taxable")}
-                  >
-                    <span>{copy?.labels?.schedule?.taxableAccountToggle ?? ""}</span>
-                  </button>
-                </div>
-                <div className="md:hidden">
-                  {languageToggle}
-                </div>
-              </div>
-              <div className="order-3 hidden items-center justify-center md:ml-auto md:flex md:justify-end">
-                {languageToggle}
-              </div>
-            </div>
+            <ScheduleHeader
+              title={copy?.labels?.schedule?.amortizationTitle ?? ""}
+              ableLabel={copy?.labels?.schedule?.ableAccountToggle ?? ""}
+              taxableLabel={copy?.labels?.schedule?.taxableAccountToggle ?? ""}
+              view={amortizationView}
+              onViewChange={setAmortizationView}
+              onDownloadAble={downloadAbleScheduleCsv}
+              onDownloadTaxable={downloadTaxableScheduleCsv}
+              downloadAbleCsvAriaLabel={copy?.labels?.schedule?.downloadAbleCsvAria ?? ""}
+              downloadTaxableCsvAriaLabel={copy?.labels?.schedule?.downloadTaxableCsvAria ?? ""}
+              downloadCsvTitle={copy?.labels?.schedule?.downloadCsvTitle ?? ""}
+              languageToggle={languageToggle}
+            />
               <div className="mt-4">
                 <AmortizationScheduleTable
                   rows={scheduleRowsWithBenefits}

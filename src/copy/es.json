@@ -50,8 +50,10 @@
   },
   "labels": {
     "reports": {
+      "title": "Resumen",
       "accountGrowthTab": "Crecimiento de la cuenta",
-      "taxBenefitsTab": "Beneficios fiscales"
+      "taxBenefitsTab": "Beneficios fiscales",
+      "reportWindowLabel": "Ventana de reporte"
     },
     "inputs": {
       "accountActivityTitle": "Actividad de la cuenta",
@@ -116,6 +118,9 @@
       "accountTotals": "Totales de la cuenta",
       "amortizationTitle": "Cronograma de amortización",
       "contributions": "Contribuciones",
+      "downloadAbleCsvAria": "Descargar CSV de cuenta ABLE",
+      "downloadCsvTitle": "Descargar CSV",
+      "downloadTaxableCsvAria": "Descargar CSV de cuenta imponible",
       "enterTimeHorizonPrompt": "Ingrese un horizonte temporal para ver el cronograma.",
       "federalSaversCredit": "Crédito federal del ahorrador",
       "federalTaxes": "Impuestos federales",

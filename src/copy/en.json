@@ -50,8 +50,10 @@
   },
   "labels": {
     "reports": {
-      "accountGrowthTab": "Account Growth",
-      "taxBenefitsTab": "Tax Benefits"
+      "title": "Summary",
+      "accountGrowthTab": "Summary",
+      "taxBenefitsTab": "Tax Benefits",
+      "reportWindowLabel": "Report Window"
     },
     "inputs": {
       "accountActivityTitle": "Account Activity",
@@ -116,6 +118,9 @@
       "accountTotals": "Account totals",
       "amortizationTitle": "Amortization Schedule",
       "contributions": "Contributions",
+      "downloadAbleCsvAria": "Download ABLE account CSV",
+      "downloadCsvTitle": "Download CSV",
+      "downloadTaxableCsvAria": "Download taxable account CSV",
       "enterTimeHorizonPrompt": "Enter a time horizon to view the schedule.",
       "federalSaversCredit": "Federal Saver’s Credit",
       "federalTaxes": "Federal Taxes",
