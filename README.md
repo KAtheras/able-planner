@@ -26,6 +26,7 @@ All new code and all code changes in this repository must be built and reviewed 
 - At session start, ask Codex: `Read README.md first`.
 - When this instruction is used, Codex should also read `docs/session-notes.md` before making changes.
 - At session end, ask Codex: `Update docs/session-notes.md`.
+- Resume reminder: before new feature work, finish `app/page.tsx` slimming by extracting remaining Inputs view orchestration into focused components/hooks.
 
 ## Development
 npm install

@@ -6,10 +6,15 @@ import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
 import { getClientConfig } from "@/config/clients";
 import AccountActivityForm from "@/components/inputs/AccountActivityForm";
-import AmortizationScheduleTable from "@/components/schedule/AmortizationScheduleTable";
-import ScheduleHeader from "@/components/schedule/ScheduleHeader";
-import ReportsHeader from "@/components/reports/ReportsHeader";
+import AccountEndingValueCard from "@/components/inputs/AccountEndingValueCard";
+import DisclosuresView from "@/components/inputs/DisclosuresView";
+import ResidencyWarningCard from "@/components/inputs/ResidencyWarningCard";
+import Screen2MessagesPanel from "@/components/inputs/Screen2MessagesPanel";
+import Screen2WtaPanel from "@/components/inputs/Screen2WtaPanel";
 import DemographicsForm from "@/components/inputs/DemographicsForm";
+import PlannerNoticeCard from "@/components/inputs/PlannerNoticeCard";
+import SummaryView from "@/components/reports/SummaryView";
+import ScheduleView from "@/components/schedule/ScheduleView";
 import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrackets.json";
 import federalSaversContributionLimits from "@/config/rules/federalSaversContributionLimits.json";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
@@ -21,6 +26,11 @@ import {
   downloadAbleScheduleCsv as exportAbleScheduleCsv,
   downloadTaxableScheduleCsv as exportTaxableScheduleCsv,
 } from "@/lib/report/exportScheduleCsv";
+import {
+  buildEndingValueInfo,
+  hasWithdrawalLimitedPlanCode,
+  shouldShowStandaloneWithdrawalLimitedMessage,
+} from "@/lib/planner/messages";
 
 // TAX LIABILITY HELPERS (PROGRESSIVE BRACKETS)
 type TaxBracket = { min: number; max?: number; rate: number };
@@ -1462,49 +1472,22 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
     const showResidencyWarning =
       residencyMismatch && (planResidencyRequired || !nonResidentProceedAck);
+    const residencyNotAllowedText = (copy?.labels?.residencyNotAllowed ?? "")
+      .split("{{plan}}")
+      .join(planLabel)
+      .replace("{{state}}", planName);
 
     const renderResidencyWarning = () => {
-      const primaryButtonClass =
-        "w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white whitespace-nowrap";
-      const secondaryButtonClass =
-        "w-full rounded-full border border-zinc-200 px-4 py-2 text-xs font-semibold text-zinc-700 whitespace-nowrap hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-900";
-      const buttonContainerClass = "flex flex-col gap-3 mt-4";
-
-      if (planResidencyRequired) {
-        return (
-          <div className="space-y-3">
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {(copy?.labels?.residencyNotAllowed ?? "").split("{{plan}}").join(planLabel).replace("{{state}}", planName) + " " + (copy?.labels?.residencyGeneralAdvice ?? "")}
-            </p>
-            <div className={buttonContainerClass}>
-              <button
-                type="button"
-                className={primaryButtonClass}
-                onClick={changeResidencyToPlan}
-              >{copy?.buttons?.changeResidencyProceed ?? ""}</button>
-            </div>
-          </div>
-        );
-      }
-
       return (
-        <div className="space-y-3">
-          <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-            {copy?.labels?.residencyGeneralAdvice ?? ""}
-          </p>
-          <div className={buttonContainerClass}>
-            <button
-              type="button"
-              className={primaryButtonClass}
-              onClick={acknowledgeNonResident}
-            >{copy?.buttons?.understandProceed ?? ""}</button>
-            <button
-              type="button"
-              className={secondaryButtonClass}
-              onClick={changeResidencyToPlan}
-            >{copy?.buttons?.changeResidencyProceed ?? ""}</button>
-          </div>
-        </div>
+        <ResidencyWarningCard
+          planResidencyRequired={planResidencyRequired}
+          residencyNotAllowedText={residencyNotAllowedText}
+          residencyGeneralAdviceText={copy?.labels?.residencyGeneralAdvice ?? ""}
+          changeResidencyLabel={copy?.buttons?.changeResidencyProceed ?? ""}
+          understandProceedLabel={copy?.buttons?.understandProceed ?? ""}
+          onChangeResidencyToPlan={changeResidencyToPlan}
+          onAcknowledgeNonResident={acknowledgeNonResident}
+        />
       );
     };
 
@@ -1512,248 +1495,77 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       const forcedMsg =
         ssiMessages.find((message) => message.code === "SSI_FORCED_WITHDRAWALS_APPLIED") ?? null;
       const showStandaloneWithdrawalLimitedMessage =
-        hasConfiguredWithdrawals &&
-        hasWithdrawalLimitedMessage &&
-        !endingValueInfo.depletionEligible;
+        shouldShowStandaloneWithdrawalLimitedMessage({
+          hasConfiguredWithdrawals,
+          hasWithdrawalLimitedMessage,
+          endingValueInfo,
+        });
+      const planMaxNoticeText =
+        planMessages.length > 0
+          ? (copy?.messages?.planMaxReached ?? "")
+              .replace("{{month}}", planMessages[0].data.monthLabel)
+              .replace("{{cap}}", formatCurrency(planMessages[0].data.planMax).replace(".00", ""))
+          : null;
+      const ssiBalanceCapWarningText =
+        ssiMessages.length > 0
+          ? (copy?.messages?.balanceCapWarning ?? "")
+              .split("{{cap}}").join("$100,000")
+              .replace("{{breach}}", (ssiMessages[0]?.data?.monthLabel ?? ""))
+              .replace("{{stop}}", (planMessages[0]?.data?.monthLabel ?? ssiMessages[0]?.data?.monthLabel ?? ""))
+              .replace("{{withdrawStart}}", (forcedMsg?.data?.monthLabel ?? ""))
+          : null;
       return (
-        <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-          {renderAccountEndingBlock()}
-          {renderAbleDepletionNotice()}
-          {showStandaloneWithdrawalLimitedMessage && (
-            <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
-              <p className="text-sm leading-relaxed">
-                {copy?.messages?.withdrawalLimitedToAvailable ?? ""}
-              </p>
-            </div>
-          )}
-          {planMessages.length > 0 && (
-            <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
-              <p className="text-sm leading-relaxed">
-                
-{(copy?.messages?.planMaxReached ?? "")
-  .replace("{{month}}", planMessages[0].data.monthLabel)
-  
-.replace("{{cap}}", formatCurrency(planMessages[0].data.planMax).replace(".00", ""))}
-
-              </p>
-            </div>
-          )}
-          {ssiMessages.length > 0 && (
-            <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
-              <div className="mb-2 whitespace-pre-line text-sm leading-relaxed">{
-              (copy?.messages?.balanceCapWarning ?? "")
-  .split("{{cap}}").join("$100,000")
-  
-.replace("{{breach}}", (ssiMessages[0]?.data?.monthLabel ?? ""))
-  
-.replace("{{stop}}", (planMessages[0]?.data?.monthLabel ?? ssiMessages[0]?.data?.monthLabel ?? ""))
-  .replace("{{withdrawStart}}", (forcedMsg?.data?.monthLabel ?? ""))
-}</div>
-            </div>
-          )}
-          {screen2Messages.map((message, index) => (
-            <p
-              key={`${message}-${index}`}
-              className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
-            >
-              {message}
-            </p>
-          ))}
-        </div>
+        <Screen2MessagesPanel
+          accountEndingNode={renderAccountEndingBlock()}
+          depletionNoticeNode={renderAbleDepletionNotice()}
+          showStandaloneWithdrawalLimitedMessage={showStandaloneWithdrawalLimitedMessage}
+          withdrawalLimitedText={copy?.messages?.withdrawalLimitedToAvailable ?? ""}
+          planMaxNoticeText={planMaxNoticeText}
+          ssiBalanceCapWarningText={ssiBalanceCapWarningText}
+          screen2Messages={screen2Messages}
+        />
       );
     };
 
     const renderScreen2Panel = () => {
-      const buttonBase =
-        "flex-1 rounded-full border px-3 py-1 text-xs font-semibold transition";
-
-      if (wtaMode === "initialPrompt") {
-        return (
-          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-            {renderAccountEndingBlock()}
-            {renderAbleDepletionNotice()}
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              
-              {(copy?.messages?.workToAblePrompt ?? "")
-  .replace("{{cap}}", "$20,000")}
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className={[
-                  buttonBase,
-                  "border-transparent bg-[var(--brand-primary)] text-white",
-                ].join(" ")}
-                onClick={promptlyStartWta}
-              >{copy?.buttons?.yes ?? ""}</button>
-              <button
-                type="button"
-                className={[
-                  buttonBase,
-                  "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
-                ].join(" ")}
-                onClick={handleOverLimitNo}
-              >{copy?.buttons?.no ?? ""}</button>
-            </div>
-          </div>
-        );
-      }
-
-      if (wtaMode === "wtaQuestion") {
-        const earnedIncomeValue = Number(wtaEarnedIncome);
-        const showStep3 = earnedIncomeValue > 0;
-        return (
-          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-            {renderAccountEndingBlock()}
-            {renderAbleDepletionNotice()}
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                  {copy?.labels?.inputs?.wtaEarnedIncomeQuestion ?? ""}
-                </label>
-                <div className="flex gap-2 mt-1">
-                  <button
-                    type="button"
-                    className={[
-                      buttonBase,
-                      wtaHasEarnedIncome === true
-                        ? "border-transparent bg-[var(--brand-primary)] text-white"
-                        : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
-                    ].join(" ")}
-                    onClick={() => handleEarnedIncomeAnswer(true)}
-                  >{copy?.buttons?.yes ?? ""}</button>
-                  <button
-                    type="button"
-                    className={[
-                      buttonBase,
-                      wtaHasEarnedIncome === false
-                        ? "border-transparent bg-[var(--brand-primary)] text-white"
-                        : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
-                    ].join(" ")}
-                    onClick={() => handleEarnedIncomeAnswer(false)}
-                  >{copy?.buttons?.no ?? ""}</button>
-                </div>
-              </div>
-              {wtaHasEarnedIncome === true && (
-                <div className="space-y-1">
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{copy?.labels?.inputs?.wtaEarnedIncomeInput ?? ""}</label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={wtaEarnedIncome}
-                    onChange={(e) => setWtaEarnedIncome(sanitizeAmountInput(e.target.value))}
-                    className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)] focus-visible:ring-inset md:text-sm dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
-                  />
-                </div>
-              )}
-              {showStep3 && (
-                <div className="space-y-1">
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{copy?.labels?.inputs?.wtaRetirementPlanQuestion ?? ""}</label>
-                  <div className="flex gap-2 mt-1">
-                    <button
-                      type="button"
-                      className={[
-                        buttonBase,
-                        wtaRetirementPlan === true
-                          ? "border-transparent bg-[var(--brand-primary)] text-white"
-                          : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
-                      ].join(" ")}
-                      onClick={() => evaluateWtaEligibility(true)}
-                    >{copy?.buttons?.yes ?? ""}</button>
-                    <button
-                      type="button"
-                      className={[
-                        buttonBase,
-                        wtaRetirementPlan === false
-                          ? "border-transparent bg-[var(--brand-primary)] text-white"
-                          : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200",
-                      ].join(" ")}
-                      onClick={() => evaluateWtaEligibility(false)}
-                    >{copy?.buttons?.no ?? ""}</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      }
-
-      const showWtaPanel =
-        !wtaDismissed && (wtaMode === "noPath" || wtaMode === "combinedLimit");
-
-      if (!showWtaPanel) {
-        return renderScreen2Messages();
-      }
-
-      if (wtaStatus === "ineligible" && !wtaDismissed) {
-        const baseLimitCaps = deriveMonthlyCaps(WTA_BASE_ANNUAL_LIMIT);
-        return (
-          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-            {renderAccountEndingBlock()}
-            {renderAbleDepletionNotice()}
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-line">
-              {(() => {
-                const part1 = (copy?.messages?.wtaNotEligible ?? "").trim();
-                const part2 = copy?.messages?.wtaAutoAppliedAdjustedLine ?? "";
-                const template = copy?.messages?.wtaAutoAppliedMonthlyCapHint ?? "";
-                const current = formatMonthlyLabel(baseLimitCaps.currentYearMaxMonthly);
-                const future = formatMonthlyLabel(baseLimitCaps.futureYearMaxMonthly);
-                const part3 = template
-                  ? template.replace("{{current}}", current).replace("{{future}}", future)
-                  : "";
-                return [part1, part2, part3].filter(Boolean).join("\n\n");
-              })()}
-            </p>
-            <button
-              type="button"
-              className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
-              onClick={() => {
-                setWtaDismissed(true);
-                setWtaMode("idle");
-              }}
-            >
-              OK
-            </button>
-          </div>
-        );
-      }
-
-      if (wtaStatus === "eligible" && !wtaDismissed) {
-        const combinedLimitCaps = deriveMonthlyCaps(wtaCombinedLimit);
-        return (
-          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-            {renderAccountEndingBlock()}
-            {renderAbleDepletionNotice()}
-            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-line">
-              {(() => {
-                const firstPart = (copy?.messages?.wtaEligibleOverCombinedLine1 ?? "")
-                  .replace("{{additional}}", formatCurrency(wtaAdditionalAllowed).replace(".00",""))
-                  .replace("{{combined}}", formatCurrency(wtaCombinedLimit).replace(".00",""));
-                const secondPart = copy?.messages?.wtaAutoAppliedAdjustedLine ?? "";
-                const template = copy?.messages?.wtaAutoAppliedMonthlyCapHint ?? "";
-                const current = formatMonthlyLabel(combinedLimitCaps.currentYearMaxMonthly);
-                const future = formatMonthlyLabel(combinedLimitCaps.futureYearMaxMonthly);
-                const thirdPart = template
-                  ? template.replace("{{current}}", current).replace("{{future}}", future)
-                  : "";
-                return [firstPart, secondPart, thirdPart].filter(Boolean).join("\n\n");
-              })()}
-            </p>
-            <button
-              type="button"
-              className="w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
-              onClick={() => {
-                setWtaDismissed(true);
-                setWtaMode("idle");
-              }}
-            >
-              OK
-            </button>
-          </div>
-        );
-      }
-
-      return renderScreen2Messages();
+      return (
+        <Screen2WtaPanel
+          wtaMode={wtaMode}
+          wtaDismissed={wtaDismissed}
+          wtaStatus={wtaStatus}
+          wtaHasEarnedIncome={wtaHasEarnedIncome}
+          wtaEarnedIncome={wtaEarnedIncome}
+          wtaRetirementPlan={wtaRetirementPlan}
+          wtaAdditionalAllowed={wtaAdditionalAllowed}
+          wtaCombinedLimit={wtaCombinedLimit}
+          baseAnnualLimit={WTA_BASE_ANNUAL_LIMIT}
+          accountEndingNode={renderAccountEndingBlock()}
+          depletionNoticeNode={renderAbleDepletionNotice()}
+          renderDefaultPanel={renderScreen2Messages}
+          workToAblePromptText={(copy?.messages?.workToAblePrompt ?? "").replace("{{cap}}", "$20,000")}
+          yesLabel={copy?.buttons?.yes ?? ""}
+          noLabel={copy?.buttons?.no ?? ""}
+          earnedIncomeQuestionLabel={copy?.labels?.inputs?.wtaEarnedIncomeQuestion ?? ""}
+          earnedIncomeInputLabel={copy?.labels?.inputs?.wtaEarnedIncomeInput ?? ""}
+          retirementPlanQuestionLabel={copy?.labels?.inputs?.wtaRetirementPlanQuestion ?? ""}
+          wtaNotEligibleText={copy?.messages?.wtaNotEligible ?? ""}
+          wtaAutoAppliedAdjustedLine={copy?.messages?.wtaAutoAppliedAdjustedLine ?? ""}
+          wtaAutoAppliedMonthlyCapHint={copy?.messages?.wtaAutoAppliedMonthlyCapHint ?? ""}
+          wtaEligibleOverCombinedLine1={copy?.messages?.wtaEligibleOverCombinedLine1 ?? ""}
+          onStartWta={promptlyStartWta}
+          onOverLimitNo={handleOverLimitNo}
+          onEarnedIncomeAnswer={handleEarnedIncomeAnswer}
+          onEarnedIncomeChange={(value) => setWtaEarnedIncome(sanitizeAmountInput(value))}
+          onEvaluateWta={evaluateWtaEligibility}
+          onDismiss={() => {
+            setWtaDismissed(true);
+            setWtaMode("idle");
+          }}
+          deriveMonthlyCaps={deriveMonthlyCaps}
+          formatMonthlyLabel={formatMonthlyLabel}
+          formatCurrency={formatCurrency}
+        />
+      );
     };
 
     const parsedTimeHorizon = parseIntegerInput(timeHorizonYears);
@@ -1843,85 +1655,20 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         enabled: hasTimeHorizon,
       planMaxBalance,
       });     
-    const hasWithdrawalLimitedMessage = scheduleRows.some((row) =>
-      row.months.some(
-        (monthRow) =>
-          Array.isArray(monthRow.planCodes) &&
-          monthRow.planCodes.includes("WITHDRAWALS_LIMITED_TO_AVAILABLE_BALANCE"),
-      ),
-    );
-
-    const endingValueInfo = (() => {
-      if (!scheduleRows.length) {
-        return {
-          endingLabel: "—",
-          depletionEligible: false,
-          withdrawalsStopAfterDepletion: false,
-          reachLabel: "",
-          stopLabel: "",
-        };
-      }
-      const lastRow = scheduleRows[scheduleRows.length - 1];
-      const endingValue = Number.isFinite(lastRow?.endingBalance) ? lastRow.endingBalance : NaN;
-      const endingLabel = Number.isFinite(endingValue)
-        ? formatCurrency(endingValue).replace(".00", "")
-        : "—";
-      const scheduleHasWithdrawals = scheduleRows.some((row) =>
-        row.months.some(
-          (monthRow) =>
-            Number.isFinite(monthRow.withdrawal) && monthRow.withdrawal > 0,
-        ),
-      );
-      let depletionMonthIndex: number | null = null;
-      for (const row of scheduleRows) {
-        for (const monthRow of row.months) {
-          if (!Number.isFinite(monthRow.endingBalance)) continue;
-          if (monthRow.endingBalance <= 0.01) {
-            depletionMonthIndex = monthRow.monthIndex;
-            break;
-          }
-        }
-        if (depletionMonthIndex !== null) break;
-      }
-      const depletionEligible =
-        hasConfiguredWithdrawals &&
-        scheduleHasWithdrawals &&
-        depletionMonthIndex !== null &&
-        depletionMonthIndex < horizonEndIndex;
-      const reachLabel =
-        depletionMonthIndex !== null ? formatMonthYearLabel(depletionMonthIndex) : "";
-      const stopLabel = reachLabel;
-      const withdrawalsStopAfterDepletion =
-        depletionMonthIndex !== null
-          ? !scheduleRows.some((row) =>
-              row.months.some(
-                (monthRow) =>
-                  monthRow.monthIndex > depletionMonthIndex &&
-                  Number.isFinite(monthRow.withdrawal) &&
-                  monthRow.withdrawal > 0,
-              ),
-            )
-          : false;
-      return {
-        endingLabel,
-        depletionEligible,
-        withdrawalsStopAfterDepletion,
-        reachLabel,
-        stopLabel,
-      };
-    })();
+    const hasWithdrawalLimitedMessage = hasWithdrawalLimitedPlanCode(scheduleRows);
+    const endingValueInfo = buildEndingValueInfo({
+      scheduleRows,
+      hasConfiguredWithdrawals,
+      horizonEndIndex,
+      formatCurrency,
+      formatMonthYearLabel,
+    });
     const renderAccountEndingBlock = () => {
       return (
-        <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="flex items-center justify-between gap-4">
-            <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              {copy?.messages?.accountEndingValueLabel ?? ""}
-            </div>
-            <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 tabular-nums">
-              {endingValueInfo.endingLabel}
-            </div>
-          </div>
-        </div>
+        <AccountEndingValueCard
+          label={copy?.messages?.accountEndingValueLabel ?? ""}
+          value={endingValueInfo.endingLabel}
+        />
       );
     };
     const renderAbleDepletionNotice = () => {
@@ -1930,13 +1677,13 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         ? copy?.messages?.ableDepletionNotice
         : copy?.messages?.ableDepletionNoticeLimitedWithdrawals;
       return (
-        <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
+        <PlannerNoticeCard>
           <p className="text-sm leading-relaxed">
             {(depletionTemplate ?? "")
               .split("{{reachMonthYear}}").join(endingValueInfo.reachLabel || "")
               .split("{{stopMonthYear}}").join(endingValueInfo.stopLabel || "")}
           </p>
-        </div>
+        </PlannerNoticeCard>
       );
     };
 
@@ -2113,84 +1860,34 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         };
       });
       return (
-        <div className="space-y-6">
-          <ReportsHeader
-            title={reportTitle}
-            accountGrowthTabLabel={accountGrowthTabLabel}
-            taxBenefitsTabLabel={taxBenefitsTabLabel}
-            reportView={reportView}
-            onReportViewChange={setReportView}
-            reportWindowLabel={reportWindowLabel}
-            reportWindowOptions={reportWindowOptions}
-            languageToggle={languageToggle}
-          />
-          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
-            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              {reportTitle}
-            </h1>
-            {reportView === "account_growth" ? (
-              <div className="mt-4 space-y-4">
-                {accountGrowthNarrativeParagraphs.map((paragraph, index) => (
-                  <p
-                    key={`account-growth-narrative-${index}`}
-                    className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-            ) : (
-              <p className="mt-4 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-                {copy?.labels?.ui?.placeholderComingSoon ?? ""}
-              </p>
-            )}
-          </div>
-        </div>
+        <SummaryView
+          reportTitle={reportTitle}
+          accountGrowthTabLabel={accountGrowthTabLabel}
+          taxBenefitsTabLabel={taxBenefitsTabLabel}
+          reportView={reportView}
+          onReportViewChange={setReportView}
+          reportWindowLabel={reportWindowLabel}
+          reportWindowOptions={reportWindowOptions}
+          languageToggle={languageToggle}
+          accountGrowthNarrativeParagraphs={accountGrowthNarrativeParagraphs}
+          placeholderText={copy?.labels?.ui?.placeholderComingSoon ?? ""}
+        />
       );
     }
 
     if (active === "schedule") {
-      if (!hasTimeHorizon) {
-        return (
-          <div className="space-y-6">
-            <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
-              <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                  {copy?.labels?.schedule?.amortizationTitle ?? ""}
-                </h1>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-                {copy?.labels?.schedule?.enterTimeHorizonPrompt ?? ""}
-              </p>
-            </div>
-          </div>
-        );
-      }
-
       return (
-        <div className="space-y-6">
-          <div className="h-full text-sm text-zinc-600 dark:text-zinc-400">
-            <ScheduleHeader
-              title={copy?.labels?.schedule?.amortizationTitle ?? ""}
-              ableLabel={copy?.labels?.schedule?.ableAccountToggle ?? ""}
-              taxableLabel={copy?.labels?.schedule?.taxableAccountToggle ?? ""}
-              view={amortizationView}
-              onViewChange={setAmortizationView}
-              onDownloadAble={downloadAbleScheduleCsv}
-              onDownloadTaxable={downloadTaxableScheduleCsv}
-              downloadAbleCsvAriaLabel={copy?.labels?.schedule?.downloadAbleCsvAria ?? ""}
-              downloadTaxableCsvAriaLabel={copy?.labels?.schedule?.downloadTaxableCsvAria ?? ""}
-              downloadCsvTitle={copy?.labels?.schedule?.downloadCsvTitle ?? ""}
-              languageToggle={languageToggle}
-            />
-              <div className="mt-4">
-                <AmortizationScheduleTable
-                  rows={scheduleRowsWithBenefits}
-                  taxableRows={taxableRows}
-                  view={amortizationView}
-                  labels={copy?.labels?.schedule}
-                />
-              </div>
-          </div>
-        </div>
+        <ScheduleView
+          hasTimeHorizon={hasTimeHorizon}
+          labels={copy?.labels?.schedule}
+          view={amortizationView}
+          onViewChange={setAmortizationView}
+          onDownloadAble={downloadAbleScheduleCsv}
+          onDownloadTaxable={downloadTaxableScheduleCsv}
+          languageToggle={languageToggle}
+          rows={scheduleRowsWithBenefits}
+          taxableRows={taxableRows}
+        />
       );
     }
 
@@ -2202,31 +1899,12 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         : [];
       const disclosuresAssumptionsOverride = getClientBlock("disclosuresAssumptions");
       return (
-        <div className="space-y-6">
-          <div className="flex justify-end">{languageToggle}</div>
-          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
-            <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
-              {assumptionTitle}
-            </h1>
-            {disclosuresAssumptionsOverride && (
-              <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
-                {disclosuresAssumptionsOverride}
-              </p>
-            )}
-            {!disclosuresAssumptionsOverride && assumptionItems.length > 0 && (
-              <ul className="mt-4 space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
-                {assumptionItems.map((item, index) => (
-                  <li
-                    key={`assumption-${index}`}
-                    className="list-disc pl-5 text-left text-sm text-zinc-600 dark:text-zinc-400"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            )}
-      </div>
-        </div>
+        <DisclosuresView
+          title={assumptionTitle}
+          items={assumptionItems}
+          overrideText={disclosuresAssumptionsOverride}
+          languageToggle={languageToggle}
+        />
       );
     }
 

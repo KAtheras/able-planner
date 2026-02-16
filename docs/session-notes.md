@@ -42,6 +42,9 @@ Use this file to preserve working context between editor sessions.
 - Consider adding focused tests for taxable depletion-year tax posting behavior.
 - Consider adding client-level overrides for infotip/callout text (currently from `src/copy/*.json`).
 - Re-test mobile console auto-scroll timing/offset and tune if needed.
+- Continue `app/page.tsx` reduction in small safe slices:
+- Extract remaining Inputs view orchestration (left form shell + right console shell) into dedicated components/hooks.
+- Keep behavior and copy unchanged while extracting.
 
 ## Deploy Notes
 - Netlify branch currently used: `refactor/extract-calc`.
@@ -61,6 +64,27 @@ Use this file to preserve working context between editor sessions.
 - `34b699c` consistent chevron icons for form dropdowns.
 
 ## Session Log
+### 2026-02-16
+- Implemented and refined withdrawal-capping behavior:
+- First overdraw month now drains available balance (up to user-entered withdrawal), then ongoing months limit withdrawals to available funds.
+- Added/smoothed planner messaging for withdrawal-limited scenarios and removed conflicting duplicate notices.
+- Added navigation guardrails for `Summary`/`Amortization` based on residency conflict resolution and projection drivers (starting balance or contribution).
+- Continued architecture cleanup:
+- Extracted CSV export logic to `src/lib/report/exportScheduleCsv.ts`.
+- Extracted planner message derivation to `src/lib/planner/messages.ts`.
+- Extracted reusable UI components:
+- `src/components/inputs/AccountEndingValueCard.tsx`
+- `src/components/inputs/PlannerNoticeCard.tsx`
+- `src/components/inputs/Screen2MessagesPanel.tsx`
+- `src/components/inputs/Screen2WtaPanel.tsx`
+- `src/components/inputs/ResidencyWarningCard.tsx`
+- `src/components/reports/SummaryView.tsx`
+- `src/components/schedule/ScheduleView.tsx`
+- `src/components/inputs/DisclosuresView.tsx`
+- Current pause state:
+- `app/page.tsx` reduced to ~2309 lines.
+- Working tree contains additional uncommitted refactor files from the latest extraction batch; review with `git status` before next commit.
+
 ### 2026-02-15
 - Created persistent session notes file.
 - Added template/process for session start/end context syncing.
