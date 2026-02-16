@@ -2051,7 +2051,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
               <div className="md:hidden">{languageToggle}</div>
             </div>
             <div className="inline-flex flex-nowrap items-center gap-1.5 overflow-x-auto">
-              <span className="hidden text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 md:inline">
+              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                 {reportWindowLabel}
               </span>
               <div className="inline-flex flex-nowrap rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
