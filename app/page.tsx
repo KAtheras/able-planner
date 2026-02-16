@@ -1645,6 +1645,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const renderScreen2Messages = () => {
       const forcedMsg =
         ssiMessages.find((message) => message.code === "SSI_FORCED_WITHDRAWALS_APPLIED") ?? null;
+      const contributionStopMsg =
+        ssiMessages.find((message) => message.code === "SSI_CONTRIBUTIONS_STOPPED") ?? null;
       const showStandaloneWithdrawalLimitedMessage =
         shouldShowStandaloneWithdrawalLimitedMessage({
           hasConfiguredWithdrawals,
@@ -1661,9 +1663,22 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         ssiMessages.length > 0
           ? (copy?.messages?.balanceCapWarning ?? "")
               .split("{{cap}}").join("$100,000")
-              .replace("{{breach}}", (ssiMessages[0]?.data?.monthLabel ?? ""))
-              .replace("{{stop}}", (planMessages[0]?.data?.monthLabel ?? ssiMessages[0]?.data?.monthLabel ?? ""))
-              .replace("{{withdrawStart}}", (forcedMsg?.data?.monthLabel ?? ""))
+              .replace(
+                "{{breach}}",
+                contributionStopMsg?.data?.monthLabel ?? forcedMsg?.data?.monthLabel ?? "",
+              )
+              .replace(
+                "{{stop}}",
+                planMessages[0]?.data?.monthLabel ??
+                  contributionStopMsg?.data?.monthLabel ??
+                  "",
+              )
+              .replace(
+                "{{withdrawStart}}",
+                forcedMsg?.data?.monthLabel ??
+                  contributionStopMsg?.data?.monthLabel ??
+                  "",
+              )
           : null;
       return (
         <Screen2MessagesPanel
