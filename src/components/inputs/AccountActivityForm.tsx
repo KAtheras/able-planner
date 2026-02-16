@@ -48,6 +48,7 @@ type AccountActivityFormProps = {
   withdrawalYearOptions: string[];
   onChange?: (updates: Partial<AccountActivityFormProps>) => void;
   onAdvancedClick?: () => void;
+  advancedButtonLabel?: string;
   onTimeHorizonBlur?: () => void;
   timeHorizonLabel?: string;
   contributionIncreaseDisabled?: boolean;
@@ -93,6 +94,7 @@ export default function AccountActivityForm({
   withdrawalYearOptions,
   onChange,
   onAdvancedClick,
+  advancedButtonLabel,
   onTimeHorizonBlur,
   timeHorizonLabel,
   copy,
@@ -694,7 +696,7 @@ export default function AccountActivityForm({
             onClick={() => onAdvancedClick?.()}
             className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-200 dark:bg-zinc-900/30 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
           >
-            Advanced Controls
+            {advancedButtonLabel ?? "Budget for Qualified Withdrawals"}
           </button>
         </div>
       </div>

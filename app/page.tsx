@@ -11,6 +11,7 @@ import DisclosuresView from "@/components/inputs/DisclosuresView";
 import ResidencyWarningCard from "@/components/inputs/ResidencyWarningCard";
 import Screen2MessagesPanel from "@/components/inputs/Screen2MessagesPanel";
 import Screen2WtaPanel from "@/components/inputs/Screen2WtaPanel";
+import QualifiedWithdrawalsBudgetPanel from "@/components/inputs/QualifiedWithdrawalsBudgetPanel";
 import DemographicsForm from "@/components/inputs/DemographicsForm";
 import PlannerNoticeCard from "@/components/inputs/PlannerNoticeCard";
 import SummaryView from "@/components/reports/SummaryView";
@@ -31,6 +32,7 @@ import {
   hasWithdrawalLimitedPlanCode,
   shouldShowStandaloneWithdrawalLimitedMessage,
 } from "@/lib/planner/messages";
+import { useQualifiedWithdrawalBudget } from "@/lib/inputs/useQualifiedWithdrawalBudget";
 
 // TAX LIABILITY HELPERS (PROGRESSIVE BRACKETS)
 type TaxBracket = { min: number; max?: number; rate: number };
@@ -298,6 +300,7 @@ export default function Home() {
   const [withdrawalStartYear, setWithdrawalStartYear] = useState("");
   const [withdrawalStartMonth, setWithdrawalStartMonth] = useState("");
   const [contributionIncreasePct, setContributionIncreasePct] = useState("");
+  const [hasUserEnteredContributionIncrease, setHasUserEnteredContributionIncrease] = useState(false);
   const [withdrawalIncreasePct, setWithdrawalIncreasePct] = useState("");
   const [contributionIncreaseHelperText, setContributionIncreaseHelperText] = useState<string | undefined>(
     undefined,
@@ -509,10 +512,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
   const sanitizeAmountInput = (value: string) => {
     if (value === "") return "";
-    const clean = value.replace(".00","");
-    const parts = clean.split(".");
+    const clean = value.replace(".00", "");
+    const digitsAndDot = clean.replace(/[^0-9.]/g, "");
+    const parts = digitsAndDot.split(".");
     if (parts.length <= 2) {
-      return clean;
+      return digitsAndDot;
     }
     return `${parts[0]}.${parts.slice(1).join("")}`;
   };
@@ -592,6 +596,21 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       horizonEndIndex: Math.max(startIndex, horizonEndIndex),
     };
   }, [getTimeHorizonLimits, timeHorizonYears]);
+
+  const {
+    budgetMode,
+    setBudgetMode,
+    toggleBudgetMode,
+    qualifiedWithdrawalBudget,
+    qualifiedWithdrawalTotal,
+    handleBudgetFieldChange,
+    handleManualWithdrawalOverride,
+    resetQualifiedWithdrawalBudget,
+  } = useQualifiedWithdrawalBudget({
+    monthlyWithdrawal,
+    setMonthlyWithdrawal,
+    sanitizeAmountInput,
+  });
 
   const contributionConstraintHorizon = getHorizonConfig();
   const enforcedContributionStopIndex = (() => {
@@ -709,6 +728,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setScreen1Messages(nextScreen1Messages);
     setScreen2Messages(nextScreen2Messages);
   }, [language, messagesMode, rightCardPrimaryOverride, rightCardSecondaryOverride, copy.flows?.screen1?.defaultMessages, copy.flows?.screen2?.defaultMessages]);
+
+  useEffect(() => {
+    if (inputStep !== 2) {
+      setBudgetMode("default");
+    }
+  }, [inputStep, setBudgetMode]);
 
   useEffect(() => {
     const agiValue = Number(plannerAgi);
@@ -1264,6 +1289,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setContributionEndYear("");
     setContributionEndMonth("");
     setMonthlyWithdrawal("");
+    resetQualifiedWithdrawalBudget();
     setWithdrawalStartYear("");
     setWithdrawalStartMonth("");
     setNonResidentProceedAck(false);
@@ -1274,6 +1300,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setAgiGateEligible(null);
     setScreen1Messages([...screen1DefaultMessages]);
     setContributionIncreasePct("");
+    setHasUserEnteredContributionIncrease(false);
     setWithdrawalIncreasePct("");
     setContributionIncreaseHelperText(undefined);
     setContributionBreachYear(null);
@@ -1652,6 +1679,30 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     };
 
     const renderScreen2Panel = () => {
+      if (budgetMode === "qualifiedWithdrawals") {
+        return (
+          <QualifiedWithdrawalsBudgetPanel
+            accountEndingNode={renderAccountEndingBlock()}
+            depletionNoticeNode={renderAbleDepletionNotice()}
+            values={qualifiedWithdrawalBudget}
+            total={qualifiedWithdrawalTotal}
+            onChange={handleBudgetFieldChange}
+            onClose={() => setBudgetMode("default")}
+            formatCurrency={formatCurrency}
+            copy={{
+              title: copy?.labels?.inputs?.qualifiedWithdrawalsBudgetTitle ?? "",
+              housing: copy?.labels?.inputs?.qualifiedWithdrawalsHousing ?? "",
+              healthcare: copy?.labels?.inputs?.qualifiedWithdrawalsHealthcare ?? "",
+              transportation: copy?.labels?.inputs?.qualifiedWithdrawalsTransportation ?? "",
+              education: copy?.labels?.inputs?.qualifiedWithdrawalsEducation ?? "",
+              other: copy?.labels?.inputs?.qualifiedWithdrawalsOther ?? "",
+              total: copy?.labels?.inputs?.qualifiedWithdrawalsTotal ?? "",
+              closeButton: copy?.buttons?.done ?? "",
+            }}
+          />
+        );
+      }
+
       return (
         <Screen2WtaPanel
           wtaMode={wtaMode}
@@ -2147,7 +2198,9 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
               withdrawalStartYear={withdrawalStartYear}
               withdrawalStartMonth={withdrawalStartMonth}
               contributionIncreaseDisabled={contributionIncreaseDisabledNow}
-              contributionIncreaseHelperText={contributionIncreaseHelperText}
+              contributionIncreaseHelperText={
+                hasUserEnteredContributionIncrease ? contributionIncreaseHelperText : undefined
+              }
               contributionIncreasePct={contributionIncreasePct}
               withdrawalIncreasePct={withdrawalIncreasePct}
               contributionIncreaseStopYear={stopContributionIncreasesAfterYear}
@@ -2177,7 +2230,9 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                   setContributionEndMonth(updates.contributionEndMonth ?? "");
                 }
                 if ("monthlyWithdrawal" in updates)
-                  setMonthlyWithdrawal(sanitizeAmountInput(updates.monthlyWithdrawal ?? ""));
+                  {
+                    handleManualWithdrawalOverride(updates.monthlyWithdrawal ?? "");
+                  }
                 if ("withdrawalStartYear" in updates) {
                   setWithdrawalStartTouched(true);
                   setWithdrawalStartYear(updates.withdrawalStartYear ?? "");
@@ -2187,15 +2242,23 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                   setWithdrawalStartMonth(updates.withdrawalStartMonth ?? "");
                 }
                 if ("contributionIncreasePct" in updates) {
-                  setContributionIncreasePct(updates.contributionIncreasePct ?? "");
+                  const nextValue = updates.contributionIncreasePct ?? "";
+                  setContributionIncreasePct(nextValue);
+                  const nextNumeric = Number(nextValue);
+                  setHasUserEnteredContributionIncrease(
+                    Number.isFinite(nextNumeric) && nextNumeric > 0,
+                  );
                 }
                 if ("withdrawalIncreasePct" in updates) {
                   setWithdrawalIncreasePct(updates.withdrawalIncreasePct ?? "");
                 }
               }}
               onAdvancedClick={() => {
-                /* placeholder */
+                toggleBudgetMode();
               }}
+              advancedButtonLabel={
+                copy?.labels?.inputs?.qualifiedWithdrawalsBudgetButtonLabel ?? ""
+              }
               onTimeHorizonBlur={enforceTimeHorizonLimits}
               timeHorizonLabel={
                 language === "es"
