@@ -21,6 +21,36 @@ const formatCurrencyLabel = (value: number) => formatCurrency(value).replace(".0
 const sumFiniteValues = (values: number[]) =>
   values.reduce((acc, value) => acc + (Number.isFinite(value) ? value : 0), 0);
 
+function buildEnglishTaxBalanceSentence(federalTaxTotal: number, stateTaxTotal: number): string {
+  const hasFederal = federalTaxTotal > 0;
+  const hasState = stateTaxTotal > 0;
+  if (hasFederal && hasState) {
+    return `The taxable account's returns are lower, in part, because federal taxes of ${formatCurrencyLabel(federalTaxTotal)} and state taxes of ${formatCurrencyLabel(stateTaxTotal)} during the projection period reduce the taxable account balances over time, which in turn results in lower investment returns.`;
+  }
+  if (hasFederal) {
+    return `The taxable account's returns are lower, in part, because federal taxes of ${formatCurrencyLabel(federalTaxTotal)} during the projection period reduce the taxable account balances over time, which in turn results in lower investment returns.`;
+  }
+  if (hasState) {
+    return `The taxable account's returns are lower, in part, because state taxes of ${formatCurrencyLabel(stateTaxTotal)} during the projection period reduce the taxable account balances over time, which in turn results in lower investment returns.`;
+  }
+  return "The taxable account's returns are lower, in part, because taxable account balances are reduced over time, which in turn results in lower investment returns.";
+}
+
+function buildSpanishTaxBalanceSentence(federalTaxTotal: number, stateTaxTotal: number): string {
+  const hasFederal = federalTaxTotal > 0;
+  const hasState = stateTaxTotal > 0;
+  if (hasFederal && hasState) {
+    return `Los rendimientos de la cuenta imponible son menores en parte porque los impuestos federales de ${formatCurrencyLabel(federalTaxTotal)} y los impuestos estatales de ${formatCurrencyLabel(stateTaxTotal)} reducen los saldos de la cuenta imponible con el tiempo, lo que a su vez resulta en menores rendimientos de inversión.`;
+  }
+  if (hasFederal) {
+    return `Los rendimientos de la cuenta imponible son menores en parte porque los impuestos federales de ${formatCurrencyLabel(federalTaxTotal)} reducen los saldos de la cuenta imponible con el tiempo, lo que a su vez resulta en menores rendimientos de inversión.`;
+  }
+  if (hasState) {
+    return `Los rendimientos de la cuenta imponible son menores en parte porque los impuestos estatales de ${formatCurrencyLabel(stateTaxTotal)} reducen los saldos de la cuenta imponible con el tiempo, lo que a su vez resulta en menores rendimientos de inversión.`;
+  }
+  return "Los rendimientos de la cuenta imponible son menores en parte porque los saldos de la cuenta imponible se reducen con el tiempo, lo que a su vez resulta en menores rendimientos de inversión.";
+}
+
 export function buildAccountGrowthNarrative({
   language,
   ableRows,
@@ -32,16 +62,18 @@ export function buildAccountGrowthNarrative({
       : "Enter a time horizon to generate the comparative account growth summary.";
   }
 
-  const ableContributionTotal = sumFiniteValues(ableRows.map((row) => row.contribution));
-  const taxableContributionTotal = sumFiniteValues(taxableRows.map((row) => row.contribution));
-  const ableReturnTotal = sumFiniteValues(ableRows.map((row) => row.earnings));
-  const taxableReturnTotal = sumFiniteValues(taxableRows.map((row) => row.investmentReturn));
-  const ableWithdrawalTotal = sumFiniteValues(ableRows.map((row) => row.withdrawal));
-  const taxableWithdrawalTotal = sumFiniteValues(taxableRows.map((row) => row.withdrawal));
-  const taxableFederalTaxTotal = sumFiniteValues(taxableRows.map((row) => row.federalTaxOnEarnings));
-  const taxableStateTaxTotal = sumFiniteValues(taxableRows.map((row) => row.stateTaxOnEarnings));
-  const fscTotal = sumFiniteValues(ableRows.map((row) => row.saversCredit));
-  const stateBenefitTotal = sumFiniteValues(ableRows.map((row) => row.stateBenefit));
+  const ableDetailRows = ableRows.filter((row) => row.year >= 0);
+  const taxableDetailRows = taxableRows.filter((row) => row.year >= 0);
+
+  const ableContributionTotal = sumFiniteValues(ableDetailRows.map((row) => row.contribution));
+  const ableReturnTotal = sumFiniteValues(ableDetailRows.map((row) => row.earnings));
+  const taxableReturnTotal = sumFiniteValues(taxableDetailRows.map((row) => row.investmentReturn));
+  const ableWithdrawalTotal = sumFiniteValues(ableDetailRows.map((row) => row.withdrawal));
+  const taxableWithdrawalTotal = sumFiniteValues(taxableDetailRows.map((row) => row.withdrawal));
+  const taxableFederalTaxTotal = sumFiniteValues(taxableDetailRows.map((row) => row.federalTaxOnEarnings));
+  const taxableStateTaxTotal = sumFiniteValues(taxableDetailRows.map((row) => row.stateTaxOnEarnings));
+  const fscTotal = sumFiniteValues(ableDetailRows.map((row) => row.saversCredit));
+  const stateBenefitTotal = sumFiniteValues(ableDetailRows.map((row) => row.stateBenefit));
 
   const ableEndingBalanceRaw = ableRows.at(-1)?.endingBalance;
   const taxableEndingBalanceRaw = taxableRows.at(-1)?.endingBalance;
@@ -49,7 +81,7 @@ export function buildAccountGrowthNarrative({
   const taxableEndingBalance = Number.isFinite(taxableEndingBalanceRaw) ? Number(taxableEndingBalanceRaw) : 0;
 
   let taxableDepletionLabel: string | null = null;
-  for (const yearRow of taxableRows) {
+  for (const yearRow of taxableDetailRows) {
     for (const monthRow of yearRow.months) {
       if (!Number.isFinite(monthRow.endingBalance)) continue;
       if (monthRow.endingBalance <= 0.01) {
@@ -61,26 +93,63 @@ export function buildAccountGrowthNarrative({
   }
 
   if (language === "es") {
-    const base = `En esta proyección, las contribuciones son ${formatCurrencyLabel(ableContributionTotal)} en ABLE y ${formatCurrencyLabel(taxableContributionTotal)} en la cuenta imponible. La cuenta ABLE genera ${formatCurrencyLabel(ableReturnTotal)} en rendimientos de inversión frente a ${formatCurrencyLabel(taxableReturnTotal)} en la cuenta imponible, donde los rendimientos se reducen por impuestos estimados de ${formatCurrencyLabel(taxableFederalTaxTotal)} federales y ${formatCurrencyLabel(taxableStateTaxTotal)} estatales. Los retiros totales son ${formatCurrencyLabel(ableWithdrawalTotal)} en ABLE y ${formatCurrencyLabel(taxableWithdrawalTotal)} en imponible. Los saldos finales son ${formatCurrencyLabel(ableEndingBalance)} en ABLE y ${formatCurrencyLabel(taxableEndingBalance)} en imponible.`;
+    const withdrawalsSentence =
+      ableWithdrawalTotal <= 0.01 && taxableWithdrawalTotal <= 0.01
+        ? "No hubo retiros programados durante el período."
+        : `Los retiros totales son ${formatCurrencyLabel(ableWithdrawalTotal)} en ABLE y ${formatCurrencyLabel(taxableWithdrawalTotal)} en imponible.`;
+    const paragraphs: string[] = [
+      `En esta proyección, las contribuciones son ${formatCurrencyLabel(ableContributionTotal)} tanto en ABLE como en la cuenta imponible.`,
+      `La cuenta ABLE genera ${formatCurrencyLabel(ableReturnTotal)} en rendimientos de inversión frente a ${formatCurrencyLabel(taxableReturnTotal)} en la cuenta imponible. ${buildSpanishTaxBalanceSentence(taxableFederalTaxTotal, taxableStateTaxTotal)}`,
+      withdrawalsSentence,
+      `Los saldos finales son ${formatCurrencyLabel(ableEndingBalance)} en ABLE y ${formatCurrencyLabel(taxableEndingBalance)} en imponible.`,
+    ];
     const depletion =
       taxableDepletionLabel && taxableWithdrawalTotal + 0.01 < ableWithdrawalTotal
         ? ` La cuenta imponible llega a cero en ${taxableDepletionLabel}, por lo que los retiros imponibles se detienen antes que en ABLE.`
         : "";
+    const spanishBenefitParts: string[] = [];
+    if (fscTotal > 0) {
+      spanishBenefitParts.push(`${formatCurrencyLabel(fscTotal)} por Crédito del Ahorrador Federal`);
+    }
+    if (stateBenefitTotal > 0) {
+      spanishBenefitParts.push(`${formatCurrencyLabel(stateBenefitTotal)} por beneficios fiscales estatales`);
+    }
     const benefits =
-      fscTotal > 0 || stateBenefitTotal > 0
-        ? ` Los beneficios económicos potenciales mostrados por separado del saldo ABLE son ${formatCurrencyLabel(fscTotal)} por Crédito del Ahorrador Federal y ${formatCurrencyLabel(stateBenefitTotal)} por beneficio fiscal estatal.`
+      spanishBenefitParts.length > 0
+        ? ` Además, durante el período de proyección, se estima que la cuenta ABLE puede proporcionar beneficios económicos adicionales potenciales de ${spanishBenefitParts.join(" y ")}. Estos beneficios son adicionales y no están incluidos en el saldo de la cuenta ABLE indicado arriba.`
         : "";
-    return `${base}${depletion}${benefits}`;
+    if (depletion) paragraphs.push(depletion.trim());
+    if (benefits) paragraphs.push(benefits.trim());
+    return paragraphs.join("\n\n");
   }
 
-  const base = `Over this projection, contributions are ${formatCurrencyLabel(ableContributionTotal)} in ABLE and ${formatCurrencyLabel(taxableContributionTotal)} in the taxable account. The ABLE account earns ${formatCurrencyLabel(ableReturnTotal)} in investment returns versus ${formatCurrencyLabel(taxableReturnTotal)} in the taxable account, where returns are reduced by an estimated ${formatCurrencyLabel(taxableFederalTaxTotal)} in federal taxes and ${formatCurrencyLabel(taxableStateTaxTotal)} in state taxes. Total withdrawals are ${formatCurrencyLabel(ableWithdrawalTotal)} from ABLE and ${formatCurrencyLabel(taxableWithdrawalTotal)} from taxable. Ending balances are ${formatCurrencyLabel(ableEndingBalance)} for ABLE and ${formatCurrencyLabel(taxableEndingBalance)} for taxable.`;
+  const withdrawalsSentence =
+    ableWithdrawalTotal <= 0.01 && taxableWithdrawalTotal <= 0.01
+      ? "There were no withdrawals scheduled during the projection."
+      : `Total withdrawals are ${formatCurrencyLabel(ableWithdrawalTotal)} from ABLE and ${formatCurrencyLabel(taxableWithdrawalTotal)} from taxable.`;
+
+  const paragraphs: string[] = [
+    `Over this projection, contributions are ${formatCurrencyLabel(ableContributionTotal)} in both ABLE and the taxable account.`,
+    `The ABLE account is projected to earn ${formatCurrencyLabel(ableReturnTotal)} in investment returns versus ${formatCurrencyLabel(taxableReturnTotal)} in the taxable account. ${buildEnglishTaxBalanceSentence(taxableFederalTaxTotal, taxableStateTaxTotal)}`,
+    withdrawalsSentence,
+    `Ending account balances are projected to be ${formatCurrencyLabel(ableEndingBalance)} for ABLE account and ${formatCurrencyLabel(taxableEndingBalance)} for the taxable account.`,
+  ];
   const depletion =
     taxableDepletionLabel && taxableWithdrawalTotal + 0.01 < ableWithdrawalTotal
       ? ` The taxable account reaches zero in ${taxableDepletionLabel}, so taxable withdrawals stop earlier than ABLE withdrawals.`
       : "";
+  const englishBenefitParts: string[] = [];
+  if (fscTotal > 0) {
+    englishBenefitParts.push(`${formatCurrencyLabel(fscTotal)} in Federal Saver's Credits`);
+  }
+  if (stateBenefitTotal > 0) {
+    englishBenefitParts.push(`${formatCurrencyLabel(stateBenefitTotal)} in state tax benefits`);
+  }
   const benefits =
-    fscTotal > 0 || stateBenefitTotal > 0
-      ? ` Additional potential economic benefits disclosed separately from ABLE balance are ${formatCurrencyLabel(fscTotal)} in Federal Saver's Credit and ${formatCurrencyLabel(stateBenefitTotal)} in state tax benefits.`
+    englishBenefitParts.length > 0
+      ? ` Also, during the projection period, the ABLE account is estimated to provide potential additional economic benefits of ${englishBenefitParts.join(" and ")} on contributions. These benefits are in addition to and are not included in the ABLE account balance above.`
       : "";
-  return `${base}${depletion}${benefits}`;
+  if (depletion) paragraphs.push(depletion.trim());
+  if (benefits) paragraphs.push(benefits.trim());
+  return paragraphs.join("\n\n");
 }

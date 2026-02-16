@@ -186,7 +186,6 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
   const planMaxBalanceValue = Number.isFinite(inputs.planMaxBalance ?? NaN)
     ? inputs.planMaxBalance ?? 0
     : null;
-  let ssiCapMode = false;
   let withdrawalsStopped = false;
   for (let offset = 0; offset < monthsToBuild; offset += 1) {
     const monthIndex = inputs.startMonthIndex + offset;
@@ -277,26 +276,17 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
       }
       contributionValue = 0;
 
-      let forcedWithdrawal = 0;
+      // Apply only the incremental forced withdrawal needed after user-scheduled
+      // withdrawals so SSI-cap mode targets (and does not undershoot) 100,000.
       const projectedAfterContrib = currentBalance + earnings + contributionValue - withdrawalValue;
-      if (!ssiCapMode) {
-        forcedWithdrawal = projectedAfterContrib - SSI_LIMIT;
-        if (forcedWithdrawal > 0) {
-          ssiCapMode = true;
-          if (!forcedWithdrawalsStarted) {
-            forcedWithdrawalsStarted = true;
-            monthSsiCodes.push("SSI_FORCED_WITHDRAWALS_APPLIED");
-          }
-        }
-      } else {
-        forcedWithdrawal = Math.max(0, earnings);
-        if (forcedWithdrawal > 0 && !forcedWithdrawalsStarted) {
+      const forcedWithdrawal = Math.max(0, projectedAfterContrib - SSI_LIMIT);
+      if (forcedWithdrawal > 0) {
+        if (!forcedWithdrawalsStarted) {
           forcedWithdrawalsStarted = true;
           monthSsiCodes.push("SSI_FORCED_WITHDRAWALS_APPLIED");
         }
       }
 
-      forcedWithdrawal = Math.max(0, forcedWithdrawal);
       withdrawalValue += forcedWithdrawal;
       endingBalance = currentBalance + earnings + contributionValue - withdrawalValue;
 

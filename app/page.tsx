@@ -21,8 +21,20 @@ type TaxBracketInput = { min?: number; max?: number; rate?: number };
 type TaxBracketMap = Record<string, TaxBracketInput[]>;
 type StateTaxBracketMap = Record<string, TaxBracketMap>;
 type ClientBlocks = Partial<
-  Record<"landingWelcome" | "disclosuresAssumptions" | "rightCardPrimary" | "rightCardSecondary", Partial<Record<SupportedLanguage, string>>>
+  Record<
+    "landingWelcome" | "disclosuresAssumptions" | "rightCardPrimary" | "rightCardSecondary",
+    Partial<Record<SupportedLanguage, string>>
+  >
 >;
+type ClientLandingContent = Partial<{
+  heroTitle: string;
+  heroBody: string;
+  heroBullets: string[];
+  disclosuresTitle: string;
+  disclosuresIntro: string;
+  disclosuresBody: string;
+}>;
+type ClientLandingOverrides = Partial<Record<SupportedLanguage, ClientLandingContent>>;
 
 function resolveDefaultMessages(
   override: string,
@@ -311,6 +323,16 @@ export default function Home() {
     const raw = (currentClientConfig as { clientBlocks?: ClientBlocks } | undefined)?.clientBlocks?.[slot]?.[language];
     return typeof raw === "string" && raw.trim() ? raw : "";
   };
+  const landingOverride = (currentClientConfig as { landing?: ClientLandingOverrides } | undefined)?.landing?.[language];
+  const hasLandingOverride = Boolean(
+    landingOverride &&
+      (landingOverride.heroTitle?.trim() ||
+        landingOverride.heroBody?.trim() ||
+        landingOverride.disclosuresTitle?.trim() ||
+        landingOverride.disclosuresIntro?.trim() ||
+        landingOverride.disclosuresBody?.trim() ||
+        (Array.isArray(landingOverride.heroBullets) && landingOverride.heroBullets.length > 0)),
+  );
   const rightCardPrimaryOverride = getClientBlock("rightCardPrimary");
   const rightCardSecondaryOverride = getClientBlock("rightCardSecondary");
   const screen1DefaultMessages = resolveDefaultMessages(
@@ -375,17 +397,25 @@ export default function Home() {
   const annualContributionLimit =
     wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
 
+  const landingWelcomeOverride = getClientBlock("landingWelcome");
+  const useLegacyLandingWelcomeOverride = Boolean(landingWelcomeOverride) && !hasLandingOverride;
   const landingCopy = {
-    heroTitle: copy.landing?.heroTitle ?? "",
-    heroBody: copy.landing?.heroBody ?? "",
-    heroBullets: copy.landing?.heroBullets ?? [],
-    disclosuresTitle: copy.landing?.disclosuresTitle ?? "",
-    disclosuresIntro: copy.landing?.disclosuresIntro ?? "",
-    disclosuresBody: copy.landing?.disclosuresBody ?? "",
+    heroTitle: landingOverride?.heroTitle?.trim() || copy.landing?.heroTitle || "",
+    heroBody:
+      landingOverride?.heroBody?.trim() ||
+      (useLegacyLandingWelcomeOverride ? landingWelcomeOverride : "") ||
+      copy.landing?.heroBody ||
+      "",
+    heroBullets:
+      Array.isArray(landingOverride?.heroBullets) && landingOverride.heroBullets.length > 0
+        ? landingOverride.heroBullets
+        : (copy.landing?.heroBullets ?? []),
+    disclosuresTitle: landingOverride?.disclosuresTitle?.trim() || copy.landing?.disclosuresTitle || "",
+    disclosuresIntro: landingOverride?.disclosuresIntro?.trim() || copy.landing?.disclosuresIntro || "",
+    disclosuresBody: landingOverride?.disclosuresBody?.trim() || copy.landing?.disclosuresBody || "",
   };
 
   const disclosuresBodyParagraphs = (landingCopy.disclosuresBody || "").split("\n\n").filter(Boolean);
-  const landingWelcomeOverride = getClientBlock("landingWelcome");
 
   const sanitizeAgiInput = (value: string) => {
     if (value === "") return "";
@@ -1245,8 +1275,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     };
 
     const currentQuestionIndexRaw = questions.findIndex((question) => fscQ[question.key] === null);
-    const currentQuestionIndex = currentQuestionIndexRaw === -1 ? questions.length - 1 : currentQuestionIndexRaw;
-    const currentQuestion = questions[currentQuestionIndex];
+    const visibleQuestionCount = currentQuestionIndexRaw === -1 ? questions.length : currentQuestionIndexRaw + 1;
+    const visibleQuestions = questions.slice(0, visibleQuestionCount);
     const answerFscQuestion = (key: keyof FscAnswers, value: boolean) => {
       setFscQ((prev) => ({ ...prev, [key]: value }));
       const required = FSC_REQUIRED_ANSWERS[key];
@@ -1254,7 +1284,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         finalizeFscEvaluation(false);
         return;
       }
-      if (currentQuestionIndex >= questions.length - 1) {
+      const answeredQuestionIndex = questions.findIndex((question) => question.key === key);
+      if (answeredQuestionIndex >= questions.length - 1) {
         finalizeFscEvaluation(true);
       }
     };
@@ -1845,6 +1876,10 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       ableRows: scheduleRowsWithBenefits,
       taxableRows,
     });
+    const accountGrowthNarrativeParagraphs = accountGrowthNarrative
+      .split("\n\n")
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
 
     if (active === "reports") {
       const reportTitle = copy?.ui?.sidebar?.reports ?? "Reports";
@@ -1893,9 +1928,16 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
               </div>
             </div>
             {reportView === "account_growth" ? (
-              <p className="mt-4 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                {accountGrowthNarrative}
-              </p>
+              <div className="mt-4 space-y-4">
+                {accountGrowthNarrativeParagraphs.map((paragraph, index) => (
+                  <p
+                    key={`account-growth-narrative-${index}`}
+                    className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
             ) : (
               <p className="mt-4 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
                 {copy?.labels?.ui?.placeholderComingSoon ?? ""}
@@ -2212,33 +2254,46 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                             {copy?.labels?.fsc?.intro ?? ""}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
-                          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                            {language === "es"
-                              ? `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`
-                              : `Question ${currentQuestionIndex + 1} of ${questions.length}`}
-                          </p>
-                          <fieldset className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-900/40">
-                            <legend className="px-1 text-xs font-semibold text-zinc-700 dark:text-zinc-200">
-                              {currentQuestion.label}
-                            </legend>
-                            <div className="flex gap-2">
-                              <button
-                                type="button"
-                                className="flex-1 rounded-full border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
-                                onClick={() => answerFscQuestion(currentQuestion.key, true)}
-                              >
-                                {copy?.buttons?.yes ?? ""}
-                              </button>
-                              <button
-                                type="button"
-                                className="flex-1 rounded-full border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
-                                onClick={() => answerFscQuestion(currentQuestion.key, false)}
-                              >
-                                {copy?.buttons?.no ?? ""}
-                              </button>
-                            </div>
-                          </fieldset>
+                        <div className="space-y-3">
+                          {visibleQuestions.map((question) => {
+                            const selectedAnswer = fscQ[question.key];
+                            const isAnswered = selectedAnswer !== null;
+                            return (
+                              <fieldset key={question.key} className="space-y-2">
+                                <legend className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">
+                                  {question.label}
+                                </legend>
+                                <div className="flex gap-2">
+                                  <button
+                                    type="button"
+                                    className={[
+                                      "flex-1 rounded-full border px-3 py-2 text-xs font-semibold transition",
+                                      selectedAnswer === true
+                                        ? "border-transparent bg-[var(--brand-primary)] text-white"
+                                        : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900",
+                                    ].join(" ")}
+                                    onClick={() => answerFscQuestion(question.key, true)}
+                                    disabled={isAnswered}
+                                  >
+                                    {copy?.buttons?.yes ?? ""}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={[
+                                      "flex-1 rounded-full border px-3 py-2 text-xs font-semibold transition",
+                                      selectedAnswer === false
+                                        ? "border-transparent bg-[var(--brand-primary)] text-white"
+                                        : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900",
+                                    ].join(" ")}
+                                    onClick={() => answerFscQuestion(question.key, false)}
+                                    disabled={isAnswered}
+                                  >
+                                    {copy?.buttons?.no ?? ""}
+                                  </button>
+                                </div>
+                              </fieldset>
+                            );
+                          })}
                         </div>
                       </div>
                     ) : annualReturnWarningText ? (
@@ -2298,10 +2353,10 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
             </h1>
 
             <p className="mt-4 max-w-6xl mx-auto text-left text-base text-zinc-600 dark:text-zinc-400">
-              {landingWelcomeOverride || landingCopy.heroBody}
+              {landingCopy.heroBody}
             </p>
 
-            {!landingWelcomeOverride && (
+            {!useLegacyLandingWelcomeOverride && (
               <>
                 {landingCopy.heroBullets.length > 0 && (
                   <ul className="mt-4 flex flex-col items-center gap-2 text-base text-zinc-600 dark:text-zinc-400">
