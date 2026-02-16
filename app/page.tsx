@@ -415,6 +415,11 @@ export default function Home() {
     ? (copy?.messages?.ssiIncomeEligibilityWarning ??
       "Based on your taxable income and filing status, you may not be eligible for SSI benefits. However, the ABLE planner will assume the beneficiary is eligible for SSI benefits based on your selection. Accordingly, the ABLE planner will implement logic that will keep the account balances below the SSI limit by stopping contributions and enforcing required distributions, where necessary.")
     : "";
+  const showSsiSelectionPlannerMessage = isSsiEligible && !showSsiIncomeEligibilityWarning;
+  const ssiSelectionPlannerMessageText = showSsiSelectionPlannerMessage
+    ? (copy?.messages?.ssiSelectionPlannerMessage ??
+      "Checking this box will instruct the planner to stop contributions and implement withdrawals where necessary to keep your projected account balance under $100,000.")
+    : "";
 
   const landingWelcomeOverride = getClientBlock("landingWelcome");
   const useLegacyLandingWelcomeOverride = Boolean(landingWelcomeOverride) && !hasLandingOverride;
@@ -1909,39 +1914,42 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       const taxBenefitsTabLabel = copy?.labels?.reports?.taxBenefitsTab ?? "Tax Benefits";
       return (
         <div className="space-y-6">
-          <div
-            role="tablist"
-            aria-label={reportTitle}
-            className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={reportView === "account_growth"}
-              className={[
-                "rounded-full px-4 py-1 text-xs font-semibold transition",
-                reportView === "account_growth"
-                  ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                  : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-              ].join(" ")}
-              onClick={() => setReportView("account_growth")}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div
+              role="tablist"
+              aria-label={reportTitle}
+              className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
             >
-              {accountGrowthTabLabel}
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={reportView === "tax_benefits"}
-              className={[
-                "rounded-full px-4 py-1 text-xs font-semibold transition",
-                reportView === "tax_benefits"
-                  ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                  : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-              ].join(" ")}
-              onClick={() => setReportView("tax_benefits")}
-            >
-              {taxBenefitsTabLabel}
-            </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={reportView === "account_growth"}
+                className={[
+                  "rounded-full px-4 py-1 text-xs font-semibold transition",
+                  reportView === "account_growth"
+                    ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                    : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+                ].join(" ")}
+                onClick={() => setReportView("account_growth")}
+              >
+                {accountGrowthTabLabel}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={reportView === "tax_benefits"}
+                className={[
+                  "rounded-full px-4 py-1 text-xs font-semibold transition",
+                  reportView === "tax_benefits"
+                    ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                    : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+                ].join(" ")}
+                onClick={() => setReportView("tax_benefits")}
+              >
+                {taxBenefitsTabLabel}
+              </button>
+            </div>
+            <div>{languageToggle}</div>
           </div>
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
             <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
@@ -1986,7 +1994,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
 
       return (
         <div className="space-y-6">
-          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
+          <div className="h-full text-sm text-zinc-600 dark:text-zinc-400">
             <div className="flex flex-col items-center gap-3 md:flex-row md:items-center md:gap-4">
               <h1 className="order-1 w-full text-center text-lg font-semibold text-zinc-900 dark:text-zinc-50 md:order-2 md:flex-1">
                 {copy?.labels?.schedule?.amortizationTitle ?? ""}
@@ -2276,6 +2284,11 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                       </div>
                     ) : showQuestionnaire ? (
                       <div className="space-y-4">
+                        {ssiSelectionPlannerMessageText && (
+                          <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-xs text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
+                            {ssiSelectionPlannerMessageText}
+                          </div>
+                        )}
                         <div>
                           <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">{copy?.labels?.inputs?.fscEligibilityTitle ?? ""}</h2>
                           <p className="text-xs text-zinc-500">
@@ -2334,6 +2347,11 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                       </div>
                     ) : (
                       <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+                        {ssiSelectionPlannerMessageText && (
+                          <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-xs text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
+                            {ssiSelectionPlannerMessageText}
+                          </div>
+                        )}
                         {screen1Messages.map((message, index) => (
                           <p
                             key={`${message}-${index}`}

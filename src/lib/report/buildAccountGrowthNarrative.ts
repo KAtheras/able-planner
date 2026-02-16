@@ -136,12 +136,16 @@ export function buildAccountGrowthNarrative({
       : Math.abs(ableWithdrawalTotal - taxableWithdrawalTotal) <= 0.01
         ? `Total withdrawals are ${formatCurrencyLabel(ableWithdrawalTotal)} for both ABLE and taxable accounts.${englishDepletionParenthetical}`
       : `Total withdrawals are ${formatCurrencyLabel(ableWithdrawalTotal)} from ABLE and ${formatCurrencyLabel(taxableWithdrawalTotal)} from taxable.${englishDepletionParenthetical}`;
+  const endingBalancesSentence =
+    Math.abs(ableEndingBalance - taxableEndingBalance) <= 0.01
+      ? `Ending account balances are projected to be ${formatCurrencyLabel(ableEndingBalance)} for both the ABLE and the taxable accounts.`
+      : `Ending account balances are projected to be ${formatCurrencyLabel(ableEndingBalance)} for ABLE account and ${formatCurrencyLabel(taxableEndingBalance)} for the taxable account.`;
 
   const paragraphs: string[] = [
     `Over this projection, contributions are ${formatCurrencyLabel(ableContributionTotal)} in both ABLE and the taxable account.`,
     `The ABLE account is projected to earn ${formatCurrencyLabel(ableReturnTotal)} in investment returns versus ${formatCurrencyLabel(taxableReturnTotal)} in the taxable account. ${buildEnglishTaxBalanceSentence(taxableFederalTaxTotal, taxableStateTaxTotal)}`,
     withdrawalsSentence,
-    `Ending account balances are projected to be ${formatCurrencyLabel(ableEndingBalance)} for ABLE account and ${formatCurrencyLabel(taxableEndingBalance)} for the taxable account.`,
+    endingBalancesSentence,
   ];
   const englishBenefitParts: string[] = [];
   if (fscTotal > 0) {
