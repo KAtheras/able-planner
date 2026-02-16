@@ -318,6 +318,7 @@ export default function Home() {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const inputsColumnRef = useRef<HTMLDivElement | null>(null);
   const consoleCardRef = useRef<HTMLDivElement | null>(null);
+  const fscQuestionnaireRef = useRef<HTMLDivElement | null>(null);
   const lastMobileConsoleModeRef = useRef<"annual" | "residency" | "fsc" | "ssi" | null>(null);
   const currentClientConfig = getClientConfig(plannerStateCode);
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
@@ -1026,6 +1027,17 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     showFscQuestionnaire,
     showWelcome,
   ]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile || showWelcome || active !== "inputs" || inputStep !== 1 || !showFscQuestionnaire) {
+      return;
+    }
+    window.setTimeout(() => {
+      fscQuestionnaireRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  }, [active, inputStep, showFscQuestionnaire, showWelcome]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -2000,8 +2012,8 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         language === "es" ? "Ventana de reporte" : "Report Window";
       return (
         <div className="space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-3">
+          <div className="space-y-3 md:space-y-0 md:flex md:flex-wrap md:items-center md:justify-between md:gap-3">
+            <div className="flex items-center justify-between gap-3 md:justify-start">
               <div
                 role="tablist"
                 aria-label={reportTitle}
@@ -2036,60 +2048,61 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                   {taxBenefitsTabLabel}
                 </button>
               </div>
-              <div className="inline-flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                  {reportWindowLabel}
-                </span>
-                <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
-                  {(() => {
-                    const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
-                      (option) => option !== "max" && option === horizonConfig.safeYears,
-                    );
-                    const showMaxOption = !hasPresetMatchingHorizon;
-                    const optionsToRender = REPORT_WINDOW_OPTIONS.filter(
-                      (option) => option !== "max" || showMaxOption,
-                    );
-                    return optionsToRender.map((option) => {
-                    const isMax = option === "max";
-                    const optionYears = isMax ? horizonLimits.maxYears : option;
-                    const disabled = !isMax && horizonConfig.safeYears > 0 && option > horizonConfig.safeYears;
-                    const isActive =
-                      reportWindowYears === option ||
-                      (!showMaxOption &&
-                        reportWindowYears === "max" &&
-                        option !== "max" &&
-                        option === horizonConfig.safeYears);
-                    const label = isMax
-                      ? language === "es"
-                        ? `MAX (${horizonConfig.safeYears}A)`
-                        : `MAX (${horizonConfig.safeYears}Y)`
-                      : language === "es"
-                        ? `${optionYears}A`
-                        : `${optionYears}Y`;
-                    return (
-                      <button
-                        key={`report-window-${option}`}
-                        type="button"
-                        disabled={disabled}
-                        aria-pressed={isActive}
-                        className={[
-                          "rounded-full px-3 py-1 text-xs font-semibold transition",
-                          isActive
-                            ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                            : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-                          disabled ? "cursor-not-allowed opacity-40 hover:bg-transparent" : "",
-                        ].join(" ")}
-                        onClick={() => setReportWindowYears(option)}
-                      >
-                        {label}
-                      </button>
-                    );
-                    });
-                  })()}
-                </div>
+              <div className="md:hidden">{languageToggle}</div>
+            </div>
+            <div className="inline-flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                {reportWindowLabel}
+              </span>
+              <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
+                {(() => {
+                  const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
+                    (option) => option !== "max" && option === horizonConfig.safeYears,
+                  );
+                  const showMaxOption = !hasPresetMatchingHorizon;
+                  const optionsToRender = REPORT_WINDOW_OPTIONS.filter(
+                    (option) => option !== "max" || showMaxOption,
+                  );
+                  return optionsToRender.map((option) => {
+                  const isMax = option === "max";
+                  const optionYears = isMax ? horizonLimits.maxYears : option;
+                  const disabled = !isMax && horizonConfig.safeYears > 0 && option > horizonConfig.safeYears;
+                  const isActive =
+                    reportWindowYears === option ||
+                    (!showMaxOption &&
+                      reportWindowYears === "max" &&
+                      option !== "max" &&
+                      option === horizonConfig.safeYears);
+                  const label = isMax
+                    ? language === "es"
+                      ? `MAX (${horizonConfig.safeYears}A)`
+                      : `MAX (${horizonConfig.safeYears}Y)`
+                    : language === "es"
+                      ? `${optionYears}A`
+                      : `${optionYears}Y`;
+                  return (
+                    <button
+                      key={`report-window-${option}`}
+                      type="button"
+                      disabled={disabled}
+                      aria-pressed={isActive}
+                      className={[
+                        "rounded-full px-3 py-1 text-xs font-semibold transition",
+                        isActive
+                          ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                          : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+                        disabled ? "cursor-not-allowed opacity-40 hover:bg-transparent" : "",
+                      ].join(" ")}
+                      onClick={() => setReportWindowYears(option)}
+                    >
+                      {label}
+                    </button>
+                  );
+                  });
+                })()}
               </div>
             </div>
-            <div>{languageToggle}</div>
+            <div className="hidden md:block">{languageToggle}</div>
           </div>
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
             <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
@@ -2439,7 +2452,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                       </div>
                     )}
                     {showQuestionnaire && !showResidencyWarning && (
-                      <div className="space-y-4">
+                      <div ref={fscQuestionnaireRef} className="space-y-4">
                         <div>
                           <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">{copy?.labels?.inputs?.fscEligibilityTitle ?? ""}</h2>
                           <p className="text-xs text-zinc-500">
