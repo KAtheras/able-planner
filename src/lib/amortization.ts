@@ -88,6 +88,7 @@ const MAX_MONTHS = 900;
 
 const SSI_LIMIT = 100000;
 const PLAN_STOP_CODE = "PLAN_MAX_CONTRIBUTIONS_STOPPED";
+const WITHDRAWAL_LIMITED_CODE = "WITHDRAWALS_LIMITED_TO_AVAILABLE_BALANCE";
 
 export type SsiMessage = {
   code: string;
@@ -311,21 +312,22 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
       adjustedEndingBalance = 0;
     } else if (plannedWithdrawal <= availableFunds) {
       adjustedEndingBalance = availableFunds - plannedWithdrawal;
-    } else if (safeContribution > 0) {
-      // cap withdrawals to contributions + earnings when contributions still arrive
-      actualWithdrawal = Math.min(plannedWithdrawal, Math.max(0, safeContribution + safeEarnings));
-      adjustedEndingBalance = Math.max(0, availableFunds - actualWithdrawal);
     } else {
-      // final bucket-empty withdrawal then stop future draws
+      // When planned withdrawals exceed available funds, fully drain the account
+      // for this month (up to the planned withdrawal). This avoids carrying
+      // leftover balance into future months once depletion begins.
       actualWithdrawal = Math.min(plannedWithdrawal, availableFunds);
       adjustedEndingBalance = Math.max(0, availableFunds - actualWithdrawal);
-      if (adjustedEndingBalance === 0) {
+      if (adjustedEndingBalance === 0 && safeContribution <= 0) {
         withdrawalsStopped = true;
       }
     }
 
     withdrawalValue = actualWithdrawal;
     endingBalance = adjustedEndingBalance;
+    if (plannedWithdrawal > actualWithdrawal) {
+      monthPlanCodes.push(WITHDRAWAL_LIMITED_CODE);
+    }
 
     const monthRow: MonthlyRow = {
       monthLabel,

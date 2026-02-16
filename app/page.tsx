@@ -406,8 +406,11 @@ export default function Home() {
     beneficiaryStateOfResidence.toUpperCase() !== planState;
   const residencyBlocking = residencyMismatch && (planResidencyRequired || !nonResidentProceedAck);
   const showFscQuestionnaire = messagesMode === "fsc" && agiGateEligible === true;
+  const startingBalanceNum =
+    Number((startingBalance ?? "").replace(".00", "")) || 0;
   const monthlyContributionNum =
     Number((monthlyContribution ?? "").replace(".00","")) || 0;
+  const hasProjectionDriver = startingBalanceNum > 0 || monthlyContributionNum > 0;
   const annualContributionLimit =
     wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
   const agiValueForSsiWarning = Number(plannerAgi);
@@ -415,6 +418,22 @@ export default function Home() {
     plannerAgi !== "" &&
     !Number.isNaN(agiValueForSsiWarning) &&
     (agiValueForSsiWarning > 0 || agiValueForSsiWarning === 0);
+  const canAccessProjectionViews =
+    !residencyBlocking &&
+    hasProjectionDriver;
+  const handleSidebarChange = (next: NavKey) => {
+    if ((next === "reports" || next === "schedule") && !canAccessProjectionViews) {
+      setActive("inputs");
+      setMessagesMode("intro");
+      if (residencyBlocking) {
+        setInputStep(1);
+      } else {
+        setInputStep(2);
+      }
+      return;
+    }
+    setActive(next);
+  };
   const ssiWarningThreshold = ssiIncomeThresholdMap?.[plannerFilingStatus];
   const showSsiIncomeEligibilityWarning =
     isSsiEligible &&
@@ -1304,7 +1323,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         setInputStep(2);
         return;
       }
-      if (hasContributionIssue) return;
+      const startingBalanceNumber = startingBalance === "" ? 0 : Number(startingBalance);
+      const hasDriverForProjection =
+        (Number.isFinite(startingBalanceNumber) && startingBalanceNumber > 0) ||
+        (Number.isFinite(monthlyContributionNumber) && monthlyContributionNumber > 0);
+      if (hasContributionIssue || !hasDriverForProjection) return;
       enforceTimeHorizonLimits();
       setActive("reports");
       setReportView("account_growth");
@@ -1488,10 +1511,21 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const renderScreen2Messages = () => {
       const forcedMsg =
         ssiMessages.find((message) => message.code === "SSI_FORCED_WITHDRAWALS_APPLIED") ?? null;
+      const showStandaloneWithdrawalLimitedMessage =
+        hasConfiguredWithdrawals &&
+        hasWithdrawalLimitedMessage &&
+        !endingValueInfo.depletionEligible;
       return (
         <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
           {renderAccountEndingBlock()}
           {renderAbleDepletionNotice()}
+          {showStandaloneWithdrawalLimitedMessage && (
+            <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
+              <p className="text-sm leading-relaxed">
+                {copy?.messages?.withdrawalLimitedToAvailable ?? ""}
+              </p>
+            </div>
+          )}
           {planMessages.length > 0 && (
             <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
               <p className="text-sm leading-relaxed">
@@ -1741,6 +1775,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         ? parseAmount(monthlyContributionFuture)
         : monthlyContributionValue;
     const monthlyWithdrawalValue = parseAmount(monthlyWithdrawal);
+    const hasConfiguredWithdrawals = monthlyWithdrawalValue > 0;
     const contributionEndRaw = parseMonthYearToIndex(contributionEndYear, contributionEndMonth);
     const contributionEndIndexValue =
       contributionEndRaw !== null
@@ -1808,12 +1843,20 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         enabled: hasTimeHorizon,
       planMaxBalance,
       });     
+    const hasWithdrawalLimitedMessage = scheduleRows.some((row) =>
+      row.months.some(
+        (monthRow) =>
+          Array.isArray(monthRow.planCodes) &&
+          monthRow.planCodes.includes("WITHDRAWALS_LIMITED_TO_AVAILABLE_BALANCE"),
+      ),
+    );
 
     const endingValueInfo = (() => {
       if (!scheduleRows.length) {
         return {
           endingLabel: "—",
           depletionEligible: false,
+          withdrawalsStopAfterDepletion: false,
           reachLabel: "",
           stopLabel: "",
         };
@@ -1841,15 +1884,28 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         if (depletionMonthIndex !== null) break;
       }
       const depletionEligible =
+        hasConfiguredWithdrawals &&
         scheduleHasWithdrawals &&
         depletionMonthIndex !== null &&
         depletionMonthIndex < horizonEndIndex;
       const reachLabel =
         depletionMonthIndex !== null ? formatMonthYearLabel(depletionMonthIndex) : "";
       const stopLabel = reachLabel;
+      const withdrawalsStopAfterDepletion =
+        depletionMonthIndex !== null
+          ? !scheduleRows.some((row) =>
+              row.months.some(
+                (monthRow) =>
+                  monthRow.monthIndex > depletionMonthIndex &&
+                  Number.isFinite(monthRow.withdrawal) &&
+                  monthRow.withdrawal > 0,
+              ),
+            )
+          : false;
       return {
         endingLabel,
         depletionEligible,
+        withdrawalsStopAfterDepletion,
         reachLabel,
         stopLabel,
       };
@@ -1870,13 +1926,15 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
     };
     const renderAbleDepletionNotice = () => {
       if (!endingValueInfo.depletionEligible) return null;
+      const depletionTemplate = endingValueInfo.withdrawalsStopAfterDepletion
+        ? copy?.messages?.ableDepletionNotice
+        : copy?.messages?.ableDepletionNoticeLimitedWithdrawals;
       return (
         <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
           <p className="text-sm leading-relaxed">
-            {(copy?.messages?.ableDepletionNotice ??
-              "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.")
-              .replace("{{reachMonthYear}}", endingValueInfo.reachLabel || "")
-              .replace("{{stopMonthYear}}", endingValueInfo.stopLabel || "")}
+            {(depletionTemplate ?? "")
+              .split("{{reachMonthYear}}").join(endingValueInfo.reachLabel || "")
+              .split("{{stopMonthYear}}").join(endingValueInfo.stopLabel || "")}
           </p>
         </div>
       );
@@ -2559,7 +2617,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       <div ref={shellRef} className="mx-auto flex w-full max-w-6xl">
         <Sidebar
           active={active}
-          onChange={setActive}
+          onChange={handleSidebarChange}
           labels={copy.ui?.sidebar}
           desktopTopOffsetPx={sidebarDesktopTopOffset}
         />
