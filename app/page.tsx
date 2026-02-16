@@ -2041,15 +2041,28 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                   {reportWindowLabel}
                 </span>
                 <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
-                  {REPORT_WINDOW_OPTIONS.map((option) => {
+                  {(() => {
+                    const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
+                      (option) => option !== "max" && option === horizonConfig.safeYears,
+                    );
+                    const showMaxOption = !hasPresetMatchingHorizon;
+                    const optionsToRender = REPORT_WINDOW_OPTIONS.filter(
+                      (option) => option !== "max" || showMaxOption,
+                    );
+                    return optionsToRender.map((option) => {
                     const isMax = option === "max";
                     const optionYears = isMax ? horizonLimits.maxYears : option;
                     const disabled = !isMax && horizonConfig.safeYears > 0 && option > horizonConfig.safeYears;
-                    const isActive = reportWindowYears === option;
+                    const isActive =
+                      reportWindowYears === option ||
+                      (!showMaxOption &&
+                        reportWindowYears === "max" &&
+                        option !== "max" &&
+                        option === horizonConfig.safeYears);
                     const label = isMax
                       ? language === "es"
-                        ? `MAX (${horizonLimits.maxYears})`
-                        : `MAX (${horizonLimits.maxYears})`
+                        ? `MAX (${horizonConfig.safeYears}A)`
+                        : `MAX (${horizonConfig.safeYears}Y)`
                       : language === "es"
                         ? `${optionYears}A`
                         : `${optionYears}Y`;
@@ -2071,7 +2084,8 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                         {label}
                       </button>
                     );
-                  })}
+                    });
+                  })()}
                 </div>
               </div>
             </div>
