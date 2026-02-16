@@ -96,6 +96,8 @@ export function buildAccountGrowthNarrative({
     const withdrawalsSentence =
       ableWithdrawalTotal <= 0.01 && taxableWithdrawalTotal <= 0.01
         ? "No hubo retiros programados durante el período."
+        : Math.abs(ableWithdrawalTotal - taxableWithdrawalTotal) <= 0.01
+          ? `Los retiros totales son ${formatCurrencyLabel(ableWithdrawalTotal)} tanto para las cuentas ABLE como imponible.`
         : `Los retiros totales son ${formatCurrencyLabel(ableWithdrawalTotal)} en ABLE y ${formatCurrencyLabel(taxableWithdrawalTotal)} en imponible.`;
     const paragraphs: string[] = [
       `En esta proyección, las contribuciones son ${formatCurrencyLabel(ableContributionTotal)} tanto en ABLE como en la cuenta imponible.`,
@@ -123,10 +125,17 @@ export function buildAccountGrowthNarrative({
     return paragraphs.join("\n\n");
   }
 
+  const englishDepletionParenthetical =
+    taxableDepletionLabel && taxableWithdrawalTotal + 0.01 < ableWithdrawalTotal
+      ? ` (The taxable account reaches zero in ${taxableDepletionLabel}, so taxable account withdrawals stop earlier than ABLE withdrawals.)`
+      : "";
+
   const withdrawalsSentence =
     ableWithdrawalTotal <= 0.01 && taxableWithdrawalTotal <= 0.01
       ? "There were no withdrawals scheduled during the projection."
-      : `Total withdrawals are ${formatCurrencyLabel(ableWithdrawalTotal)} from ABLE and ${formatCurrencyLabel(taxableWithdrawalTotal)} from taxable.`;
+      : Math.abs(ableWithdrawalTotal - taxableWithdrawalTotal) <= 0.01
+        ? `Total withdrawals are ${formatCurrencyLabel(ableWithdrawalTotal)} for both ABLE and taxable accounts.${englishDepletionParenthetical}`
+      : `Total withdrawals are ${formatCurrencyLabel(ableWithdrawalTotal)} from ABLE and ${formatCurrencyLabel(taxableWithdrawalTotal)} from taxable.${englishDepletionParenthetical}`;
 
   const paragraphs: string[] = [
     `Over this projection, contributions are ${formatCurrencyLabel(ableContributionTotal)} in both ABLE and the taxable account.`,
@@ -134,10 +143,6 @@ export function buildAccountGrowthNarrative({
     withdrawalsSentence,
     `Ending account balances are projected to be ${formatCurrencyLabel(ableEndingBalance)} for ABLE account and ${formatCurrencyLabel(taxableEndingBalance)} for the taxable account.`,
   ];
-  const depletion =
-    taxableDepletionLabel && taxableWithdrawalTotal + 0.01 < ableWithdrawalTotal
-      ? ` The taxable account reaches zero in ${taxableDepletionLabel}, so taxable withdrawals stop earlier than ABLE withdrawals.`
-      : "";
   const englishBenefitParts: string[] = [];
   if (fscTotal > 0) {
     englishBenefitParts.push(`${formatCurrencyLabel(fscTotal)} in Federal Saver's Credits`);
@@ -149,7 +154,6 @@ export function buildAccountGrowthNarrative({
     englishBenefitParts.length > 0
       ? ` Also, during the projection period, the ABLE account is estimated to provide potential additional economic benefits of ${englishBenefitParts.join(" and ")} on contributions. These benefits are in addition to and are not included in the ABLE account balance above.`
       : "";
-  if (depletion) paragraphs.push(depletion.trim());
   if (benefits) paragraphs.push(benefits.trim());
   return paragraphs.join("\n\n");
 }

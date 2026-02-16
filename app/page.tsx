@@ -1887,46 +1887,44 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       const taxBenefitsTabLabel = copy?.labels?.reports?.taxBenefitsTab ?? "Tax Benefits";
       return (
         <div className="space-y-6">
+          <div
+            role="tablist"
+            aria-label={reportTitle}
+            className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={reportView === "account_growth"}
+              className={[
+                "rounded-full px-4 py-1 text-xs font-semibold transition",
+                reportView === "account_growth"
+                  ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                  : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+              ].join(" ")}
+              onClick={() => setReportView("account_growth")}
+            >
+              {accountGrowthTabLabel}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={reportView === "tax_benefits"}
+              className={[
+                "rounded-full px-4 py-1 text-xs font-semibold transition",
+                reportView === "tax_benefits"
+                  ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                  : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+              ].join(" ")}
+              onClick={() => setReportView("tax_benefits")}
+            >
+              {taxBenefitsTabLabel}
+            </button>
+          </div>
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
-            <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
-              <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                {reportTitle}
-              </h1>
-              <div
-                role="tablist"
-                aria-label={reportTitle}
-                className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
-              >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={reportView === "account_growth"}
-                  className={[
-                    "rounded-full px-4 py-1 text-xs font-semibold transition",
-                    reportView === "account_growth"
-                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                      : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-                  ].join(" ")}
-                  onClick={() => setReportView("account_growth")}
-                >
-                  {accountGrowthTabLabel}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={reportView === "tax_benefits"}
-                  className={[
-                    "rounded-full px-4 py-1 text-xs font-semibold transition",
-                    reportView === "tax_benefits"
-                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
-                      : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-                  ].join(" ")}
-                  onClick={() => setReportView("tax_benefits")}
-                >
-                  {taxBenefitsTabLabel}
-                </button>
-              </div>
-            </div>
+            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              {reportTitle}
+            </h1>
             {reportView === "account_growth" ? (
               <div className="mt-4 space-y-4">
                 {accountGrowthNarrativeParagraphs.map((paragraph, index) => (
