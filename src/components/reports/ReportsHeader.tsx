@@ -26,7 +26,7 @@ export default function ReportsHeader({
   languageToggle,
 }: Props) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-30 -mx-4 mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 bg-zinc-50/95 px-4 py-2 backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:static md:mx-0 md:mb-0 md:border-0 md:bg-transparent md:px-0 md:py-0">
       <div className="flex items-center justify-between gap-3 md:justify-start">
         <div
           role="tablist"
@@ -45,7 +45,8 @@ export default function ReportsHeader({
             ].join(" ")}
             onClick={() => onReportViewChange("account_growth")}
           >
-            {accountGrowthTabLabel}
+            <span className="md:hidden">Summary</span>
+            <span className="hidden md:inline">{accountGrowthTabLabel}</span>
           </button>
           <button
             type="button"
@@ -59,7 +60,8 @@ export default function ReportsHeader({
             ].join(" ")}
             onClick={() => onReportViewChange("tax_benefits")}
           >
-            {ableGrowthTabLabel}
+            <span className="md:hidden">ABLE</span>
+            <span className="hidden md:inline">{ableGrowthTabLabel}</span>
           </button>
           <button
             type="button"
@@ -73,7 +75,8 @@ export default function ReportsHeader({
             ].join(" ")}
             onClick={() => onReportViewChange("taxable_growth")}
           >
-            {taxableGrowthTabLabel}
+            <span className="md:hidden">Taxable</span>
+            <span className="hidden md:inline">{taxableGrowthTabLabel}</span>
           </button>
           <button
             type="button"
@@ -87,7 +90,8 @@ export default function ReportsHeader({
             ].join(" ")}
             onClick={() => onReportViewChange("able_vs_taxable")}
           >
-            {ableVsTaxableTabLabel}
+            <span className="md:hidden">Comparison</span>
+            <span className="hidden md:inline">{ableVsTaxableTabLabel}</span>
           </button>
         </div>
         <div className="md:hidden">{languageToggle}</div>

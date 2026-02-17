@@ -97,6 +97,15 @@ export default function SummaryView({
               {paragraph}
             </p>
           ))}
+          <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+            You can view the account growth of an ABLE and a Taxable investment account by
+            selecting the ABLE or Taxable tabs at the top. You can also see a comparison of the
+            ABLE and Taxable accounts.
+          </p>
+          <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+            Lastly, you can view these results across a variety of time periods by selecting the
+            desired time period on the Report Window button above for each of the report tabs.
+          </p>
           </div>
         </div>
       ) : reportView === "tax_benefits" ? (
