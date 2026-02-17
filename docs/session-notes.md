@@ -64,6 +64,50 @@ Use this file to preserve working context between editor sessions.
 - `34b699c` consistent chevron icons for form dropdowns.
 
 ## Session Log
+### 2026-02-16 (Later Session)
+- Reports/summary architecture and UX updates:
+- Added new report tabs and views:
+- `Summary` narrative tab (heading restored in centered card).
+- `ABLE Account Growth` chart tab.
+- `Taxable Account Growth` chart tab.
+- `ABLE vs Taxable` comparison tab (new table-style panel).
+- Removed `5Y` from report window selector options.
+- Added `ABLE vs Taxable` comparison component:
+- New file: `src/components/reports/AbleVsTaxablePanel.tsx`.
+- Side-by-side components: starting balance, contributions, withdrawals, investment returns, taxable federal/state taxes, ending balances, ABLE FSC/state contribution tax benefits, ABLE total economic value.
+- Taxable federal/state taxes shown as negative values in comparison.
+- Taxable `Total Economic Value` row extended to show taxable ending balance for comparability.
+- Zero-value ABLE benefit rows now show dash (`—`) instead of `$0`.
+- Chart improvements (`src/components/reports/ChartsPanel.tsx`):
+- Added taxable growth decomposition with smoothed tax drag display.
+- Combined taxable federal/state drag into a single `Taxes on Earnings (Drag)` series and card value.
+- Added ABLE and taxable footnotes with dynamic starting balance amount:
+- `** Amount includes account starting balance of $X.`
+- Tooltip improvements:
+- ABLE tooltip now includes derived `ABLE Account Balance` and `Total Economic Value`.
+- Reordered tooltip to place existing `Additional Economic Benefit` between those two values.
+- Tooltip rows now render with right-aligned numeric values.
+- UI polish:
+- Left desktop sidebar icon-button corners reduced (less rounded).
+- Summary and comparison report cards now match chart card corner radius (`rounded-xl`).
+- Copy and wiring updates:
+- Added new report labels/keys in `src/copy/en.json` and `src/copy/es.json` for the 4th tab and comparison panel labels.
+- Updated report view unions/props in:
+- `app/page.tsx`
+- `src/components/reports/ReportsHeader.tsx`
+- `src/components/reports/SummaryView.tsx`
+- Commits pushed in this session:
+- `c20fb8d` feat: refine reports charts and tighten page spacing
+- `3ba06d7` feat: expand report charts with taxable growth and tooltip refinements
+- `7463794` feat: add ABLE vs taxable panel and refine report views
+- `2dd6938` chore: polish report card styling and comparison formatting
+- Next-session plan (user confirmed):
+- Clean up code further and reduce `app/page.tsx`.
+- Eliminate any remaining hardcoded text in UI flow.
+- Continue refactoring elements out of `app/page.tsx` in safe slices.
+- Plan client implementation steps.
+- Prepare repository for test deployment to simulated client website (using own website as test case).
+
 ### 2026-02-16
 - Implemented/refined withdrawal capping and message behavior:
 - First overdraw month now drains available balance (up to planned withdrawal), then ongoing months are limited by available funds.

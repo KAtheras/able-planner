@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as echarts from "echarts";
 import type { TaxableYearRow, YearRow } from "@/lib/amortization";
 import { formatMonthYearFromIndex } from "@/lib/date/formatMonthYear";
@@ -37,6 +37,17 @@ const formatSignedCurrencyValue = (value: number) =>
 
 export default function ChartsPanel({ language, accountType, ableRows = [], taxableRows = [] }: Props) {
   const chartRef = useRef<HTMLDivElement | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const update = () => setIsDarkMode(mediaQuery.matches);
+    update();
+
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
 
   const monthlyRows = useMemo<GrowthPoint[]>(() => {
     if (accountType === "taxable") {
@@ -77,12 +88,10 @@ export default function ChartsPanel({ language, accountType, ableRows = [], taxa
   useEffect(() => {
     if (!chartRef.current) return;
     const chart = echarts.init(chartRef.current);
-    const isDark =
-      typeof document !== "undefined" &&
-      document.documentElement.classList.contains("dark");
-    const axisColor = isDark ? "#d4d4d8" : "#52525b";
-    const splitLineColor = isDark ? "rgba(161,161,170,0.22)" : "rgba(63,63,70,0.16)";
-    const titleColor = isDark ? "#e4e4e7" : "#18181b";
+    const axisColor = isDarkMode ? "#ffffff" : "#52525b";
+    const splitLineColor = isDarkMode ? "rgba(161,161,170,0.22)" : "rgba(63,63,70,0.16)";
+    const titleColor = isDarkMode ? "#ffffff" : "#18181b";
+    const endingBalanceLineColor = isDarkMode ? "#ffffff" : "#111827";
 
     const labels = monthlyRows.map((monthRow) =>
       formatMonthYearFromIndex(monthRow.monthIndex, language, { monthStyle: "short" }),
@@ -345,8 +354,8 @@ export default function ChartsPanel({ language, accountType, ableRows = [], taxa
                 smooth: 0.2,
                 symbol: "none",
                 data: endingBalanceSeries,
-                lineStyle: { width: 2, color: "#111827", type: "solid" },
-                itemStyle: { color: "#111827" },
+                lineStyle: { width: 2, color: endingBalanceLineColor, type: "solid" },
+                itemStyle: { color: endingBalanceLineColor },
               },
             ]
           : []),
@@ -383,7 +392,7 @@ export default function ChartsPanel({ language, accountType, ableRows = [], taxa
       window.removeEventListener("resize", resize);
       chart.dispose();
     };
-  }, [accountType, language, monthlyRows]);
+  }, [accountType, isDarkMode, language, monthlyRows]);
 
   const chartSummaryRows = useMemo(() => {
     if (!monthlyRows.length) return [];
@@ -517,7 +526,7 @@ export default function ChartsPanel({ language, accountType, ableRows = [], taxa
         : []),
       {
         key: "ending",
-        color: "#111827",
+        color: accountType === "taxable" && isDarkMode ? "#ffffff" : "#111827",
         label:
           language === "es"
             ? accountType === "able"
@@ -544,7 +553,7 @@ export default function ChartsPanel({ language, accountType, ableRows = [], taxa
     ];
 
     return rows;
-  }, [accountType, language, monthlyRows]);
+  }, [accountType, isDarkMode, language, monthlyRows]);
 
   const accountStartingBalance = useMemo(() => {
     const firstRow = monthlyRows[0];
