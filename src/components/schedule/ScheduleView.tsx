@@ -54,7 +54,7 @@ export default function ScheduleView({
 }: Props) {
   if (!hasTimeHorizon) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
           <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             {labels?.amortizationTitle ?? ""}
@@ -68,7 +68,7 @@ export default function ScheduleView({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div className="h-full text-sm text-zinc-600 dark:text-zinc-400">
         <ScheduleHeader
           title={labels?.amortizationTitle ?? ""}
@@ -83,7 +83,7 @@ export default function ScheduleView({
           downloadCsvTitle={labels?.downloadCsvTitle ?? ""}
           languageToggle={languageToggle}
         />
-        <div className="mt-4">
+        <div className="mt-2">
           <AmortizationScheduleTable
             rows={rows}
             taxableRows={taxableRows}

@@ -53,7 +53,7 @@
     "reports": {
       "title": "Resumen",
       "accountGrowthTab": "Crecimiento de la cuenta",
-      "taxBenefitsTab": "Beneficios fiscales",
+      "taxBenefitsTab": "Charts",
       "reportWindowLabel": "Ventana de reporte"
     },
     "inputs": {

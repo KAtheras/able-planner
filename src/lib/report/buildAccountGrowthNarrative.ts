@@ -9,15 +9,13 @@ type BuildAccountGrowthNarrativeArgs = {
   taxableRows: TaxableYearRow[];
 };
 
-const formatCurrency = (value: number) =>
+const formatCurrencyLabel = (value: number) =>
   value.toLocaleString("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
-
-const formatCurrencyLabel = (value: number) => formatCurrency(value).replace(".00", "");
 
 const sumFiniteValues = (values: number[]) =>
   values.reduce((acc, value) => acc + (Number.isFinite(value) ? value : 0), 0);

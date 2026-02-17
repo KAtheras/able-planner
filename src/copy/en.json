@@ -53,7 +53,7 @@
     "reports": {
       "title": "Summary",
       "accountGrowthTab": "Summary",
-      "taxBenefitsTab": "Tax Benefits",
+      "taxBenefitsTab": "Charts",
       "reportWindowLabel": "Report Window"
     },
     "inputs": {

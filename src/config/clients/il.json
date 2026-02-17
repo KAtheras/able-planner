@@ -19,7 +19,7 @@
   },
   "typography": {
     "fontFamily": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", system-ui, sans-serif",
-    "baseFontSizePx": 16,
+    "baseFontSizePx": 18,
     "lineHeight": 1.45
   },
   "clientBlocks": {

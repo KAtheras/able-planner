@@ -2,6 +2,8 @@
 
 import type { ReactNode } from "react";
 import ReportsHeader from "@/components/reports/ReportsHeader";
+import ChartsPanel from "@/components/reports/ChartsPanel";
+import type { YearRow } from "@/lib/amortization";
 
 type ReportView = "account_growth" | "tax_benefits";
 
@@ -21,7 +23,9 @@ type Props = {
   reportWindowLabel: string;
   reportWindowOptions: ReportWindowOptionItem[];
   languageToggle: ReactNode;
+  language: "en" | "es";
   accountGrowthNarrativeParagraphs: string[];
+  ableRows: YearRow[];
   placeholderText: string;
 };
 
@@ -34,11 +38,14 @@ export default function SummaryView({
   reportWindowLabel,
   reportWindowOptions,
   languageToggle,
+  language,
   accountGrowthNarrativeParagraphs,
+  ableRows,
   placeholderText,
 }: Props) {
+  void placeholderText;
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <ReportsHeader
         title={reportTitle}
         accountGrowthTabLabel={accountGrowthTabLabel}
@@ -49,27 +56,20 @@ export default function SummaryView({
         reportWindowOptions={reportWindowOptions}
         languageToggle={languageToggle}
       />
-      <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
-        <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-          {reportTitle}
-        </h1>
-        {reportView === "account_growth" ? (
-          <div className="mt-4 space-y-4">
-            {accountGrowthNarrativeParagraphs.map((paragraph, index) => (
-              <p
-                key={`account-growth-narrative-${index}`}
-                className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"
-              >
-                {paragraph}
-              </p>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-4 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-            {placeholderText}
-          </p>
-        )}
-      </div>
+      {reportView === "account_growth" ? (
+        <div className="space-y-4">
+          {accountGrowthNarrativeParagraphs.map((paragraph, index) => (
+            <p
+              key={`account-growth-narrative-${index}`}
+              className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"
+            >
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      ) : (
+        <ChartsPanel ableRows={ableRows} language={language} />
+      )}
     </div>
   );
 }

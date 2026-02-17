@@ -16,7 +16,7 @@ export default function DisclosuresView({
   languageToggle,
 }: Props) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div className="flex justify-end">{languageToggle}</div>
       <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
         <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
