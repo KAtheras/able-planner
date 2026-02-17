@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-type ReportView = "account_growth" | "tax_benefits";
+type ReportView = "account_growth" | "tax_benefits" | "taxable_growth";
 
 type ReportWindowOptionItem = {
   key: string;
@@ -14,7 +14,8 @@ type ReportWindowOptionItem = {
 type Props = {
   title: string;
   accountGrowthTabLabel: string;
-  taxBenefitsTabLabel: string;
+  ableGrowthTabLabel: string;
+  taxableGrowthTabLabel: string;
   reportView: ReportView;
   onReportViewChange: (view: ReportView) => void;
   reportWindowLabel: string;
@@ -25,7 +26,8 @@ type Props = {
 export default function ReportsHeader({
   title,
   accountGrowthTabLabel,
-  taxBenefitsTabLabel,
+  ableGrowthTabLabel,
+  taxableGrowthTabLabel,
   reportView,
   onReportViewChange,
   reportWindowLabel,
@@ -66,7 +68,21 @@ export default function ReportsHeader({
             ].join(" ")}
             onClick={() => onReportViewChange("tax_benefits")}
           >
-            {taxBenefitsTabLabel}
+            {ableGrowthTabLabel}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={reportView === "taxable_growth"}
+            className={[
+              "rounded-full px-4 py-1 text-xs font-semibold transition",
+              reportView === "taxable_growth"
+                ? "bg-[var(--brand-primary)] text-white shadow-sm"
+                : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+            ].join(" ")}
+            onClick={() => onReportViewChange("taxable_growth")}
+          >
+            {taxableGrowthTabLabel}
           </button>
         </div>
         <div className="md:hidden">{languageToggle}</div>

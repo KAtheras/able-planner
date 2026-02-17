@@ -53,7 +53,8 @@
     "reports": {
       "title": "Resumen",
       "accountGrowthTab": "Crecimiento de la cuenta",
-      "taxBenefitsTab": "Charts",
+      "taxBenefitsTab": "Crecimiento de la cuenta ABLE",
+      "taxableGrowthTab": "Crecimiento de la cuenta gravable",
       "reportWindowLabel": "Ventana de reporte"
     },
     "inputs": {

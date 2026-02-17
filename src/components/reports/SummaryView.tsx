@@ -3,9 +3,9 @@
 import type { ReactNode } from "react";
 import ReportsHeader from "@/components/reports/ReportsHeader";
 import ChartsPanel from "@/components/reports/ChartsPanel";
-import type { YearRow } from "@/lib/amortization";
+import type { TaxableYearRow, YearRow } from "@/lib/amortization";
 
-type ReportView = "account_growth" | "tax_benefits";
+type ReportView = "account_growth" | "tax_benefits" | "taxable_growth";
 
 type ReportWindowOptionItem = {
   key: string;
@@ -17,7 +17,8 @@ type ReportWindowOptionItem = {
 type Props = {
   reportTitle: string;
   accountGrowthTabLabel: string;
-  taxBenefitsTabLabel: string;
+  ableGrowthTabLabel: string;
+  taxableGrowthTabLabel: string;
   reportView: ReportView;
   onReportViewChange: (view: ReportView) => void;
   reportWindowLabel: string;
@@ -26,13 +27,15 @@ type Props = {
   language: "en" | "es";
   accountGrowthNarrativeParagraphs: string[];
   ableRows: YearRow[];
+  taxableRows: TaxableYearRow[];
   placeholderText: string;
 };
 
 export default function SummaryView({
   reportTitle,
   accountGrowthTabLabel,
-  taxBenefitsTabLabel,
+  ableGrowthTabLabel,
+  taxableGrowthTabLabel,
   reportView,
   onReportViewChange,
   reportWindowLabel,
@@ -41,6 +44,7 @@ export default function SummaryView({
   language,
   accountGrowthNarrativeParagraphs,
   ableRows,
+  taxableRows,
   placeholderText,
 }: Props) {
   void placeholderText;
@@ -49,7 +53,8 @@ export default function SummaryView({
       <ReportsHeader
         title={reportTitle}
         accountGrowthTabLabel={accountGrowthTabLabel}
-        taxBenefitsTabLabel={taxBenefitsTabLabel}
+        ableGrowthTabLabel={ableGrowthTabLabel}
+        taxableGrowthTabLabel={taxableGrowthTabLabel}
         reportView={reportView}
         onReportViewChange={onReportViewChange}
         reportWindowLabel={reportWindowLabel}
@@ -67,8 +72,10 @@ export default function SummaryView({
             </p>
           ))}
         </div>
+      ) : reportView === "tax_benefits" ? (
+        <ChartsPanel ableRows={ableRows} language={language} accountType="able" />
       ) : (
-        <ChartsPanel ableRows={ableRows} language={language} />
+        <ChartsPanel taxableRows={taxableRows} language={language} accountType="taxable" />
       )}
     </div>
   );

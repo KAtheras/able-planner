@@ -270,7 +270,9 @@ const getStateTaxBenefitConfig = (
 export default function Home() {
   const [language, setLanguage] = useState<SupportedLanguage>("en");
   const [active, setActive] = useState<NavKey>("inputs");
-  const [reportView, setReportView] = useState<"account_growth" | "tax_benefits">("account_growth");
+  const [reportView, setReportView] = useState<
+    "account_growth" | "tax_benefits" | "taxable_growth"
+  >("account_growth");
   const [reportWindowYears, setReportWindowYears] = useState<ReportWindowOption>("max");
   const [plannerStateCode, setPlannerStateCode] = useState<PlannerState>("default");
   const [inputStep, setInputStep] = useState<1 | 2>(1);
@@ -2025,7 +2027,8 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
     if (active === "reports") {
       const reportTitle = copy?.labels?.reports?.title ?? "";
       const accountGrowthTabLabel = copy?.labels?.reports?.accountGrowthTab ?? "";
-      const taxBenefitsTabLabel = copy?.labels?.reports?.taxBenefitsTab ?? "";
+      const ableGrowthTabLabel = copy?.labels?.reports?.taxBenefitsTab ?? "";
+      const taxableGrowthTabLabel = copy?.labels?.reports?.taxableGrowthTab ?? "";
       const reportWindowLabel = copy?.labels?.reports?.reportWindowLabel ?? "";
       const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
         (option) => option !== "max" && option === horizonConfig.safeYears,
@@ -2064,7 +2067,8 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         <SummaryView
           reportTitle={reportTitle}
           accountGrowthTabLabel={accountGrowthTabLabel}
-          taxBenefitsTabLabel={taxBenefitsTabLabel}
+          ableGrowthTabLabel={ableGrowthTabLabel}
+          taxableGrowthTabLabel={taxableGrowthTabLabel}
           reportView={reportView}
           onReportViewChange={setReportView}
           reportWindowLabel={reportWindowLabel}
@@ -2073,6 +2077,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           language={language}
           accountGrowthNarrativeParagraphs={accountGrowthNarrativeParagraphs}
           ableRows={reportAbleRows}
+          taxableRows={reportTaxableRows}
           placeholderText={copy?.labels?.ui?.placeholderComingSoon ?? ""}
         />
       );
