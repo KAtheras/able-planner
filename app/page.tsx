@@ -2737,6 +2737,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         <Sidebar
           active={active}
           onChange={handleSidebarChange}
+          language={language}
           labels={copy.ui?.sidebar}
           desktopTopOffsetPx={sidebarDesktopTopOffset}
           mobileBackAction={{

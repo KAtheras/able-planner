@@ -90,6 +90,7 @@ const ITEMS: NavItem[] = [
 type SidebarProps = {
   active: NavKey;
   onChange: (key: NavKey) => void;
+  language: "en" | "es";
   labels?: Partial<Record<NavKey, string>>;
   desktopTopOffsetPx?: number;
   mobileBackAction?: {
@@ -107,6 +108,7 @@ type SidebarProps = {
 export default function Sidebar({
   active,
   onChange,
+  language,
   labels,
   desktopTopOffsetPx,
   mobileBackAction,
@@ -183,9 +185,13 @@ export default function Sidebar({
               const baseLabel = labels?.[item.key] ?? item.label;
               const mobileLabel =
                 item.key === "schedule"
-                  ? "Schedule"
+                  ? language === "es"
+                    ? "Cronograma"
+                    : "Schedule"
                   : item.key === "disclosures"
-                    ? "Notes"
+                    ? language === "es"
+                      ? "Notas"
+                      : "Notes"
                     : baseLabel;
               return (
                 <button

@@ -10,6 +10,7 @@ type Props = {
   ableGrowthTabLabel: string;
   taxableGrowthTabLabel: string;
   ableVsTaxableTabLabel: string;
+  language: "en" | "es";
   reportView: ReportView;
   enabledReportViews: ReportView[];
   onReportViewChange: (view: ReportView) => void;
@@ -22,6 +23,7 @@ export default function ReportsHeader({
   ableGrowthTabLabel,
   taxableGrowthTabLabel,
   ableVsTaxableTabLabel,
+  language,
   reportView,
   enabledReportViews,
   onReportViewChange,
@@ -31,7 +33,7 @@ export default function ReportsHeader({
     if (view === "account_growth") {
       return {
         view,
-        mobileLabel: "Summary",
+        mobileLabel: language === "es" ? "Resumen" : "Summary",
         desktopLabel: accountGrowthTabLabel,
       };
     }
@@ -45,13 +47,13 @@ export default function ReportsHeader({
     if (view === "taxable_growth") {
       return {
         view,
-        mobileLabel: "Taxable",
+        mobileLabel: language === "es" ? "Gravable" : "Taxable",
         desktopLabel: taxableGrowthTabLabel,
       };
     }
     return {
       view: "able_vs_taxable" as const,
-      mobileLabel: "Comparison",
+      mobileLabel: language === "es" ? "Comparación" : "Comparison",
       desktopLabel: ableVsTaxableTabLabel,
     };
   });

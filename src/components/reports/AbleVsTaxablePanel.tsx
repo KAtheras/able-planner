@@ -45,6 +45,7 @@ const formatSignedCurrency = (value: number) =>
   value < 0 ? `-${formatCurrency(Math.abs(value))}` : formatCurrency(value);
 const formatCurrencyOrDash = (value: number, dash: string) =>
   value === 0 ? dash : formatCurrency(value);
+const NA_DISPLAY = "N/A";
 
 type Totals = {
   startingBalance: number;
@@ -198,70 +199,98 @@ export default function AbleVsTaxablePanel({
     {
       key: "startingBalance",
       label: labels.rows.startingBalance,
+      ableNumeric: ableTotals.startingBalance,
+      taxableNumeric: taxableTotals.startingBalance,
       able: formatCurrency(ableTotals.startingBalance),
       taxable: formatCurrency(taxableTotals.startingBalance),
     },
     {
       key: "contributions",
       label: labels.rows.contributions,
+      ableNumeric: ableTotals.contributions,
+      taxableNumeric: taxableTotals.contributions,
       able: formatCurrency(ableTotals.contributions),
       taxable: formatCurrency(taxableTotals.contributions),
     },
     {
       key: "withdrawals",
       label: labels.rows.withdrawals,
+      ableNumeric: ableTotals.withdrawals,
+      taxableNumeric: taxableTotals.withdrawals,
       able: formatCurrency(ableTotals.withdrawals),
       taxable: formatCurrency(taxableTotals.withdrawals),
     },
     {
       key: "investmentReturns",
       label: labels.rows.investmentReturns,
+      ableNumeric: ableTotals.investmentReturns,
+      taxableNumeric: taxableTotals.investmentReturns,
       able: formatCurrency(ableTotals.investmentReturns),
       taxable: formatCurrency(taxableTotals.investmentReturns),
     },
     {
       key: "federalTaxes",
       label: labels.rows.federalTaxes,
-      able: labels.naLabel,
+      ableNumeric: null,
+      taxableNumeric: taxableTotals.federalTaxes,
+      able: NA_DISPLAY,
       taxable: formatSignedCurrency(-taxableTotals.federalTaxes),
     },
     {
       key: "stateTaxes",
       label: labels.rows.stateTaxes,
-      able: labels.naLabel,
+      ableNumeric: null,
+      taxableNumeric: taxableTotals.stateTaxes,
+      able: NA_DISPLAY,
       taxable: formatSignedCurrency(-taxableTotals.stateTaxes),
     },
     {
       key: "endingBalance",
       label: labels.rows.endingBalance,
+      ableNumeric: ableTotals.endingBalance,
+      taxableNumeric: taxableTotals.endingBalance,
       able: formatCurrency(ableTotals.endingBalance),
       taxable: formatCurrency(taxableTotals.endingBalance),
     },
     {
       key: "federalSaversCredit",
       label: labels.rows.federalSaversCredit,
+      ableNumeric: ableTotals.federalSaversCredit,
+      taxableNumeric: null,
       able: formatCurrencyOrDash(ableTotals.federalSaversCredit, labels.naLabel),
-      taxable: labels.naLabel,
+      taxable: NA_DISPLAY,
     },
     {
       key: "stateTaxBenefits",
       label: labels.rows.stateTaxBenefits,
+      ableNumeric: ableTotals.stateTaxBenefits,
+      taxableNumeric: null,
       able: formatCurrencyOrDash(ableTotals.stateTaxBenefits, labels.naLabel),
-      taxable: labels.naLabel,
+      taxable: NA_DISPLAY,
     },
     {
       key: "totalEconomicValue",
       label: labels.rows.totalEconomicValue,
+      ableNumeric: ableTotals.totalEconomicValue,
+      taxableNumeric: taxableTotals.endingBalance,
       able: formatCurrency(ableTotals.totalEconomicValue),
       taxable: formatCurrency(taxableTotals.endingBalance),
     },
     {
       key: "totalEconomicBenefit",
       label: labels.rows.totalEconomicBenefit,
+      ableNumeric: ableTotals.totalEconomicBenefit,
+      taxableNumeric: taxableTotals.totalEconomicBenefit,
       able: formatCurrencyOrDash(ableTotals.totalEconomicBenefit, labels.naLabel),
       taxable: formatSignedCurrency(taxableTotals.totalEconomicBenefit),
     },
-  ];
+  ].filter((row) => {
+    const ableValue = row.ableNumeric;
+    const taxableValue = row.taxableNumeric;
+    const ableIsZero = ableValue === null || ableValue === 0;
+    const taxableIsZero = taxableValue === null || taxableValue === 0;
+    return !(ableIsZero && taxableIsZero);
+  });
 
   return (
     <div className="mt-4">
@@ -269,7 +298,7 @@ export default function AbleVsTaxablePanel({
         <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950/50">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              <span className="md:hidden">Able vs. Taxable</span>
+              <span className="md:hidden">{language === "es" ? "ABLE vs. Gravable" : "Able vs. Taxable"}</span>
               <span className="hidden md:inline">{labels.title}</span>
             </h2>
             <div className="ml-auto">

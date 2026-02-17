@@ -8,6 +8,7 @@ type Props = {
   title: string;
   ableLabel: string;
   taxableLabel: string;
+  language: "en" | "es";
   view: ViewMode;
   onViewChange: (view: ViewMode) => void;
   onDownloadAble: () => void;
@@ -32,6 +33,7 @@ export default function ScheduleHeader({
   title,
   ableLabel,
   taxableLabel,
+  language,
   view,
   onViewChange,
   onDownloadAble,
@@ -85,7 +87,7 @@ export default function ScheduleHeader({
               ].join(" ")}
               onClick={() => onViewChange("taxable")}
             >
-              <span className="md:hidden">Taxable</span>
+              <span className="md:hidden">{language === "es" ? "Gravable" : "Taxable"}</span>
               <span className="hidden md:inline">{taxableLabel}</span>
             </button>
             <button

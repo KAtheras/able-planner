@@ -74,6 +74,7 @@ export default function ScheduleView({
           title={labels?.amortizationTitle ?? ""}
           ableLabel={labels?.ableAccountToggle ?? ""}
           taxableLabel={labels?.taxableAccountToggle ?? ""}
+          language={language}
           view={view}
           onViewChange={onViewChange}
           onDownloadAble={onDownloadAble}
