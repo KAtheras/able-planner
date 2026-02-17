@@ -131,6 +131,7 @@ export default function SummaryView({
           ableRows={ableRows}
           taxableRows={taxableRows}
           labels={ableVsTaxablePanelLabels}
+          language={language}
           reportWindowLabel={reportWindowLabel}
           reportWindowOptions={reportWindowOptions}
         />

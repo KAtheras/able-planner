@@ -29,6 +29,7 @@ type Props = {
   ableRows: YearRow[];
   taxableRows: TaxableYearRow[];
   labels: Labels;
+  language: "en" | "es";
   reportWindowLabel: string;
   reportWindowOptions: ReportWindowOptionItem[];
 };
@@ -63,6 +64,7 @@ export default function AbleVsTaxablePanel({
   ableRows,
   taxableRows,
   labels,
+  language,
   reportWindowLabel,
   reportWindowOptions,
 }: Props) {
@@ -262,39 +264,58 @@ export default function AbleVsTaxablePanel({
   ];
 
   return (
-    <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950/50">
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{labels.title}</h2>
-        <div className="ml-auto">
-          <ReportWindowToggle label={reportWindowLabel} options={reportWindowOptions} />
+    <div className="mt-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_520px]">
+        <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950/50">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{labels.title}</h2>
+            <div className="ml-auto">
+              <ReportWindowToggle label={reportWindowLabel} options={reportWindowOptions} />
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-zinc-200 text-left text-xs uppercase tracking-wide text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
+                  <th className="px-2 py-2 font-semibold">{labels.metricLabel}</th>
+                  <th className="px-2 py-2 text-right font-semibold">{labels.ableLabel}</th>
+                  <th className="px-2 py-2 text-right font-semibold">{labels.taxableLabel}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, index) => (
+                  <tr
+                    key={row.key}
+                    className={index % 2 === 0 ? "bg-zinc-50/60 dark:bg-zinc-900/40" : ""}
+                  >
+                    <td className="px-2 py-2 text-zinc-700 dark:text-zinc-200">{row.label}</td>
+                    <td className="px-2 py-2 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                      {row.able}
+                    </td>
+                    <td className="px-2 py-2 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                      {row.taxable}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-zinc-200 text-left text-xs uppercase tracking-wide text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-              <th className="px-2 py-2 font-semibold">{labels.metricLabel}</th>
-              <th className="px-2 py-2 text-right font-semibold">{labels.ableLabel}</th>
-              <th className="px-2 py-2 text-right font-semibold">{labels.taxableLabel}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr
-                key={row.key}
-                className={index % 2 === 0 ? "bg-zinc-50/60 dark:bg-zinc-900/40" : ""}
-              >
-                <td className="px-2 py-2 text-zinc-700 dark:text-zinc-200">{row.label}</td>
-                <td className="px-2 py-2 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-                  {row.able}
-                </td>
-                <td className="px-2 py-2 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-                  {row.taxable}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <aside className="rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-200">
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            {language === "es" ? "Notas de comparación" : "Comparison Notes"}
+          </h3>
+          <p className="mt-2 leading-relaxed">
+            {language === "es"
+              ? "Esta tabla compara, lado a lado, el crecimiento de una cuenta ABLE frente a una cuenta gravable según sus supuestos."
+              : "This table compares side-by-side growth for an ABLE account and a taxable account based on your assumptions."}
+          </p>
+          <p className="mt-2 leading-relaxed">
+            {language === "es"
+              ? "Los impuestos federales y estatales en la cuenta gravable se muestran como valores negativos para reflejar el impacto en el crecimiento."
+              : "Federal and state taxes for the taxable account are shown as negative values to reflect drag on growth."}
+          </p>
+        </aside>
       </div>
     </div>
   );
