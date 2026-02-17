@@ -38,6 +38,8 @@ const formatCurrency = (value: number) =>
   });
 const formatSignedCurrency = (value: number) =>
   value < 0 ? `-${formatCurrency(Math.abs(value))}` : formatCurrency(value);
+const formatCurrencyOrDash = (value: number, dash: string) =>
+  value === 0 ? dash : formatCurrency(value);
 
 type Totals = {
   startingBalance: number;
@@ -219,13 +221,13 @@ export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Pr
     {
       key: "federalSaversCredit",
       label: labels.rows.federalSaversCredit,
-      able: formatCurrency(ableTotals.federalSaversCredit),
+      able: formatCurrencyOrDash(ableTotals.federalSaversCredit, labels.naLabel),
       taxable: labels.naLabel,
     },
     {
       key: "stateTaxBenefits",
       label: labels.rows.stateTaxBenefits,
-      able: formatCurrency(ableTotals.stateTaxBenefits),
+      able: formatCurrencyOrDash(ableTotals.stateTaxBenefits, labels.naLabel),
       taxable: labels.naLabel,
     },
     {
@@ -237,7 +239,7 @@ export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Pr
   ];
 
   return (
-    <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950/50">
+    <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950/50">
       <h2 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{labels.title}</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-sm">

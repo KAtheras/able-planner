@@ -100,7 +100,7 @@ export default function Sidebar({ active, onChange, labels, desktopTopOffsetPx }
               onClick={() => onChange(item.key)}
               aria-current={isActive ? "page" : undefined}
               className={[
-                "group flex w-full flex-col items-center justify-center gap-2 rounded-3xl px-2 py-3 text-xs font-semibold",
+                "group flex w-full flex-col items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-semibold",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
                 isActive
                   ? "bg-[var(--brand-primary)] text-[var(--brand-on-primary)]"
@@ -109,7 +109,7 @@ export default function Sidebar({ active, onChange, labels, desktopTopOffsetPx }
             >
               <span
                 className={[
-                  "grid place-items-center rounded-2xl",
+                  "grid place-items-center rounded-lg",
                   isActive ? "opacity-100" : "opacity-80 group-hover:opacity-100",
                 ].join(" ")}
               >

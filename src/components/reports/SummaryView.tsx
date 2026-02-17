@@ -86,7 +86,7 @@ export default function SummaryView({
         languageToggle={languageToggle}
       />
       {reportView === "account_growth" ? (
-        <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
           <h1 className="text-center text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             {reportTitle}
           </h1>
