@@ -55,7 +55,25 @@
       "accountGrowthTab": "Crecimiento de la cuenta",
       "taxBenefitsTab": "Crecimiento de la cuenta ABLE",
       "taxableGrowthTab": "Crecimiento de la cuenta gravable",
-      "reportWindowLabel": "Ventana de reporte"
+      "ableVsTaxableTab": "ABLE vs Taxable",
+      "reportWindowLabel": "Ventana de reporte",
+      "ableVsTaxableTitle": "Comparación ABLE vs gravable",
+      "ableVsTaxableMetricLabel": "Componente",
+      "ableVsTaxableAbleLabel": "ABLE",
+      "ableVsTaxableTaxableLabel": "Gravable",
+      "ableVsTaxableNaLabel": "—",
+      "ableVsTaxableRows": {
+        "startingBalance": "Saldo inicial",
+        "contributions": "Contribuciones",
+        "withdrawals": "Retiros",
+        "investmentReturns": "Rendimientos de inversión",
+        "federalTaxes": "Impuestos federales sobre rendimientos",
+        "stateTaxes": "Impuestos estatales sobre rendimientos",
+        "endingBalance": "Saldo final",
+        "federalSaversCredit": "Crédito Federal del Ahorrista",
+        "stateTaxBenefits": "Beneficios fiscales estatales sobre contribuciones",
+        "totalEconomicValue": "Valor económico total"
+      }
     },
     "inputs": {
       "accountActivityTitle": "Actividad de la cuenta",

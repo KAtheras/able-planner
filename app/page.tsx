@@ -55,8 +55,8 @@ type ClientLandingContent = Partial<{
   disclosuresBody: string;
 }>;
 type ClientLandingOverrides = Partial<Record<SupportedLanguage, ClientLandingContent>>;
-type ReportWindowOption = 3 | 5 | 10 | 20 | 40 | "max";
-const REPORT_WINDOW_OPTIONS: ReportWindowOption[] = [3, 5, 10, 20, 40, "max"];
+type ReportWindowOption = 3 | 10 | 20 | 40 | "max";
+const REPORT_WINDOW_OPTIONS: ReportWindowOption[] = [3, 10, 20, 40, "max"];
 
 function resolveDefaultMessages(
   override: string,
@@ -271,7 +271,7 @@ export default function Home() {
   const [language, setLanguage] = useState<SupportedLanguage>("en");
   const [active, setActive] = useState<NavKey>("inputs");
   const [reportView, setReportView] = useState<
-    "account_growth" | "tax_benefits" | "taxable_growth"
+    "account_growth" | "tax_benefits" | "taxable_growth" | "able_vs_taxable"
   >("account_growth");
   const [reportWindowYears, setReportWindowYears] = useState<ReportWindowOption>("max");
   const [plannerStateCode, setPlannerStateCode] = useState<PlannerState>("default");
@@ -2029,7 +2029,27 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       const accountGrowthTabLabel = copy?.labels?.reports?.accountGrowthTab ?? "";
       const ableGrowthTabLabel = copy?.labels?.reports?.taxBenefitsTab ?? "";
       const taxableGrowthTabLabel = copy?.labels?.reports?.taxableGrowthTab ?? "";
+      const ableVsTaxableTabLabel = copy?.labels?.reports?.ableVsTaxableTab ?? "";
       const reportWindowLabel = copy?.labels?.reports?.reportWindowLabel ?? "";
+      const ableVsTaxablePanelLabels = {
+        title: copy?.labels?.reports?.ableVsTaxableTitle ?? "",
+        metricLabel: copy?.labels?.reports?.ableVsTaxableMetricLabel ?? "",
+        ableLabel: copy?.labels?.reports?.ableVsTaxableAbleLabel ?? "",
+        taxableLabel: copy?.labels?.reports?.ableVsTaxableTaxableLabel ?? "",
+        naLabel: copy?.labels?.reports?.ableVsTaxableNaLabel ?? "—",
+        rows: {
+          startingBalance: copy?.labels?.reports?.ableVsTaxableRows?.startingBalance ?? "",
+          contributions: copy?.labels?.reports?.ableVsTaxableRows?.contributions ?? "",
+          withdrawals: copy?.labels?.reports?.ableVsTaxableRows?.withdrawals ?? "",
+          investmentReturns: copy?.labels?.reports?.ableVsTaxableRows?.investmentReturns ?? "",
+          federalTaxes: copy?.labels?.reports?.ableVsTaxableRows?.federalTaxes ?? "",
+          stateTaxes: copy?.labels?.reports?.ableVsTaxableRows?.stateTaxes ?? "",
+          endingBalance: copy?.labels?.reports?.ableVsTaxableRows?.endingBalance ?? "",
+          federalSaversCredit: copy?.labels?.reports?.ableVsTaxableRows?.federalSaversCredit ?? "",
+          stateTaxBenefits: copy?.labels?.reports?.ableVsTaxableRows?.stateTaxBenefits ?? "",
+          totalEconomicValue: copy?.labels?.reports?.ableVsTaxableRows?.totalEconomicValue ?? "",
+        },
+      };
       const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
         (option) => option !== "max" && option === horizonConfig.safeYears,
       );
@@ -2069,6 +2089,8 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           accountGrowthTabLabel={accountGrowthTabLabel}
           ableGrowthTabLabel={ableGrowthTabLabel}
           taxableGrowthTabLabel={taxableGrowthTabLabel}
+          ableVsTaxableTabLabel={ableVsTaxableTabLabel}
+          ableVsTaxablePanelLabels={ableVsTaxablePanelLabels}
           reportView={reportView}
           onReportViewChange={setReportView}
           reportWindowLabel={reportWindowLabel}
