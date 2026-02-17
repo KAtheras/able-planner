@@ -38,6 +38,7 @@ type Props = {
       federalSaversCredit: string;
       stateTaxBenefits: string;
       totalEconomicValue: string;
+      totalEconomicBenefit: string;
     };
   };
   reportView: ReportView;

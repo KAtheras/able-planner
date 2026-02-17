@@ -72,7 +72,8 @@
         "endingBalance": "Saldo final",
         "federalSaversCredit": "Crédito Federal del Ahorrista",
         "stateTaxBenefits": "Beneficios fiscales estatales sobre contribuciones",
-        "totalEconomicValue": "Valor económico total"
+        "totalEconomicValue": "Valor económico total",
+        "totalEconomicBenefit": "Beneficio económico total"
       }
     },
     "inputs": {

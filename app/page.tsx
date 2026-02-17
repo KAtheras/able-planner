@@ -2048,6 +2048,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           federalSaversCredit: copy?.labels?.reports?.ableVsTaxableRows?.federalSaversCredit ?? "",
           stateTaxBenefits: copy?.labels?.reports?.ableVsTaxableRows?.stateTaxBenefits ?? "",
           totalEconomicValue: copy?.labels?.reports?.ableVsTaxableRows?.totalEconomicValue ?? "",
+          totalEconomicBenefit: copy?.labels?.reports?.ableVsTaxableRows?.totalEconomicBenefit ?? "",
         },
       };
       const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(

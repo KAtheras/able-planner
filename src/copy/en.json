@@ -72,7 +72,8 @@
         "endingBalance": "Ending Balance",
         "federalSaversCredit": "Federal Saver's Credit",
         "stateTaxBenefits": "State Tax Benefits on Contributions",
-        "totalEconomicValue": "Total Economic Value"
+        "totalEconomicValue": "Total Economic Value",
+        "totalEconomicBenefit": "Total Economic Benefit"
       }
     },
     "inputs": {

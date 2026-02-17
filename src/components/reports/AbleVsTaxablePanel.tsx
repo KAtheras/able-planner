@@ -20,6 +20,7 @@ type Labels = {
     federalSaversCredit: string;
     stateTaxBenefits: string;
     totalEconomicValue: string;
+    totalEconomicBenefit: string;
   };
 };
 
@@ -52,6 +53,7 @@ type Totals = {
   federalSaversCredit: number;
   stateTaxBenefits: number;
   totalEconomicValue: number;
+  totalEconomicBenefit: number;
 };
 
 export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Props) {
@@ -73,6 +75,7 @@ export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Pr
         federalSaversCredit: 0,
         stateTaxBenefits: 0,
         totalEconomicValue: 0,
+        totalEconomicBenefit: 0,
       };
     }
 
@@ -98,6 +101,7 @@ export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Pr
 
     const endingBalance = months[months.length - 1]?.endingBalance ?? 0;
     const totalEconomicValue = endingBalance + federalSaversCredit + stateTaxBenefits;
+    const totalEconomicBenefit = investmentReturns + federalSaversCredit + stateTaxBenefits;
 
     return {
       startingBalance,
@@ -110,6 +114,7 @@ export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Pr
       federalSaversCredit,
       stateTaxBenefits,
       totalEconomicValue,
+      totalEconomicBenefit,
     };
   }, [ableRows]);
 
@@ -131,6 +136,7 @@ export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Pr
         federalSaversCredit: 0,
         stateTaxBenefits: 0,
         totalEconomicValue: 0,
+        totalEconomicBenefit: 0,
       };
     }
 
@@ -160,6 +166,7 @@ export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Pr
     }
 
     const endingBalance = months[months.length - 1]?.endingBalance ?? 0;
+    const totalEconomicBenefit = investmentReturns - federalTaxes - stateTaxes;
 
     return {
       startingBalance,
@@ -172,6 +179,7 @@ export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Pr
       federalSaversCredit: 0,
       stateTaxBenefits: 0,
       totalEconomicValue: 0,
+      totalEconomicBenefit,
     };
   }, [taxableRows]);
 
@@ -235,6 +243,12 @@ export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Pr
       label: labels.rows.totalEconomicValue,
       able: formatCurrency(ableTotals.totalEconomicValue),
       taxable: formatCurrency(taxableTotals.endingBalance),
+    },
+    {
+      key: "totalEconomicBenefit",
+      label: labels.rows.totalEconomicBenefit,
+      able: formatCurrencyOrDash(ableTotals.totalEconomicBenefit, labels.naLabel),
+      taxable: formatSignedCurrency(taxableTotals.totalEconomicBenefit),
     },
   ];
 
