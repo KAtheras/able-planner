@@ -172,9 +172,9 @@ export default function Sidebar({
                 : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900",
             ].join(" ")}
           >
-            <span className="inline-flex items-center gap-1.5">
+            <span className="flex flex-col items-center justify-center gap-1 text-[11px] leading-none">
               <IconArrowBack />
-              <span>{mobileBackAction?.label}</span>
+              <span className="tracking-wide">{mobileBackAction?.label}</span>
             </span>
           </button>
           <div className="grid flex-1 grid-cols-4 gap-1">
@@ -212,9 +212,9 @@ export default function Sidebar({
                 : "bg-[var(--brand-primary)] text-white",
             ].join(" ")}
           >
-            <span className="inline-flex items-center gap-1.5">
-              <span>{mobileNextAction?.label}</span>
+            <span className="flex flex-col items-center justify-center gap-1 text-[11px] leading-none">
               <IconArrowForward />
+              <span className="tracking-wide">{mobileNextAction?.label}</span>
             </span>
           </button>
         </div>
