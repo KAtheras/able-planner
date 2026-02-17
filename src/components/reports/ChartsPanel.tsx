@@ -265,7 +265,7 @@ export default function ChartsPanel({
         },
         valueFormatter: (value: number) => formatCurrencyValue(value),
       },
-      grid: { left: 10, right: 12, top: 16, bottom: 64, containLabel: true },
+      grid: { left: 24, right: 12, top: 16, bottom: 64, containLabel: true },
       xAxis: {
         type: "category",
         name: language === "es" ? "Tiempo" : "Time",
@@ -285,7 +285,7 @@ export default function ChartsPanel({
         type: "value",
         name: language === "es" ? "Saldo de la cuenta" : "Account Balance",
         nameLocation: "middle",
-        nameGap: 48,
+        nameGap: 50,
         nameTextStyle: { color: axisColor },
         axisLine: { lineStyle: { color: axisColor } },
         splitLine: { lineStyle: { color: splitLineColor } },

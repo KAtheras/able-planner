@@ -34,7 +34,7 @@ export default function ReportsHeader({
 
   return (
     <div className="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-30 -mx-4 mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 bg-zinc-50/95 px-4 py-2 backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:static md:mx-0 md:mb-0 md:border-0 md:bg-transparent md:px-0 md:py-0">
-      <div className="flex items-center justify-between gap-3 md:justify-start">
+      <div className="flex w-full items-center justify-between gap-3 md:w-auto md:justify-start">
         <div
           role="tablist"
           aria-label={title}
@@ -109,7 +109,7 @@ export default function ReportsHeader({
             </button>
           )}
         </div>
-        <div className="md:hidden">{languageToggle}</div>
+        <div className="ml-auto md:hidden">{languageToggle}</div>
       </div>
       <div className="hidden md:block">{languageToggle}</div>
     </div>
