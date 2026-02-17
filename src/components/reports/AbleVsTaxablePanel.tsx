@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { TaxableYearRow, YearRow } from "@/lib/amortization";
+import ReportWindowToggle, { type ReportWindowOptionItem } from "@/components/reports/ReportWindowToggle";
 
 type Labels = {
   title: string;
@@ -28,6 +29,8 @@ type Props = {
   ableRows: YearRow[];
   taxableRows: TaxableYearRow[];
   labels: Labels;
+  reportWindowLabel: string;
+  reportWindowOptions: ReportWindowOptionItem[];
 };
 
 const formatCurrency = (value: number) =>
@@ -56,7 +59,13 @@ type Totals = {
   totalEconomicBenefit: number;
 };
 
-export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Props) {
+export default function AbleVsTaxablePanel({
+  ableRows,
+  taxableRows,
+  labels,
+  reportWindowLabel,
+  reportWindowOptions,
+}: Props) {
   const ableTotals = useMemo<Totals>(() => {
     const months = ableRows
       .filter((row) => row.year >= 0)
@@ -254,7 +263,12 @@ export default function AbleVsTaxablePanel({ ableRows, taxableRows, labels }: Pr
 
   return (
     <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950/50">
-      <h2 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{labels.title}</h2>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{labels.title}</h2>
+        <div className="ml-auto">
+          <ReportWindowToggle label={reportWindowLabel} options={reportWindowOptions} />
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-sm">
           <thead>

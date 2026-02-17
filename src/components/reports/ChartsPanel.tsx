@@ -4,12 +4,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as echarts from "echarts";
 import type { TaxableYearRow, YearRow } from "@/lib/amortization";
 import { formatMonthYearFromIndex } from "@/lib/date/formatMonthYear";
+import ReportWindowToggle, { type ReportWindowOptionItem } from "@/components/reports/ReportWindowToggle";
 
 type Props = {
   language: "en" | "es";
   accountType: "able" | "taxable";
   ableRows?: YearRow[];
   taxableRows?: TaxableYearRow[];
+  reportWindowLabel: string;
+  reportWindowOptions: ReportWindowOptionItem[];
 };
 
 type GrowthPoint = {
@@ -35,7 +38,14 @@ const formatCurrencyValue = (value: number) =>
 const formatSignedCurrencyValue = (value: number) =>
   value < 0 ? `-${formatCurrencyValue(Math.abs(value))}` : formatCurrencyValue(value);
 
-export default function ChartsPanel({ language, accountType, ableRows = [], taxableRows = [] }: Props) {
+export default function ChartsPanel({
+  language,
+  accountType,
+  ableRows = [],
+  taxableRows = [],
+  reportWindowLabel,
+  reportWindowOptions,
+}: Props) {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -577,15 +587,20 @@ export default function ChartsPanel({ language, accountType, ableRows = [], taxa
     <div className="mt-4">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
         <div className="min-w-0 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950">
-          <h2 className="px-3 pt-3 text-center text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            {language === "es"
-              ? accountType === "able"
-                ? "Crecimiento de la cuenta ABLE"
-                : "Crecimiento de la cuenta gravable"
-              : accountType === "able"
-                ? "ABLE Account Growth"
-                : "Taxable Account Growth"}
-          </h2>
+          <div className="flex flex-wrap items-center gap-2 px-3 pt-3">
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              {language === "es"
+                ? accountType === "able"
+                  ? "Crecimiento de la cuenta ABLE"
+                  : "Crecimiento de la cuenta gravable"
+                : accountType === "able"
+                  ? "ABLE Account Growth"
+                  : "Taxable Account Growth"}
+            </h2>
+            <div className="ml-auto">
+              <ReportWindowToggle label={reportWindowLabel} options={reportWindowOptions} />
+            </div>
+          </div>
           {monthlyRows.length ? (
             <div ref={chartRef} className="h-[440px] w-full min-w-0" />
           ) : (

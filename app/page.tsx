@@ -1646,23 +1646,25 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       const contributionStopMsg =
         ssiMessages.find((message) => message.code === "SSI_CONTRIBUTIONS_STOPPED") ?? null;
       const ssiContributionStopIndex =
-        isSsiEligible && enforcedContributionStopIndex !== null
-          ? enforcedContributionStopIndex
-          : contributionStopMsg?.data?.monthIndex ?? null;
+        contributionStopMsg?.data?.monthIndex ??
+        (isSsiEligible ? contributionEndIndexValue : null);
       const showStandaloneWithdrawalLimitedMessage =
         shouldShowStandaloneWithdrawalLimitedMessage({
           hasConfiguredWithdrawals,
           hasWithdrawalLimitedMessage,
           endingValueInfo,
         });
+      const firstPlanStopMessage = planMessages.find(
+        (message) => message.data.monthIndex <= contributionEndIndexValue,
+      );
       const planMaxNoticeText =
-        planMessages.length > 0
+        firstPlanStopMessage
           ? (copy?.messages?.planMaxReached ?? "")
               .replace(
                 "{{month}}",
-                formatMonthYearLabel(planMessages[0].data.monthIndex),
+                formatMonthYearLabel(firstPlanStopMessage.data.monthIndex),
               )
-              .replace("{{cap}}", formatCurrency(planMessages[0].data.planMax).replace(".00", ""))
+              .replace("{{cap}}", formatCurrency(firstPlanStopMessage.data.planMax).replace(".00", ""))
           : null;
       const ssiBalanceCapWarningText =
         ssiMessages.length > 0
@@ -1678,8 +1680,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               )
               .replace(
                 "{{stop}}",
-                planMessages[0]?.data?.monthIndex != null
-                  ? formatMonthYearLabel(planMessages[0].data.monthIndex)
+                firstPlanStopMessage?.data?.monthIndex != null
+                  ? formatMonthYearLabel(firstPlanStopMessage.data.monthIndex)
                   : ssiContributionStopIndex != null
                     ? formatMonthYearLabel(ssiContributionStopIndex)
                     : "",

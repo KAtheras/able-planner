@@ -4,16 +4,10 @@ import type { ReactNode } from "react";
 import ReportsHeader from "@/components/reports/ReportsHeader";
 import ChartsPanel from "@/components/reports/ChartsPanel";
 import AbleVsTaxablePanel from "@/components/reports/AbleVsTaxablePanel";
+import ReportWindowToggle, { type ReportWindowOptionItem } from "@/components/reports/ReportWindowToggle";
 import type { TaxableYearRow, YearRow } from "@/lib/amortization";
 
 type ReportView = "account_growth" | "tax_benefits" | "taxable_growth" | "able_vs_taxable";
-
-type ReportWindowOptionItem = {
-  key: string;
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-};
 
 type Props = {
   reportTitle: string;
@@ -82,20 +76,23 @@ export default function SummaryView({
         ableVsTaxableTabLabel={ableVsTaxableTabLabel}
         reportView={reportView}
         onReportViewChange={onReportViewChange}
-        reportWindowLabel={reportWindowLabel}
-        reportWindowOptions={reportWindowOptions}
         languageToggle={languageToggle}
       />
       {reportView === "account_growth" ? (
         <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
-          <h1 className="text-center text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            {reportTitle}
-          </h1>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              {reportTitle}
+            </h1>
+            <div className="ml-auto">
+              <ReportWindowToggle label={reportWindowLabel} options={reportWindowOptions} />
+            </div>
+          </div>
           <div className="mt-4 space-y-4">
           {accountGrowthNarrativeParagraphs.map((paragraph, index) => (
             <p
               key={`account-growth-narrative-${index}`}
-              className="text-center text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"
+              className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"
             >
               {paragraph}
             </p>
@@ -103,14 +100,28 @@ export default function SummaryView({
           </div>
         </div>
       ) : reportView === "tax_benefits" ? (
-        <ChartsPanel ableRows={ableRows} language={language} accountType="able" />
+        <ChartsPanel
+          ableRows={ableRows}
+          language={language}
+          accountType="able"
+          reportWindowLabel={reportWindowLabel}
+          reportWindowOptions={reportWindowOptions}
+        />
       ) : reportView === "taxable_growth" ? (
-        <ChartsPanel taxableRows={taxableRows} language={language} accountType="taxable" />
+        <ChartsPanel
+          taxableRows={taxableRows}
+          language={language}
+          accountType="taxable"
+          reportWindowLabel={reportWindowLabel}
+          reportWindowOptions={reportWindowOptions}
+        />
       ) : (
         <AbleVsTaxablePanel
           ableRows={ableRows}
           taxableRows={taxableRows}
           labels={ableVsTaxablePanelLabels}
+          reportWindowLabel={reportWindowLabel}
+          reportWindowOptions={reportWindowOptions}
         />
       )}
     </div>

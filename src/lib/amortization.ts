@@ -250,6 +250,7 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
     if (
       hasPlanMax &&
       !planMaxContribStopped &&
+      contributionActive &&
       endingBalance >= planMaxBalanceValue!
     ) {
       planMaxContribStopped = true;
@@ -274,7 +275,9 @@ export function buildAmortizationSchedule(inputs: AmortizationInputs): YearRow[]
     if (inputs.isSsiEligible && projectedBase > SSI_LIMIT) {
       if (!contributionsStopped) {
         contributionsStopped = true;
-        monthSsiCodes.push("SSI_CONTRIBUTIONS_STOPPED");
+        if (contributionActive) {
+          monthSsiCodes.push("SSI_CONTRIBUTIONS_STOPPED");
+        }
       }
       contributionValue = 0;
 
