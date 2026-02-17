@@ -95,6 +95,13 @@ export default function ChartsPanel({
       }));
   }, [accountType, ableRows, taxableRows]);
 
+  const displayRows = useMemo<GrowthPoint[]>(() => {
+    if (!monthlyRows.length) return monthlyRows;
+    const depletionIndex = monthlyRows.findIndex((row) => row.endingBalance <= 0);
+    if (depletionIndex === -1) return monthlyRows;
+    return monthlyRows.slice(0, depletionIndex + 1);
+  }, [monthlyRows]);
+
   useEffect(() => {
     if (!chartRef.current) return;
     const chart = echarts.init(chartRef.current);
@@ -103,12 +110,12 @@ export default function ChartsPanel({
     const titleColor = isDarkMode ? "#ffffff" : "#18181b";
     const endingBalanceLineColor = isDarkMode ? "#ffffff" : "#111827";
 
-    const labels = monthlyRows.map((monthRow) =>
+    const labels = displayRows.map((monthRow) =>
       formatMonthYearFromIndex(monthRow.monthIndex, language, { monthStyle: "short" }),
     );
     const labelStep = Math.max(1, Math.ceil(labels.length / 12));
 
-    const firstRow = monthlyRows[0];
+    const firstRow = displayRows[0];
     const initialNetContribution = firstRow
       ? firstRow.endingBalance -
         firstRow.investmentReturn +
@@ -129,7 +136,7 @@ export default function ChartsPanel({
     const yearToBenefitTotal = new Map<number, number>();
     const yearToFederalTaxTotal = new Map<number, number>();
     const yearToStateTaxTotal = new Map<number, number>();
-    for (const row of monthlyRows) {
+    for (const row of displayRows) {
       const year = Math.floor(row.monthIndex / 12);
       const list = yearToMonthIndexes.get(year) ?? [];
       list.push(row.monthIndex);
@@ -167,7 +174,7 @@ export default function ChartsPanel({
     let runningAdditionalEconomicBenefit = 0;
     let runningTotalTaxDrag = 0;
 
-    for (const row of monthlyRows) {
+    for (const row of displayRows) {
       runningNetContribution += row.contribution - row.withdrawal;
       runningGrossReturn += row.investmentReturn;
       runningTotalTaxDrag +=
@@ -417,12 +424,12 @@ export default function ChartsPanel({
       window.removeEventListener("resize", resize);
       chart.dispose();
     };
-  }, [accountType, isDarkMode, language, monthlyRows]);
+  }, [accountType, displayRows, isDarkMode, language]);
 
   const chartSummaryRows = useMemo(() => {
-    if (!monthlyRows.length) return [];
+    if (!displayRows.length) return [];
 
-    const firstRow = monthlyRows[0];
+    const firstRow = displayRows[0];
     const initialNetContribution = firstRow
       ? firstRow.endingBalance -
         firstRow.investmentReturn +
@@ -439,7 +446,7 @@ export default function ChartsPanel({
     const yearToBenefitTotal = new Map<number, number>();
     const yearToFederalTaxTotal = new Map<number, number>();
     const yearToStateTaxTotal = new Map<number, number>();
-    for (const row of monthlyRows) {
+    for (const row of displayRows) {
       const year = Math.floor(row.monthIndex / 12);
       const list = yearToMonthIndexes.get(year) ?? [];
       list.push(row.monthIndex);
@@ -484,7 +491,7 @@ export default function ChartsPanel({
     const startingBalance = Math.max(0, initialNetContribution);
     const includesStartingBalance = startingBalance > 0;
 
-    for (const row of monthlyRows) {
+    for (const row of displayRows) {
       totalContributions += row.contribution;
       totalWithdrawals += row.withdrawal;
       totalGrossReturns += row.investmentReturn;
@@ -586,10 +593,10 @@ export default function ChartsPanel({
     ];
 
     return rows;
-  }, [accountType, isDarkMode, language, monthlyRows]);
+  }, [accountType, displayRows, isDarkMode, language]);
 
   const accountStartingBalance = useMemo(() => {
-    const firstRow = monthlyRows[0];
+    const firstRow = displayRows[0];
     if (!firstRow) return 0;
     const startingBalance =
       firstRow.endingBalance -
@@ -599,7 +606,7 @@ export default function ChartsPanel({
       firstRow.contribution +
       firstRow.withdrawal;
     return Math.max(0, Number.isFinite(startingBalance) ? startingBalance : 0);
-  }, [monthlyRows]);
+  }, [displayRows]);
   const showStartingBalanceFootnote = accountStartingBalance > 0;
 
   const endingBalanceValue = chartSummaryRows.find((row) => row.key === "ending")?.value ?? 0;
@@ -625,7 +632,7 @@ export default function ChartsPanel({
               <ReportWindowToggle label={reportWindowLabel} options={reportWindowOptions} />
             </div>
           </div>
-          {monthlyRows.length ? (
+          {displayRows.length ? (
             <div ref={chartRef} className="h-[440px] w-full min-w-0" />
           ) : (
             <div className="flex h-[440px] items-center justify-center px-4 text-sm text-zinc-500 dark:text-zinc-400">
