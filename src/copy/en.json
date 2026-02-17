@@ -17,9 +17,34 @@
     "assumptions": {
       "title": "Assumptions",
       "items": [
-        "Taxable income is used for estimating federal and state tax benefits.",
-        "Federal Saver’s Credit and state tax benefits are capped by estimated tax liability when applicable.",
-        "Tax rules vary and may change; these results are estimates for planning purposes only."
+        "This planner is for educational scenario modeling only and does not provide legal, tax, investment, or financial advice.",
+        "Results are deterministic projections based entirely on user inputs and configured rules; they are not predictions of actual future performance.",
+        "Investment return is modeled as a constant annual rate converted to a constant monthly rate for projection purposes.",
+        "Market volatility, sequence-of-returns risk, and intra-year return variation are not simulated.",
+        "Contributions and withdrawals are modeled as recurring monthly cash flows according to user-entered values.",
+        "The contribution period ends on the selected Contribution End Date, or earlier if automatic stop rules apply.",
+        "The withdrawal period begins on the selected Withdrawal Start Date.",
+        "Contribution increase percentage and withdrawal increase percentage are applied in annual step intervals.",
+        "When contribution increases would exceed annual contribution limits, contribution increases are stopped according to planner limit logic.",
+        "Work-to-ABLE, if eligible, is modeled using entered earned income and configured poverty-level constraints to determine additional contribution allowance.",
+        "If Work-to-ABLE is not used or not eligible, baseline annual contribution limits are enforced in planner logic.",
+        "Federal Saver's Credit is estimated from taxable income and filing status inputs using configured bracket and limit rules.",
+        "State tax benefit estimates, deduction or credit, are based on configured state rules and filing status logic.",
+        "Tax benefits are capped by estimated liability where applicable under configured rules.",
+        "Taxable-account federal and state tax drag are estimated from configured tax rates and rules and applied in the taxable projection model.",
+        "Taxable-account tax drag is shown as a negative impact in comparison outputs.",
+        "ABLE and taxable comparisons assume identical user cash-flow assumptions unless rule-based constraints alter ABLE behavior.",
+        "If SSI mode is enabled, the planner applies SSI balance-cap behavior, including stopping contributions and applying required withdrawals as modeled.",
+        "If a plan or account max balance constraint is reached, planner logic stops contributions per configured rules.",
+        "If requested withdrawals exceed available funds, withdrawals are limited to available balance and balances are not allowed to go negative.",
+        "Projection horizon is limited to the configured maximum allowable years for the selected client or state experience.",
+        "Report Window controls filter the displayed reporting range within the full calculated schedule.",
+        "Chart display ends at the first month where projected ending balance reaches zero, when applicable.",
+        "Certain chart components use smoothing or distribution for visualization readability; detailed month-level schedule values remain the system of record for exact month results.",
+        "Currency values are rounded and formatted for display; minor visual differences may occur versus underlying calculation precision.",
+        "Outputs depend on selected language and client configuration, including labels, tab availability and order, and presentation behaviors.",
+        "State and federal program rules may change over time; this planner reflects only the currently loaded rule and configuration set.",
+        "Eligibility and compliance decisions should be confirmed with qualified professionals and official ABLE program guidance before acting."
       ]
     },
     "inputs": {

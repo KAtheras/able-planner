@@ -17,9 +17,34 @@
     "assumptions": {
       "title": "Supuestos",
       "items": [
-        "Se usa el ingreso imponible para estimar beneficios fiscales federales y estatales.",
-        "El Crédito del Ahorrador federal y los beneficios fiscales estatales se limitan por la obligación tributaria estimada cuando corresponda.",
-        "Las reglas fiscales varían y pueden cambiar; estos resultados son estimaciones solo para fines de planificación."
+        "Este planificador es solo para modelado educativo de escenarios y no proporciona asesoramiento legal, fiscal, de inversión ni financiero.",
+        "Los resultados son proyecciones determinísticas basadas por completo en los datos ingresados por el usuario y en reglas configuradas; no son predicciones del desempeño real futuro.",
+        "El rendimiento de inversión se modela como una tasa anual constante convertida a una tasa mensual constante para fines de proyección.",
+        "No se simulan la volatilidad de mercado, el riesgo de secuencia de rendimientos ni variaciones intranuales de rendimiento.",
+        "Las contribuciones y los retiros se modelan como flujos de efectivo mensuales recurrentes según los valores ingresados por el usuario.",
+        "El período de contribuciones termina en la fecha de fin de contribución seleccionada, o antes si aplican reglas automáticas de detención.",
+        "El período de retiros comienza en la fecha de inicio de retiro seleccionada.",
+        "Los porcentajes de aumento de contribución y de retiro se aplican en intervalos anuales escalonados.",
+        "Cuando los aumentos de contribución excederían los límites anuales, esos aumentos se detienen según la lógica de límites del planificador.",
+        "Work-to-ABLE, si corresponde, se modela con el ingreso laboral ingresado y restricciones configuradas del nivel de pobreza para determinar el aporte adicional permitido.",
+        "Si Work-to-ABLE no se usa o no es elegible, la lógica del planificador aplica los límites anuales base de contribución.",
+        "El Crédito Federal del Ahorrador se estima con el ingreso imponible y el estado civil para impuestos mediante reglas configuradas de tramos y límites.",
+        "Las estimaciones de beneficios fiscales estatales, deducción o crédito, se basan en reglas estatales configuradas y lógica de estado civil para impuestos.",
+        "Cuando corresponde según las reglas configuradas, los beneficios fiscales se limitan por la obligación tributaria estimada.",
+        "El impacto fiscal federal y estatal de la cuenta gravable se estima con tasas y reglas configuradas y se aplica en el modelo de proyección gravable.",
+        "El impacto fiscal de la cuenta gravable se muestra como efecto negativo en las salidas de comparación.",
+        "Las comparaciones ABLE y gravable asumen los mismos flujos de efectivo ingresados por el usuario, salvo que restricciones de reglas modifiquen el comportamiento de ABLE.",
+        "Si el modo SSI está habilitado, el planificador aplica el comportamiento de límite de saldo SSI, incluyendo detención de contribuciones y retiros requeridos según el modelo.",
+        "Si se alcanza una restricción de saldo máximo del plan o de la cuenta, la lógica del planificador detiene las contribuciones según reglas configuradas.",
+        "Si los retiros solicitados exceden los fondos disponibles, los retiros se limitan al saldo disponible y no se permiten saldos negativos.",
+        "El horizonte de proyección está limitado por el máximo de años permitido en la configuración del cliente o estado seleccionado.",
+        "Los controles de Ventana de reporte filtran el rango mostrado dentro del cronograma completo calculado.",
+        "La visualización del gráfico termina en el primer mes en que el saldo final proyectado llega a cero, cuando corresponda.",
+        "Ciertos componentes de gráficos usan suavizado o distribución para facilitar la lectura visual; los valores detallados del cronograma mensual siguen siendo la referencia para resultados exactos por mes.",
+        "Los valores monetarios se redondean y formatean para su visualización; pueden existir diferencias visuales menores frente a la precisión interna del cálculo.",
+        "Las salidas dependen del idioma y la configuración del cliente seleccionados, incluidas etiquetas, disponibilidad y orden de pestañas y comportamientos de presentación.",
+        "Las reglas de programas estatales y federales pueden cambiar con el tiempo; este planificador refleja solo el conjunto de reglas y configuración cargado actualmente.",
+        "Las decisiones de elegibilidad y cumplimiento deben confirmarse con profesionales calificados y con la guía oficial del programa ABLE antes de actuar."
       ]
     },
     "inputs": {
