@@ -195,7 +195,9 @@ export default function Sidebar({
                   ].join(" ")}
                 >
                   <span className="grid place-items-center">{item.icon}</span>
-                  <span className="tracking-wide">{labels?.[item.key] ?? item.label}</span>
+                  <span className="max-w-full text-center text-[10px] leading-tight whitespace-normal break-words">
+                    {labels?.[item.key] ?? item.label}
+                  </span>
                 </button>
               );
             })}
