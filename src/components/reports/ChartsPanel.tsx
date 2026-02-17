@@ -203,6 +203,7 @@ export default function ChartsPanel({
           let netContributions = 0;
           let investmentReturns = 0;
           let additionalEconomicBenefit = 0;
+          let ableEndingBalanceFromSeries: number | null = null;
           let additionalEconomicBenefitItem: { label: string; value: string } | null = null;
 
           for (const row of rows as Array<{ seriesName?: string; marker?: string; value?: number }>) {
@@ -229,13 +230,19 @@ export default function ChartsPanel({
             ) {
               additionalEconomicBenefit = value;
               additionalEconomicBenefitItem = item;
+            } else if (
+              seriesName.includes("ABLE Ending Balance") ||
+              seriesName.includes("Saldo final ABLE")
+            ) {
+              ableEndingBalanceFromSeries = value;
             } else {
               lineItems.push(item);
             }
           }
 
           if (accountType === "able") {
-            const ableBalance = netContributions + investmentReturns;
+            const ableBalance =
+              ableEndingBalanceFromSeries ?? (netContributions + investmentReturns);
             const totalEconomicValue = ableBalance + additionalEconomicBenefit;
             lineItems.push({
               label: language === "es" ? "Saldo de cuenta ABLE" : "ABLE Account Balance",
@@ -297,8 +304,7 @@ export default function ChartsPanel({
           type: "line",
           stack: "components",
           smooth: 0.2,
-          symbol: "circle",
-          symbolSize: 5,
+          symbol: "none",
           data: netContributionSeries,
           lineStyle: { width: 2, color: "#1f6fd8" },
           itemStyle: { color: "#1f6fd8" },
@@ -321,8 +327,7 @@ export default function ChartsPanel({
           type: "line",
           stack: "components",
           smooth: 0.2,
-          symbol: "circle",
-          symbolSize: 5,
+          symbol: "none",
           data: returnSeries,
           lineStyle: { width: 2, color: "#14b8a6" },
           itemStyle: { color: "#14b8a6" },
@@ -343,8 +348,7 @@ export default function ChartsPanel({
                 type: "line" as const,
                 stack: "components",
                 smooth: 0.2,
-                symbol: "circle",
-                symbolSize: 5,
+                symbol: "none",
                 data: taxDragSeries,
                 lineStyle: { width: 2, color: "#ef4444" },
                 itemStyle: { color: "#ef4444" },
@@ -374,13 +378,24 @@ export default function ChartsPanel({
               {
                 name:
                   language === "es"
+                    ? "Saldo final ABLE"
+                    : "ABLE Ending Balance",
+                type: "line" as const,
+                smooth: 0.2,
+                symbol: "none",
+                data: endingBalanceSeries,
+                lineStyle: { width: 2, color: endingBalanceLineColor, type: "solid" },
+                itemStyle: { color: endingBalanceLineColor },
+              },
+              {
+                name:
+                  language === "es"
                     ? "Beneficio económico adicional*"
                     : "Additional Economic Benefit*",
                 type: "line" as const,
                 stack: "components",
                 smooth: 0.2,
-                symbol: "circle",
-                symbolSize: 5,
+                symbol: "none",
                 data: additionalEconomicBenefitSeries,
                 lineStyle: { width: 2, color: "#f59e0b" },
                 itemStyle: { color: "#f59e0b" },
@@ -467,6 +482,7 @@ export default function ChartsPanel({
     let totalWithdrawals = 0;
     let totalGrossReturns = 0;
     const startingBalance = Math.max(0, initialNetContribution);
+    const includesStartingBalance = startingBalance > 0;
 
     for (const row of monthlyRows) {
       totalContributions += row.contribution;
@@ -493,7 +509,14 @@ export default function ChartsPanel({
       {
         key: "contribTotal",
         color: "#3b82f6",
-        label: language === "es" ? "Contribuciones totales**" : "Total Contributions**",
+        label:
+          language === "es"
+            ? includesStartingBalance
+              ? "Contribuciones totales**"
+              : "Contribuciones totales"
+            : includesStartingBalance
+              ? "Total Contributions**"
+              : "Total Contributions",
         value: totalContributions + startingBalance,
       },
       {
@@ -577,6 +600,7 @@ export default function ChartsPanel({
       firstRow.withdrawal;
     return Math.max(0, Number.isFinite(startingBalance) ? startingBalance : 0);
   }, [monthlyRows]);
+  const showStartingBalanceFootnote = accountStartingBalance > 0;
 
   const endingBalanceValue = chartSummaryRows.find((row) => row.key === "ending")?.value ?? 0;
   const additionalEconomicBenefitValue =
@@ -656,11 +680,13 @@ export default function ChartsPanel({
               ? "* Beneficio económico adicional por beneficios fiscales federales y estatales sobre contribuciones, no incluido en el saldo de la cuenta ABLE. Para visualización, los beneficios registrados en diciembre se distribuyen uniformemente a lo largo de los meses del mismo año calendario."
               : "* Additional Economic Benefit due to Federal and State Tax Benefits on contributions, not included in ABLE account balance. For visualization, benefits recorded in December are distributed evenly across months in the same calendar year."}
           </p>
-          <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-            {language === "es"
-              ? `** El monto incluye el saldo inicial de la cuenta de ${formatCurrencyValue(accountStartingBalance)}.`
-              : `** Amount includes account starting balance of ${formatCurrencyValue(accountStartingBalance)}.`}
-          </p>
+          {showStartingBalanceFootnote && (
+            <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+              {language === "es"
+                ? `** El monto incluye el saldo inicial de la cuenta de ${formatCurrencyValue(accountStartingBalance)}.`
+                : `** Amount includes account starting balance of ${formatCurrencyValue(accountStartingBalance)}.`}
+            </p>
+          )}
         </>
       )}
       {accountType === "taxable" && (
@@ -670,11 +696,13 @@ export default function ChartsPanel({
               ? "* Los impuestos federales y estatales sobre rendimientos se muestran como impacto distribuido de manera uniforme por mes dentro de cada año calendario, solo para visualización del gráfico."
               : "* Federal and state taxes on earnings are shown as evenly smoothed monthly drag within each calendar year for chart visualization only."}
           </p>
-          <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-            {language === "es"
-              ? `** El monto incluye el saldo inicial de la cuenta de ${formatCurrencyValue(accountStartingBalance)}.`
-              : `** Amount includes account starting balance of ${formatCurrencyValue(accountStartingBalance)}.`}
-          </p>
+          {showStartingBalanceFootnote && (
+            <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+              {language === "es"
+                ? `** El monto incluye el saldo inicial de la cuenta de ${formatCurrencyValue(accountStartingBalance)}.`
+                : `** Amount includes account starting balance of ${formatCurrencyValue(accountStartingBalance)}.`}
+            </p>
+          )}
         </>
       )}
     </div>
