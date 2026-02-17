@@ -180,6 +180,13 @@ export default function Sidebar({
           <div className="grid flex-1 grid-cols-4 gap-1">
             {ITEMS.map((item) => {
               const isActive = item.key === active;
+              const baseLabel = labels?.[item.key] ?? item.label;
+              const mobileLabel =
+                item.key === "schedule"
+                  ? "Schedule"
+                  : item.key === "disclosures"
+                    ? "Notes"
+                    : baseLabel;
               return (
                 <button
                   key={item.key}
@@ -196,7 +203,7 @@ export default function Sidebar({
                 >
                   <span className="grid place-items-center">{item.icon}</span>
                   <span className="max-w-full text-center text-[9px] leading-none whitespace-nowrap tracking-tight">
-                    {labels?.[item.key] ?? item.label}
+                    {mobileLabel}
                   </span>
                 </button>
               );
