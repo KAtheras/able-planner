@@ -60,7 +60,8 @@ export default function ScheduleHeader({
               ].join(" ")}
               onClick={() => onViewChange("able")}
             >
-              {ableLabel}
+              <span className="md:hidden">ABLE</span>
+              <span className="hidden md:inline">{ableLabel}</span>
             </button>
             <button
               type="button"
@@ -84,7 +85,8 @@ export default function ScheduleHeader({
               ].join(" ")}
               onClick={() => onViewChange("taxable")}
             >
-              <span>{taxableLabel}</span>
+              <span className="md:hidden">Taxable</span>
+              <span className="hidden md:inline">{taxableLabel}</span>
             </button>
             <button
               type="button"
