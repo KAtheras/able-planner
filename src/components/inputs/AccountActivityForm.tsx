@@ -1,4 +1,5 @@
 "use client";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type Option = {
@@ -54,6 +55,7 @@ type AccountActivityFormProps = {
   contributionIncreaseDisabled?: boolean;
   contributionIncreaseHelperText?: string;
   contributionIncreaseStopYear?: number | null;
+  headerRightSlot?: ReactNode;
   copy?: AccountActivityCopy;
 };
 
@@ -88,6 +90,7 @@ export default function AccountActivityForm({
   contributionIncreaseDisabled = false,
   contributionIncreaseHelperText,
   contributionIncreaseStopYear,
+  headerRightSlot,
   monthOptions,
   contributionMonthOptions,
   contributionYearOptions,
@@ -215,9 +218,12 @@ export default function AccountActivityForm({
       className="space-y-6"
       data-contribution-stop-year={stopYearAttr}
     >
-      <h1 className="text-2xl font-semibold">
-        {copy?.title ?? copy?.labels?.accountActivityTitle ?? "Account Activity"}
-      </h1>
+      <div className="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-20 -mx-4 mb-3 flex items-center justify-between gap-3 border-b border-zinc-200 bg-zinc-50/95 px-4 py-2 backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:hidden">
+        <h1 className="text-2xl font-semibold">
+          {copy?.title ?? copy?.labels?.accountActivityTitle ?? "Account Activity"}
+        </h1>
+        {headerRightSlot}
+      </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>

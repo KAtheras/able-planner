@@ -1335,6 +1335,30 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setWtaDismissed(false);
     setReportWindowYears("max");
   };
+  const refreshButton = (
+    <button
+      type="button"
+      aria-label={copy?.buttons?.refresh ?? "Refresh"}
+      title={copy?.buttons?.refresh ?? "Refresh"}
+      className="rounded-full border border-zinc-200 p-2 text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
+      onClick={resetInputs}
+    >
+      <svg
+        viewBox="0 -960 960 960"
+        className="h-5 w-5"
+        aria-hidden="true"
+        fill="currentColor"
+      >
+        <path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
+      </svg>
+    </button>
+  );
+  const mobileInputsHeaderActions = (
+    <div className="flex items-center gap-2 md:hidden">
+      {refreshButton}
+      {languageToggle}
+    </div>
+  );
   useEffect(() => {
     const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
     if (!Number.isFinite(numeric) || numeric <= 0) {
@@ -1393,6 +1417,140 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     wtaStatus,
   ]);
 
+  const agiValueForInputNav = Number(plannerAgi);
+  const agiValidForInputNav =
+    plannerAgi !== "" &&
+    !Number.isNaN(agiValueForInputNav) &&
+    (agiValueForInputNav > 0 || agiValueForInputNav === 0);
+  const monthlyContributionNumberForInputNav =
+    monthlyContribution === "" ? 0 : Number(monthlyContribution);
+  const monthlyContributionFutureNumberForInputNav =
+    typeof monthlyContributionFuture === "string" && monthlyContributionFuture !== ""
+      ? Number(monthlyContributionFuture)
+      : NaN;
+  const annualMonthlyBasisForInputNav = Number.isFinite(monthlyContributionFutureNumberForInputNav)
+    ? monthlyContributionFutureNumberForInputNav
+    : monthlyContributionNumberForInputNav;
+  const plannedAnnualContributionForInputNav = Number.isFinite(annualMonthlyBasisForInputNav)
+    ? annualMonthlyBasisForInputNav * 12
+    : 0;
+  const horizonConfigForInputNav = getHorizonConfig();
+  const monthsRemainingForInputNav = getMonthsRemainingInCurrentCalendarYear(
+    horizonConfigForInputNav.startIndex,
+  );
+  const plannedCurrentYearContributionForInputNav =
+    monthlyContributionNumberForInputNav * monthsRemainingForInputNav;
+  const allowedAnnualLimitForInputNav =
+    wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
+  const contributionBreachesNowForInputNav =
+    plannedCurrentYearContributionForInputNav > allowedAnnualLimitForInputNav;
+  const contributionBreachesFutureForInputNav =
+    plannedAnnualContributionForInputNav > allowedAnnualLimitForInputNav;
+  const hasContributionIssueForInputNav =
+    inputStep === 2 && (contributionBreachesNowForInputNav || contributionBreachesFutureForInputNav);
+  const startingBalanceNumberForInputNav = startingBalance === "" ? 0 : Number(startingBalance);
+  const hasDriverForProjectionForInputNav =
+    (Number.isFinite(startingBalanceNumberForInputNav) && startingBalanceNumberForInputNav > 0) ||
+    (Number.isFinite(monthlyContributionNumberForInputNav) && monthlyContributionNumberForInputNav > 0);
+  const residencyMismatchForInputNav =
+    beneficiaryStateOfResidence &&
+    planState &&
+    beneficiaryStateOfResidence !== planState;
+  const residencyBlockingForInputNav =
+    residencyMismatchForInputNav &&
+    (planResidencyRequired || !nonResidentProceedAck);
+  const isInputNextDisabledForInputNav =
+    (inputStep === 1 && (!agiValidForInputNav || residencyBlockingForInputNav)) ||
+    (inputStep === 2 && (hasContributionIssueForInputNav || !hasDriverForProjectionForInputNav));
+  const reportViewIndexForInputNav = Math.max(0, enabledReportViews.indexOf(reportView));
+  const defaultLastReportViewForInputNav =
+    enabledReportViews[enabledReportViews.length - 1] ?? defaultReportView;
+
+  const goToPreviousInputStep = () => {
+    if (inputStep === 2) {
+      setInputStep(1);
+    }
+  };
+
+  const goToMobileBack = () => {
+    if (active === "inputs") {
+      goToPreviousInputStep();
+      return;
+    }
+
+    if (active === "reports") {
+      if (reportViewIndexForInputNav <= 0) {
+        setActive("inputs");
+        setInputStep(2);
+        return;
+      }
+      setReportView(enabledReportViews[reportViewIndexForInputNav - 1]);
+      return;
+    }
+
+    if (active === "schedule") {
+      if (amortizationView === "taxable") {
+        setAmortizationView("able");
+        return;
+      }
+      setActive("reports");
+      setReportView(defaultLastReportViewForInputNav);
+      return;
+    }
+
+    if (active === "disclosures") {
+      setActive("schedule");
+    }
+  };
+
+  const goToMobileNext = () => {
+    if (active === "inputs") {
+      if (isInputNextDisabledForInputNav) return;
+      if (inputStep === 1) {
+        setInputStep(2);
+        return;
+      }
+      const { minYears, maxYears } = getTimeHorizonLimits();
+      if (timeHorizonYears !== "") {
+        const parsed = parseIntegerInput(timeHorizonYears);
+        if (parsed !== null) {
+          let next = parsed;
+          if (next < minYears) next = minYears;
+          if (next > maxYears) next = maxYears;
+          if (String(next) !== timeHorizonYears) {
+            setTimeHorizonYears(String(next));
+          }
+        }
+      }
+      setActive("reports");
+      setReportView(defaultReportView);
+      return;
+    }
+
+    if (active === "reports") {
+      if (reportViewIndexForInputNav < enabledReportViews.length - 1) {
+        setReportView(enabledReportViews[reportViewIndexForInputNav + 1]);
+        return;
+      }
+      setActive("schedule");
+      setAmortizationView("able");
+      return;
+    }
+
+    if (active === "schedule") {
+      if (amortizationView === "able") {
+        setAmortizationView("taxable");
+        return;
+      }
+      setActive("disclosures");
+    }
+  };
+
+  const mobileBackDisabled = active === "inputs" && inputStep === 1;
+  const mobileNextDisabled =
+    (active === "inputs" && isInputNextDisabledForInputNav) ||
+    active === "disclosures";
+
   const content = (() => {
     const agiValue = Number(plannerAgi);
     const agiValid =
@@ -1447,7 +1605,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const isNextDisabled =
       (inputStep === 1 && (!agiValid || residencyBlocking)) ||
       (inputStep === 2 && (hasContributionIssue || !hasDriverForProjection));
-
     const deriveMonthlyCaps = (limit: number) => {
       const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(horizonConfig.startIndex);
       const currentYearMaxMonthly = Math.floor(limit / monthsRemaining);
@@ -1527,6 +1684,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     };
 
     const showQuestionnaire = messagesMode === "fsc" && agiGateEligible === true;
+    const desktopInputPageTitle =
+      inputStep === 1
+        ? copy?.ui?.inputs?.demographics?.title
+          ?? copy?.labels?.inputs?.demographicsTitle
+          ?? "Demographic Information"
+        : copy?.ui?.inputs?.accountActivity?.title
+          ?? copy?.labels?.inputs?.accountActivityTitle
+          ?? "Account Activity";
 
     const getFscButtonLabel = () => {
       if (agiGateEligible === null) return copy?.buttons?.enterAgiToTestEligibility ?? "";
@@ -2171,24 +2336,27 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
 
     return (
       <div className="space-y-3">
-        <div className="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-30 -mx-4 mb-3 flex items-center justify-between border-b border-zinc-200 bg-zinc-50/95 px-4 py-2 text-xs font-semibold backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:py-0">
+        <div className="hidden md:flex md:items-center md:justify-between md:text-xs md:font-semibold">
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              {desktopInputPageTitle}
+            </h1>
+          </div>
           <div className="flex items-center gap-3">
             {inputStep === 2 && (
               <button
                 type="button"
-                className="rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
-                onClick={() => setInputStep(1)}
+                className="inline-flex rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
+                onClick={goToPreviousInputStep}
               >
                 {copy?.buttons?.back ?? ""}
               </button>
             )}
-          </div>
-          <div className="flex items-center gap-3">
             <button
               type="button"
               disabled={isNextDisabled}
               className={[
-                "rounded-full px-4 py-1 text-xs font-semibold transition",
+                "inline-flex rounded-full px-4 py-1 text-xs font-semibold transition",
                 isNextDisabled
                   ? "border border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
                   : "bg-[var(--brand-primary)] text-white",
@@ -2197,14 +2365,8 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
             >
               {copy?.buttons?.next ?? ""}
             </button>
-            <button
-              type="button"
-              className="rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
-              onClick={resetInputs}
-            >
-              {copy?.buttons?.refresh ?? ""}
-            </button>
-            {languageToggle}
+            <div className="hidden md:block">{refreshButton}</div>
+            <div className="hidden md:block">{languageToggle}</div>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-6 items-stretch md:grid-cols-2">
@@ -2224,6 +2386,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                   title: copy.ui?.inputs?.demographics?.title,
                   labels: copy.labels?.inputs,
                 }}
+                headerRightSlot={mobileInputsHeaderActions}
                 onChange={(updates) => {
                   if ("beneficiaryName" in updates) setBeneficiaryName(updates.beneficiaryName ?? "");
                   if ("stateOfResidence" in updates)
@@ -2355,6 +2518,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                 title: copy?.ui?.inputs?.accountActivity?.title,
                 labels: copy.labels?.inputs,
               }}
+              headerRightSlot={mobileInputsHeaderActions}
             />
             )}
           </div>
@@ -2575,6 +2739,16 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           onChange={handleSidebarChange}
           labels={copy.ui?.sidebar}
           desktopTopOffsetPx={sidebarDesktopTopOffset}
+          mobileBackAction={{
+            label: copy?.buttons?.back ?? "Back",
+            disabled: mobileBackDisabled,
+            onClick: goToMobileBack,
+          }}
+          mobileNextAction={{
+            label: copy?.buttons?.next ?? "Next",
+            disabled: mobileNextDisabled,
+            onClick: goToMobileNext,
+          }}
         />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-1.5 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:pb-6">{content}</main>
       </div>

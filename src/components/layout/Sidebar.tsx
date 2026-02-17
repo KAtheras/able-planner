@@ -64,6 +64,22 @@ function IconGear() {
   );
 }
 
+function IconArrowBack() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+      <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z" />
+    </svg>
+  );
+}
+
+function IconArrowForward() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+      <path fill="currentColor" d="m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
+    </svg>
+  );
+}
+
 const ITEMS: NavItem[] = [
   { key: "inputs", label: "Inputs", icon: <IconGrid /> },
   { key: "reports", label: "Reports", icon: <IconReports /> },
@@ -76,9 +92,26 @@ type SidebarProps = {
   onChange: (key: NavKey) => void;
   labels?: Partial<Record<NavKey, string>>;
   desktopTopOffsetPx?: number;
+  mobileBackAction?: {
+    label: string;
+    disabled?: boolean;
+    onClick: () => void;
+  };
+  mobileNextAction?: {
+    label: string;
+    disabled?: boolean;
+    onClick: () => void;
+  };
 };
 
-export default function Sidebar({ active, onChange, labels, desktopTopOffsetPx }: SidebarProps) {
+export default function Sidebar({
+  active,
+  onChange,
+  labels,
+  desktopTopOffsetPx,
+  mobileBackAction,
+  mobileNextAction,
+}: SidebarProps) {
   return (
     <>
       {/* Desktop / wide: left sidebar */}
@@ -126,28 +159,64 @@ export default function Sidebar({ active, onChange, labels, desktopTopOffsetPx }
         aria-label="Primary"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:hidden"
       >
-        <div className="mx-auto grid max-w-4xl grid-cols-4 gap-1 px-2 py-2">
-          {ITEMS.map((item) => {
-            const isActive = item.key === active;
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => onChange(item.key)}
-                aria-current={isActive ? "page" : undefined}
-              className={[
-                "flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
-                isActive
-                  ? "bg-[var(--brand-primary)] text-[var(--brand-on-primary)]"
-                  : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
-              ].join(" ")}
-              >
-                <span className="grid place-items-center">{item.icon}</span>
-                <span className="tracking-wide">{labels?.[item.key] ?? item.label}</span>
-              </button>
-            );
-          })}
+        <div className="mx-auto flex max-w-4xl items-center gap-2 px-2 py-2">
+          <button
+            type="button"
+            disabled={mobileBackAction?.disabled}
+            onClick={mobileBackAction?.onClick}
+            className={[
+              "rounded-full border px-3 py-2 text-xs font-semibold transition",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
+              mobileBackAction?.disabled
+                ? "border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
+                : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900",
+            ].join(" ")}
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <IconArrowBack />
+              <span>{mobileBackAction?.label}</span>
+            </span>
+          </button>
+          <div className="grid flex-1 grid-cols-4 gap-1">
+            {ITEMS.map((item) => {
+              const isActive = item.key === active;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => onChange(item.key)}
+                  aria-current={isActive ? "page" : undefined}
+                  className={[
+                    "flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
+                    isActive
+                      ? "bg-[var(--brand-primary)] text-[var(--brand-on-primary)]"
+                      : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
+                  ].join(" ")}
+                >
+                  <span className="grid place-items-center">{item.icon}</span>
+                  <span className="tracking-wide">{labels?.[item.key] ?? item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            disabled={mobileNextAction?.disabled}
+            onClick={mobileNextAction?.onClick}
+            className={[
+              "rounded-full px-3 py-2 text-xs font-semibold transition",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
+              mobileNextAction?.disabled
+                ? "border border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
+                : "bg-[var(--brand-primary)] text-white",
+            ].join(" ")}
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <span>{mobileNextAction?.label}</span>
+              <IconArrowForward />
+            </span>
+          </button>
         </div>
       </nav>
     </>

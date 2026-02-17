@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 
@@ -46,6 +47,7 @@ type DemographicsFormProps = {
   fscStatus?: "idle" | "eligible" | "ineligible";
   fscButtonLabel?: string;
   fscDisabled?: boolean;
+  headerRightSlot?: ReactNode;
   onChange?: (updates: Partial<DemographicsFormProps>) => void;
   onFscClick?: () => void;
   copy?: DemographicsCopy;
@@ -61,6 +63,7 @@ export default function DemographicsForm({
   fscStatus = "idle",
   fscButtonLabel,
   fscDisabled = false,
+  headerRightSlot,
   onChange,
   onFscClick,
   copy,
@@ -184,9 +187,12 @@ export default function DemographicsForm({
 
   return (
     <section ref={sectionRef} className="space-y-6">
-      <h1 className="text-2xl font-semibold">
-        {copy?.title ?? copy?.labels?.demographicsTitle ?? "Demographic Information"}
-      </h1>
+      <div className="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-20 -mx-4 mb-3 flex items-center justify-between gap-3 border-b border-zinc-200 bg-zinc-50/95 px-4 py-2 backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:hidden">
+        <h1 className="text-2xl font-semibold">
+          {copy?.title ?? copy?.labels?.demographicsTitle ?? "Demographic Information"}
+        </h1>
+        {headerRightSlot}
+      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>
