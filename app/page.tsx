@@ -15,6 +15,7 @@ import QualifiedWithdrawalsBudgetPanel from "@/components/inputs/QualifiedWithdr
 import DemographicsForm from "@/components/inputs/DemographicsForm";
 import PlannerNoticeCard from "@/components/inputs/PlannerNoticeCard";
 import SummaryView from "@/components/reports/SummaryView";
+import type { ReportView } from "@/components/reports/ReportsHeader";
 import ScheduleView from "@/components/schedule/ScheduleView";
 import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrackets.json";
 import federalSaversContributionLimits from "@/config/rules/federalSaversContributionLimits.json";
@@ -57,6 +58,12 @@ type ClientLandingContent = Partial<{
 type ClientLandingOverrides = Partial<Record<SupportedLanguage, ClientLandingContent>>;
 type ReportWindowOption = 3 | 10 | 20 | 40 | "max";
 const REPORT_WINDOW_OPTIONS: ReportWindowOption[] = [3, 10, 20, 40, "max"];
+const ALL_REPORT_VIEWS: ReportView[] = [
+  "account_growth",
+  "tax_benefits",
+  "taxable_growth",
+  "able_vs_taxable",
+];
 
 function resolveDefaultMessages(
   override: string,
@@ -270,9 +277,7 @@ const getStateTaxBenefitConfig = (
 export default function Home() {
   const [language, setLanguage] = useState<SupportedLanguage>("en");
   const [active, setActive] = useState<NavKey>("inputs");
-  const [reportView, setReportView] = useState<
-    "account_growth" | "tax_benefits" | "taxable_growth" | "able_vs_taxable"
-  >("account_growth");
+  const [reportView, setReportView] = useState<ReportView>("account_growth");
   const [reportWindowYears, setReportWindowYears] = useState<ReportWindowOption>("max");
   const [plannerStateCode, setPlannerStateCode] = useState<PlannerState>("default");
   const [inputStep, setInputStep] = useState<1 | 2>(1);
@@ -343,6 +348,16 @@ export default function Home() {
   const fscQuestionnaireRef = useRef<HTMLDivElement | null>(null);
   const lastMobileConsoleModeRef = useRef<"annual" | "residency" | "fsc" | "ssi" | null>(null);
   const currentClientConfig = getClientConfig(plannerStateCode);
+  const configuredReportTabs =
+    (currentClientConfig as { features?: { reports?: { tabs?: string[] } } })?.features?.reports?.tabs ??
+    [];
+  const enabledReportViews = (() => {
+    const sanitized = configuredReportTabs.filter((tab): tab is ReportView =>
+      ALL_REPORT_VIEWS.includes(tab as ReportView),
+    );
+    return sanitized.length ? Array.from(new Set(sanitized)) : ALL_REPORT_VIEWS;
+  })();
+  const defaultReportView = enabledReportViews[0] ?? "account_growth";
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
   const planState = planStateOverride ?? planStateFallback ?? "";
@@ -374,6 +389,13 @@ export default function Home() {
   );
   const [screen1Messages, setScreen1Messages] = useState<string[]>(() => [...screen1DefaultMessages]);
   const [screen2Messages, setScreen2Messages] = useState<string[]>(() => [...screen2DefaultMessages]);
+
+  useEffect(() => {
+    if (!enabledReportViews.includes(reportView)) {
+      setReportView(defaultReportView);
+    }
+  }, [defaultReportView, enabledReportViews, reportView]);
+
   const languageToggle = (
     <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-black">
       <button
@@ -1467,7 +1489,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       if (hasContributionIssue || !hasDriverForProjection) return;
       enforceTimeHorizonLimits();
       setActive("reports");
-      setReportView("account_growth");
+      setReportView(defaultReportView);
     };
 
     const questions: Array<{ key: keyof FscAnswers; label: string }> = [
@@ -2095,7 +2117,12 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
           ableVsTaxableTabLabel={ableVsTaxableTabLabel}
           ableVsTaxablePanelLabels={ableVsTaxablePanelLabels}
           reportView={reportView}
-          onReportViewChange={setReportView}
+          enabledReportViews={enabledReportViews}
+          onReportViewChange={(nextView) => {
+            if (enabledReportViews.includes(nextView)) {
+              setReportView(nextView);
+            }
+          }}
           reportWindowLabel={reportWindowLabel}
           reportWindowOptions={reportWindowOptions}
           languageToggle={languageToggle}

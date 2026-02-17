@@ -2,12 +2,11 @@
 
 import type { ReactNode } from "react";
 import ReportsHeader from "@/components/reports/ReportsHeader";
+import type { ReportView } from "@/components/reports/ReportsHeader";
 import ChartsPanel from "@/components/reports/ChartsPanel";
 import AbleVsTaxablePanel from "@/components/reports/AbleVsTaxablePanel";
 import ReportWindowToggle, { type ReportWindowOptionItem } from "@/components/reports/ReportWindowToggle";
 import type { TaxableYearRow, YearRow } from "@/lib/amortization";
-
-type ReportView = "account_growth" | "tax_benefits" | "taxable_growth" | "able_vs_taxable";
 
 type Props = {
   reportTitle: string;
@@ -36,6 +35,7 @@ type Props = {
     };
   };
   reportView: ReportView;
+  enabledReportViews: ReportView[];
   onReportViewChange: (view: ReportView) => void;
   reportWindowLabel: string;
   reportWindowOptions: ReportWindowOptionItem[];
@@ -55,6 +55,7 @@ export default function SummaryView({
   ableVsTaxableTabLabel,
   ableVsTaxablePanelLabels,
   reportView,
+  enabledReportViews,
   onReportViewChange,
   reportWindowLabel,
   reportWindowOptions,
@@ -75,6 +76,7 @@ export default function SummaryView({
         taxableGrowthTabLabel={taxableGrowthTabLabel}
         ableVsTaxableTabLabel={ableVsTaxableTabLabel}
         reportView={reportView}
+        enabledReportViews={enabledReportViews}
         onReportViewChange={onReportViewChange}
         languageToggle={languageToggle}
       />

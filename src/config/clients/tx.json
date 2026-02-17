@@ -22,6 +22,11 @@
     "baseFontSizePx": 16,
     "lineHeight": 1.45
   },
+  "features": {
+    "reports": {
+      "tabs": ["account_growth", "tax_benefits", "taxable_growth", "able_vs_taxable"]
+    }
+  },
   "clientBlocks": {
     "disclosuresAssumptions": {
       "en": "Taxable income is used for estimating federal and state tax benefits.\n\nFederal Saver’s Credit and state tax benefits are capped by estimated tax liability when applicable.\n\nTax rules vary and may change; these results are estimates for planning purposes only.",
