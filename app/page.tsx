@@ -397,12 +397,12 @@ export default function Home() {
   }, [defaultReportView, enabledReportViews, reportView]);
 
   const languageToggle = (
-    <div className="inline-flex rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-black">
+    <div className="inline-flex rounded-full border border-zinc-200 bg-white p-0.5 dark:border-zinc-800 dark:bg-black md:p-1">
       <button
         type="button"
         aria-pressed={language === "en"}
         className={[
-          "rounded-full px-3 py-1 text-xs font-semibold",
+          "rounded-full px-2.5 py-0.5 text-[11px] font-semibold md:px-3 md:py-1 md:text-xs",
           language === "en"
             ? "bg-[var(--brand-primary)] text-white"
             : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
@@ -415,7 +415,7 @@ export default function Home() {
         type="button"
         aria-pressed={language === "es"}
         className={[
-          "rounded-full px-3 py-1 text-xs font-semibold",
+          "rounded-full px-2.5 py-0.5 text-[11px] font-semibold md:px-3 md:py-1 md:text-xs",
           language === "es"
             ? "bg-[var(--brand-primary)] text-white"
             : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
