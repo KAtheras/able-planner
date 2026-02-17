@@ -64,6 +64,55 @@ Use this file to preserve working context between editor sessions.
 - `34b699c` consistent chevron icons for form dropdowns.
 
 ## Session Log
+### 2026-02-17
+- Reports/navigation and mobile UX updates completed and pushed:
+- Added client-configurable report tab visibility and ordering via `features.reports.tabs` in `src/config/clients/*.json`.
+- Confirmed tab order now follows per-client JSON array order (not hardcoded order).
+- Updated UT client report tabs to:
+- `["able_vs_taxable", "tax_benefits", "taxable_growth"]`
+- Comparison tab layout refactor:
+- Left column now hosts ABLE vs Taxable table.
+- Right column now hosts a wider explanatory text card (desktop two-column layout, mobile stacked).
+- Report Window label removed from toggle UI (desktop and mobile); segmented control remains.
+- Reports mobile sticky behavior added for tab/toggle row.
+- Disclosures/Assumptions language toggle row made sticky on mobile.
+- Chart refinements:
+- Added explicit ABLE ending-balance line series to match taxable chart behavior.
+- Removed chart point markers/dots for cleaner line-only charts.
+- Chart display now truncates at first month where ending balance reaches zero.
+- `**` footnote handling:
+- Starting-balance footnote line now renders only when starting balance > 0.
+- `Total Contributions**` marker in right summary card now appears only when starting balance > 0.
+- Assumptions content expanded in both EN/ES:
+- Updated `src/copy/en.json` and `src/copy/es.json` with detailed 28-item assumptions lists for left-nav Assumptions view.
+
+- Next-session implementation plan (discussed, not implemented yet):
+- Goal: mobile-only bottom-nav `Back`/`Next` buttons integrated into fixed bottom nav bar.
+- Desktop behavior must remain unchanged.
+- Mobile rule: remove/hide top `Back` and `Next` buttons.
+- Mobile bottom-nav placement:
+- `Back` button left of icon group.
+- `Next` button right of icon group.
+- Navigation behavior map:
+- Demographics screen:
+- Back disabled.
+- Next -> Account Activity screen.
+- Account Activity screen:
+- Back -> Demographics.
+- Next -> Reports page.
+- Reports page:
+- First report tab: Back -> Account Activity; Next -> next enabled report tab.
+- Middle report tabs: Back/Next move between report tabs.
+- Last report tab: Next -> Amortization page.
+- Amortization page:
+- ABLE mini-tab: Back -> Reports page; Next -> Taxable mini-tab.
+- Taxable mini-tab: Back -> ABLE mini-tab; Next -> Assumptions page.
+- Assumptions page:
+- Back -> Amortization page.
+- Next disabled.
+- Estimated implementation impact:
+- Mostly in `app/page.tsx` with a centralized mobile back/next state resolver.
+
 ### 2026-02-16 (Later Session)
 - Reports/summary architecture and UX updates:
 - Added new report tabs and views:
