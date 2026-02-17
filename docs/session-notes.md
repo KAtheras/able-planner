@@ -45,6 +45,11 @@ Use this file to preserve working context between editor sessions.
 - Continue `app/page.tsx` reduction in small safe slices:
 - Extract remaining Inputs view orchestration (left form shell + right console shell) into dedicated components/hooks.
 - Keep behavior and copy unchanged while extracting.
+- **Next Priority:** Start `app/page.tsx` extraction/refactor immediately in the next session.
+- Target first slices:
+- Move mobile/desktop Back/Next navigation flow logic into a dedicated navigation module/hook.
+- Move input-page top action/header orchestration into focused components.
+- Keep behavior unchanged; run lint/build checks after each slice.
 
 ## Deploy Notes
 - Netlify branch currently used: `refactor/extract-calc`.
@@ -64,6 +69,35 @@ Use this file to preserve working context between editor sessions.
 - `34b699c` consistent chevron icons for form dropdowns.
 
 ## Session Log
+### 2026-02-18
+- Translation and mobile label consistency updates completed and pushed:
+- Fixed report tab/header translation gaps across mobile and desktop (including `ABLE vs Gravable` on ES report tabs).
+- Localized mobile bottom-nav short labels in ES (`Sig.` for next, `Tabla` for schedule, `Notas` for assumptions).
+- Tightened mobile report header layout to keep report tabs + EN/ES toggle inside frame on narrow iPhone widths.
+- Preserved report tab font sizing while tightening pill spacing to avoid clipping.
+- Inputs required-field UX update:
+- Added inline required guidance for `Taxable Income` and `Monthly Contribution`.
+- Refined `Taxable Income` behavior to show inline `Required field*` when empty plus footnote:
+- EN: `* Enter $0 if no income.`
+- ES: `* Ingrese $0 si no tiene ingresos.`
+- Adjusted asterisk styling (larger and lower) for better readability/alignment.
+
+- Mobile and desktop UX refinements completed and pushed:
+- Added mobile bottom-nav Back/Next flow controls and state transitions across Inputs -> Reports -> Amortization -> Assumptions.
+- Added Material-style arrows to Back/Next controls and aligned icon/text stacking for mobile nav buttons.
+- Moved mobile input refresh + EN/ES controls into sticky input card header rows.
+- Updated desktop input top row to show page title on left with action controls on right.
+- Added client-configurable report tab ordering support and verified ordering behavior from `features.reports.tabs`.
+- Comparison report view updated to left table + right explanatory card layout.
+- Report and schedule mobile tab labels shortened for better fit.
+- Expanded assumptions content in EN/ES copy for the Notes/Assumptions view.
+- Notes/Assumptions page layout updated: title + EN/ES row above card; card body scrollable.
+- Multiple commits pushed to `refactor/extract-calc`; branch is current with remote.
+
+- Confirmed next-session priority:
+- `app/page.tsx` extraction/refactor is now the primary follow-up task.
+- Refactor goal: reduce file size/responsibility without behavior changes.
+
 ### 2026-02-17
 - Reports/navigation and mobile UX updates completed and pushed:
 - Added client-configurable report tab visibility and ordering via `features.reports.tabs` in `src/config/clients/*.json`.
