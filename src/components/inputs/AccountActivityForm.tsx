@@ -17,6 +17,7 @@ type AccountActivityCopy = {
     startingBalanceCallout?: string;
     monthlyContributionLabel?: string;
     monthlyContributionCallout?: string;
+    requiredFieldPlaceholder?: string;
     monthlyWithdrawalLabel?: string;
     monthlyWithdrawalCallout?: string;
     contributionEndLabel?: string;
@@ -355,9 +356,10 @@ export default function AccountActivityForm({
             type="text"
             inputMode="decimal"
             autoComplete="off"
+            placeholder={copy?.labels?.requiredFieldPlaceholder ?? "Required field"}
             value={monthlyContribution}
             onChange={(e) => onChange?.({ monthlyContribution: e.target.value })}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base placeholder:font-medium placeholder:text-[var(--brand-primary)] md:text-sm"
           />
         </div>
 

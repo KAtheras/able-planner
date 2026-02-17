@@ -15,6 +15,10 @@ type DemographicsCopy = {
     filingStatusCallout?: string;
     agiLabel?: string;
     agiCallout?: string;
+    agiRequiredInlineLabel?: string;
+    agiRequiredFootnote?: string;
+    agiRequiredFieldPlaceholder?: string;
+    requiredFieldPlaceholder?: string;
     annualReturnLabel?: string;
     annualReturnCallout?: string;
     ssiEligibilityLabel?: string;
@@ -419,29 +423,37 @@ export default function DemographicsForm({
               </div>
             ) : null}
           </div>
-          <input
-            id="demographics-agi"
-            type="number"
-            min={0}
-            step={1}
-            inputMode="numeric"
-            autoComplete="off"
-            value={agi}
-            onChange={(e) => {
-              const raw = e.target.value;
-              if (raw === "") {
-                onChange?.({ agi: "" });
-                return;
-              }
-              const parsed = Number(raw);
-              if (Number.isNaN(parsed)) {
-                onChange?.({ agi: raw });
-                return;
-              }
-              onChange?.({ agi: String(Math.max(0, parsed)) });
-            }}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          />
+          <div className="relative mt-1">
+            <input
+              id="demographics-agi"
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              autoComplete="off"
+              value={agi}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (raw === "") {
+                  onChange?.({ agi: "" });
+                  return;
+                }
+                const parsed = Number(raw);
+                if (Number.isNaN(parsed)) {
+                  onChange?.({ agi: raw });
+                  return;
+                }
+                onChange?.({ agi: String(Math.max(0, parsed)) });
+              }}
+              className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            />
+            {agi === "" ? (
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[11px] font-medium text-[var(--brand-primary)] md:text-sm">
+                {copy?.labels?.agiRequiredInlineLabel ?? "Required field"}
+                <sup className="ml-px text-[11px] leading-none align-[0.15em] md:text-[12px]">*</sup>
+              </span>
+            ) : null}
+          </div>
         </div>
         <div className="md:col-span-2">
           <div ref={annualReturnCalloutAnchorRef} className="relative flex items-center gap-1">
@@ -596,6 +608,9 @@ export default function DemographicsForm({
           </div>
         </div>
       </div>
+      <p className="mt-2 text-xs font-medium text-[var(--brand-primary)]">
+        {copy?.labels?.agiRequiredFootnote ?? "* Enter $0 if no income."}
+      </p>
     </section>
   );
 }
