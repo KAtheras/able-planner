@@ -2746,7 +2746,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
             onClick: goToMobileBack,
           }}
           mobileNextAction={{
-            label: copy?.buttons?.next ?? "Next",
+            label: language === "es" ? "Sig." : (copy?.buttons?.next ?? "Next"),
             disabled: mobileNextDisabled,
             onClick: goToMobileNext,
           }}

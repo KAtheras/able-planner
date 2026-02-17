@@ -186,7 +186,7 @@ export default function Sidebar({
               const mobileLabel =
                 item.key === "schedule"
                   ? language === "es"
-                    ? "Cronograma"
+                    ? "Tabla"
                     : "Schedule"
                   : item.key === "disclosures"
                     ? language === "es"
