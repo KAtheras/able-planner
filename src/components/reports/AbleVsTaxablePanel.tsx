@@ -34,15 +34,20 @@ type Props = {
   reportWindowOptions: ReportWindowOptionItem[];
 };
 
+const normalizeZero = (value: number) =>
+  Object.is(value, -0) || Math.abs(value) < 0.5 ? 0 : value;
+
 const formatCurrency = (value: number) =>
-  value.toLocaleString("en-US", {
+  normalizeZero(value).toLocaleString("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
-const formatSignedCurrency = (value: number) =>
-  value < 0 ? `-${formatCurrency(Math.abs(value))}` : formatCurrency(value);
+const formatSignedCurrency = (value: number) => {
+  const normalized = normalizeZero(value);
+  return normalized < 0 ? `-${formatCurrency(Math.abs(normalized))}` : formatCurrency(normalized);
+};
 const formatCurrencyOrDash = (value: number, dash: string) =>
   value === 0 ? dash : formatCurrency(value);
 const NA_DISPLAY = "N/A";
@@ -378,8 +383,22 @@ export default function AbleVsTaxablePanel({
   const showWithdrawalDepletionNote = taxableDepletesSooner && hasWithdrawalShortfall;
   const withdrawalShortfallLabel = formatCurrency(withdrawalShortfall);
   const additionalEconomicBenefit = ableTotals.federalSaversCredit + ableTotals.stateTaxBenefits;
+  const hasFederalSaversCredit = ableTotals.federalSaversCredit > 0;
+  const hasStateTaxBenefits = ableTotals.stateTaxBenefits > 0;
   const showAdditionalBenefitNote = additionalEconomicBenefit > 0;
   const additionalEconomicBenefitLabel = formatCurrency(additionalEconomicBenefit);
+  const additionalBenefitLabelEn =
+    hasFederalSaversCredit && hasStateTaxBenefits
+      ? "the Federal Saver's Credit and state tax benefits on contributions"
+      : hasFederalSaversCredit
+        ? "the Federal Saver's Credit"
+        : "state tax benefits on contributions";
+  const additionalBenefitLabelEs =
+    hasFederalSaversCredit && hasStateTaxBenefits
+      ? "el Crédito Federal del Ahorrador y los beneficios fiscales estatales sobre contribuciones"
+      : hasFederalSaversCredit
+        ? "el Crédito Federal del Ahorrador"
+        : "los beneficios fiscales estatales sobre contribuciones";
 
   return (
     <div className="mt-4">
@@ -449,8 +468,8 @@ export default function AbleVsTaxablePanel({
           {showAdditionalBenefitNote && (
             <p className="mt-2 leading-relaxed">
               {language === "es"
-                ? `Además, el Crédito Federal del Ahorrador y los beneficios fiscales estatales sobre contribuciones suman ${additionalEconomicBenefitLabel}. Este monto representa un beneficio económico adicional y no está incluido en el saldo de la cuenta ABLE.`
-                : `In addition, the Federal Saver's Credit and state tax benefits on contributions total ${additionalEconomicBenefitLabel}. This amount is additional economic benefit and is not included in the ABLE account balance.`}
+                ? `Además, ${additionalBenefitLabelEs} suman ${additionalEconomicBenefitLabel}. Este monto no está incluido en el saldo de la cuenta ABLE. Sin embargo, representa un beneficio económico real y adicional al que no tendría derecho si invirtiera en una cuenta gravable.`
+                : `In addition, ${additionalBenefitLabelEn} total ${additionalEconomicBenefitLabel}. This amount is not included in the ABLE account balance. However, it represents a real and additional economic benefit which you would not be entitled to if you were to invest in a taxable account.`}
             </p>
           )}
         </aside>

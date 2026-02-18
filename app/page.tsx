@@ -2282,10 +2282,48 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         months,
       };
     });
+    const getDisplayEndIndex = (
+      months: Array<{ monthIndex: number; endingBalance: number }>,
+      fallbackEndIndex: number,
+    ) => {
+      const depletionMonth = months.find((month) => month.endingBalance <= 0);
+      return depletionMonth ? depletionMonth.monthIndex : fallbackEndIndex;
+    };
+    const ableMonthlyForDisplay = scheduleRowsWithBenefits
+      .filter((row) => row.year >= 0)
+      .flatMap((row) => row.months)
+      .sort((a, b) => a.monthIndex - b.monthIndex);
+    const taxableMonthlyForDisplay = taxableRows
+      .filter((row) => row.year >= 0)
+      .flatMap((row) => row.months)
+      .sort((a, b) => a.monthIndex - b.monthIndex);
+    const ableDisplayEndIndex = getDisplayEndIndex(
+      ableMonthlyForDisplay,
+      horizonConfig.horizonEndIndex,
+    );
+    const taxableDisplayEndIndex = getDisplayEndIndex(
+      taxableMonthlyForDisplay,
+      horizonConfig.horizonEndIndex,
+    );
+    const reportDisplayEndIndex =
+      reportView === "tax_benefits"
+        ? ableDisplayEndIndex
+        : reportView === "taxable_growth"
+          ? taxableDisplayEndIndex
+          : Math.max(ableDisplayEndIndex, taxableDisplayEndIndex);
+    const reportDisplayMonths = Math.max(1, reportDisplayEndIndex - startIndex + 1);
+    const reportDisplayYearsRaw = Math.ceil(reportDisplayMonths / 12);
+    const reportDisplayYearsEvenRounded =
+      reportDisplayYearsRaw % 2 === 0 ? reportDisplayYearsRaw : reportDisplayYearsRaw + 1;
+    const reportWindowMaxYears = clampNumber(
+      reportDisplayYearsEvenRounded,
+      1,
+      horizonConfig.safeYears,
+    );
     const reportWindowYearsValue =
       reportWindowYears === "max"
-        ? horizonConfig.safeYears
-        : Math.min(reportWindowYears, horizonConfig.safeYears);
+        ? reportWindowMaxYears
+        : Math.min(reportWindowYears, reportWindowMaxYears);
     const reportWindowEndIndex =
       reportWindowYearsValue > 0 ? startIndex + reportWindowYearsValue * 12 - 1 : startIndex - 1;
     const reportAbleRows = scheduleRowsWithBenefits
@@ -2396,28 +2434,23 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         },
       };
       const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
-        (option) => option !== "max" && option === horizonConfig.safeYears,
+        (option) => option !== "max" && option === reportWindowMaxYears,
       );
       const showMaxOption = !hasPresetMatchingHorizon;
       const optionsToRender = REPORT_WINDOW_OPTIONS.filter(
         (option) =>
           option === "max"
             ? showMaxOption
-            : option <= horizonConfig.safeYears,
+            : option <= reportWindowMaxYears,
       );
       const reportWindowOptions = optionsToRender.map((option) => {
         const isMax = option === "max";
-        const optionYears = isMax ? horizonLimits.maxYears : option;
-        const isActive =
-          reportWindowYears === option ||
-          (!showMaxOption &&
-            reportWindowYears === "max" &&
-            option !== "max" &&
-            option === horizonConfig.safeYears);
+        const optionYears = isMax ? reportWindowMaxYears : option;
+        const isActive = reportWindowYearsValue === optionYears;
         const label = isMax
           ? language === "es"
-            ? `${horizonConfig.safeYears}A`
-            : `${horizonConfig.safeYears}Y`
+            ? `${reportWindowMaxYears}A`
+            : `${reportWindowMaxYears}Y`
           : language === "es"
             ? `${optionYears}A`
             : `${optionYears}Y`;
