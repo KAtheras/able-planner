@@ -46,7 +46,6 @@ const formatSignedCurrency = (value: number) =>
 const formatCurrencyOrDash = (value: number, dash: string) =>
   value === 0 ? dash : formatCurrency(value);
 const NA_DISPLAY = "N/A";
-
 type Totals = {
   startingBalance: number;
   contributions: number;
@@ -213,14 +212,6 @@ export default function AbleVsTaxablePanel({
       taxable: formatCurrency(taxableTotals.contributions),
     },
     {
-      key: "withdrawals",
-      label: labels.rows.withdrawals,
-      ableNumeric: ableTotals.withdrawals,
-      taxableNumeric: taxableTotals.withdrawals,
-      able: formatCurrency(ableTotals.withdrawals),
-      taxable: formatCurrency(taxableTotals.withdrawals),
-    },
-    {
       key: "investmentReturns",
       label: labels.rows.investmentReturns,
       ableNumeric: ableTotals.investmentReturns,
@@ -245,12 +236,79 @@ export default function AbleVsTaxablePanel({
       taxable: formatSignedCurrency(-taxableTotals.stateTaxes),
     },
     {
-      key: "endingBalance",
-      label: labels.rows.endingBalance,
-      ableNumeric: ableTotals.endingBalance,
-      taxableNumeric: taxableTotals.endingBalance,
-      able: formatCurrency(ableTotals.endingBalance),
-      taxable: formatCurrency(taxableTotals.endingBalance),
+      key: "totalFundsAvailable",
+      label: language === "es" ? "Total de fondos disponibles" : "Total Funds Available",
+      ableNumeric:
+        ableTotals.startingBalance +
+        ableTotals.contributions +
+        ableTotals.investmentReturns -
+        ableTotals.federalTaxes -
+        ableTotals.stateTaxes,
+      taxableNumeric:
+        taxableTotals.startingBalance +
+        taxableTotals.contributions +
+        taxableTotals.investmentReturns -
+        taxableTotals.federalTaxes -
+        taxableTotals.stateTaxes,
+      able: formatCurrency(
+        ableTotals.startingBalance +
+          ableTotals.contributions +
+          ableTotals.investmentReturns -
+          ableTotals.federalTaxes -
+          ableTotals.stateTaxes,
+      ),
+      taxable: formatCurrency(
+        taxableTotals.startingBalance +
+          taxableTotals.contributions +
+          taxableTotals.investmentReturns -
+          taxableTotals.federalTaxes -
+          taxableTotals.stateTaxes,
+      ),
+      forceShow: true,
+    },
+    {
+      key: "withdrawals",
+      label: labels.rows.withdrawals,
+      ableNumeric: ableTotals.withdrawals,
+      taxableNumeric: taxableTotals.withdrawals,
+      able: formatCurrency(ableTotals.withdrawals),
+      taxable: formatCurrency(taxableTotals.withdrawals),
+      forceShow: true,
+    },
+    {
+      key: "endingAccountBalance",
+      label: language === "es" ? "Saldo final de la cuenta" : "Ending Account Balance",
+      ableNumeric:
+        ableTotals.startingBalance +
+        ableTotals.contributions +
+        ableTotals.investmentReturns -
+        ableTotals.federalTaxes -
+        ableTotals.stateTaxes -
+        ableTotals.withdrawals,
+      taxableNumeric:
+        taxableTotals.startingBalance +
+        taxableTotals.contributions +
+        taxableTotals.investmentReturns -
+        taxableTotals.federalTaxes -
+        taxableTotals.stateTaxes -
+        taxableTotals.withdrawals,
+      able: formatCurrency(
+        ableTotals.startingBalance +
+          ableTotals.contributions +
+          ableTotals.investmentReturns -
+          ableTotals.federalTaxes -
+          ableTotals.stateTaxes -
+          ableTotals.withdrawals,
+      ),
+      taxable: formatCurrency(
+        taxableTotals.startingBalance +
+          taxableTotals.contributions +
+          taxableTotals.investmentReturns -
+          taxableTotals.federalTaxes -
+          taxableTotals.stateTaxes -
+          taxableTotals.withdrawals,
+      ),
+      forceShow: true,
     },
     {
       key: "federalSaversCredit",
@@ -259,6 +317,7 @@ export default function AbleVsTaxablePanel({
       taxableNumeric: null,
       able: formatCurrencyOrDash(ableTotals.federalSaversCredit, labels.naLabel),
       taxable: NA_DISPLAY,
+      forceShow: true,
     },
     {
       key: "stateTaxBenefits",
@@ -268,29 +327,60 @@ export default function AbleVsTaxablePanel({
       able: formatCurrencyOrDash(ableTotals.stateTaxBenefits, labels.naLabel),
       taxable: NA_DISPLAY,
     },
-    {
-      key: "totalEconomicValue",
-      label: labels.rows.totalEconomicValue,
-      ableNumeric: ableTotals.totalEconomicValue,
-      taxableNumeric: taxableTotals.endingBalance,
-      able: formatCurrency(ableTotals.totalEconomicValue),
-      taxable: formatCurrency(taxableTotals.endingBalance),
-    },
-    {
-      key: "totalEconomicBenefit",
-      label: labels.rows.totalEconomicBenefit,
-      ableNumeric: ableTotals.totalEconomicBenefit,
-      taxableNumeric: taxableTotals.totalEconomicBenefit,
-      able: formatCurrencyOrDash(ableTotals.totalEconomicBenefit, labels.naLabel),
-      taxable: formatSignedCurrency(taxableTotals.totalEconomicBenefit),
-    },
   ].filter((row) => {
+    if ("forceShow" in row && row.forceShow) return true;
     const ableValue = row.ableNumeric;
     const taxableValue = row.taxableNumeric;
     const ableIsZero = ableValue === null || ableValue === 0;
     const taxableIsZero = taxableValue === null || taxableValue === 0;
     return !(ableIsZero && taxableIsZero);
   });
+
+  const taxableTaxAmount = taxableTotals.federalTaxes + taxableTotals.stateTaxes;
+  const hasFederalTaxAmount = taxableTotals.federalTaxes > 0;
+  const hasStateTaxAmount = taxableTotals.stateTaxes > 0;
+  const hasTaxAmount = taxableTaxAmount > 0;
+  const taxableTaxAmountLabel = formatCurrency(taxableTaxAmount);
+  const investmentReturnDrag = Math.max(0, ableTotals.investmentReturns - taxableTotals.investmentReturns);
+  const investmentReturnDragLabel = formatCurrency(investmentReturnDrag);
+  const taxTypeLabelEn =
+    hasFederalTaxAmount && hasStateTaxAmount
+      ? "federal and state taxes"
+      : hasFederalTaxAmount
+        ? "federal taxes"
+        : "state taxes";
+  const taxTypeLabelEs =
+    hasFederalTaxAmount && hasStateTaxAmount
+      ? "los impuestos federales y estatales"
+      : hasFederalTaxAmount
+        ? "los impuestos federales"
+        : "los impuestos estatales";
+  const getFirstDepletionMonthIndex = (
+    months: Array<{ monthIndex: number; endingBalance: number }>,
+  ): number | null => {
+    const depleted = months.find((month) => month.endingBalance <= 0);
+    return depleted ? depleted.monthIndex : null;
+  };
+  const ableMonths = ableRows
+    .filter((row) => row.year >= 0)
+    .flatMap((row) => row.months)
+    .sort((a, b) => a.monthIndex - b.monthIndex);
+  const taxableMonths = taxableRows
+    .filter((row) => row.year >= 0)
+    .flatMap((row) => row.months)
+    .sort((a, b) => a.monthIndex - b.monthIndex);
+  const ableDepletionMonthIndex = getFirstDepletionMonthIndex(ableMonths);
+  const taxableDepletionMonthIndex = getFirstDepletionMonthIndex(taxableMonths);
+  const taxableDepletesSooner =
+    taxableDepletionMonthIndex !== null &&
+    (ableDepletionMonthIndex === null || taxableDepletionMonthIndex < ableDepletionMonthIndex);
+  const withdrawalShortfall = ableTotals.withdrawals - taxableTotals.withdrawals;
+  const hasWithdrawalShortfall = withdrawalShortfall > 0;
+  const showWithdrawalDepletionNote = taxableDepletesSooner && hasWithdrawalShortfall;
+  const withdrawalShortfallLabel = formatCurrency(withdrawalShortfall);
+  const additionalEconomicBenefit = ableTotals.federalSaversCredit + ableTotals.stateTaxBenefits;
+  const showAdditionalBenefitNote = additionalEconomicBenefit > 0;
+  const additionalEconomicBenefitLabel = formatCurrency(additionalEconomicBenefit);
 
   return (
     <div className="mt-4">
@@ -318,7 +408,12 @@ export default function AbleVsTaxablePanel({
                 {rows.map((row, index) => (
                   <tr
                     key={row.key}
-                    className={index % 2 === 0 ? "bg-zinc-50/60 dark:bg-zinc-900/40" : ""}
+                    className={[
+                      index % 2 === 0 ? "bg-zinc-50/60 dark:bg-zinc-900/40" : "",
+                      row.key === "totalFundsAvailable" ? "border-t border-zinc-300 dark:border-zinc-600" : "",
+                      row.key === "withdrawals" ? "border-b border-zinc-300 dark:border-zinc-600" : "",
+                      row.key === "endingAccountBalance" ? "border-b-4 border-double border-zinc-400 dark:border-zinc-500" : "",
+                    ].join(" ")}
                   >
                     <td className="px-2 py-2 text-zinc-700 dark:text-zinc-200">{row.label}</td>
                     <td className="px-2 py-2 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
@@ -334,19 +429,31 @@ export default function AbleVsTaxablePanel({
           </div>
         </div>
         <aside className="rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-200">
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <h3 className="text-center text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
             {language === "es" ? "Notas de comparación" : "Comparison Notes"}
           </h3>
-          <p className="mt-2 leading-relaxed">
-            {language === "es"
-              ? "Esta tabla compara, lado a lado, el crecimiento de una cuenta ABLE frente a una cuenta gravable según sus supuestos."
-              : "This table compares side-by-side growth for an ABLE account and a taxable account based on your assumptions."}
-          </p>
-          <p className="mt-2 leading-relaxed">
-            {language === "es"
-              ? "Los impuestos federales y estatales en la cuenta gravable se muestran como valores negativos para reflejar el impacto en el crecimiento."
-              : "Federal and state taxes for the taxable account are shown as negative values to reflect drag on growth."}
-          </p>
+          <div className="mb-4 mt-2 border-b border-zinc-200 dark:border-zinc-700" />
+          {hasTaxAmount && (
+            <p className="leading-relaxed">
+              {language === "es"
+                ? `Durante el periodo seleccionado, ${taxTypeLabelEs} sobre la cuenta gravable suman ${taxableTaxAmountLabel}. Ese monto reduce directamente el saldo de la cuenta gravable y también genera un efecto de arrastre sobre los rendimientos de inversión de ${investmentReturnDragLabel}, medido como la diferencia entre los rendimientos de inversión de ABLE y gravable.`
+                : `Over the selected period, ${taxTypeLabelEn} on the taxable account total ${taxableTaxAmountLabel}. This amount directly reduces the taxable account balance and also creates drag on investment returns of ${investmentReturnDragLabel}, measured as the difference between ABLE and taxable investment returns.`}
+            </p>
+          )}
+          {showWithdrawalDepletionNote && (
+            <p className="mt-2 leading-relaxed">
+              {language === "es"
+                ? `Además, la cuenta gravable se agota antes que la cuenta ABLE. Una vez agotada, los retiros quedan limitados al saldo disponible, por lo que los retiros acumulados terminan siendo menores. En este escenario, la cuenta gravable retira ${withdrawalShortfallLabel} menos que la cuenta ABLE.`
+                : `In this scenario, the taxable account depletes earlier than the ABLE account. Once depleted, withdrawals are limited to remaining available funds, so cumulative withdrawals are lower. In this scenario, the taxable account delivers ${withdrawalShortfallLabel} less in total withdrawals than the ABLE account.`}
+            </p>
+          )}
+          {showAdditionalBenefitNote && (
+            <p className="mt-2 leading-relaxed">
+              {language === "es"
+                ? `Además, el Crédito Federal del Ahorrador y los beneficios fiscales estatales sobre contribuciones suman ${additionalEconomicBenefitLabel}. Este monto representa un beneficio económico adicional y no está incluido en el saldo de la cuenta ABLE.`
+                : `In addition, the Federal Saver's Credit and state tax benefits on contributions total ${additionalEconomicBenefitLabel}. This amount is additional economic benefit and is not included in the ABLE account balance.`}
+            </p>
+          )}
         </aside>
       </div>
     </div>
