@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import AccountActivityForm from "@/components/inputs/AccountActivityForm";
 import DemographicsForm from "@/components/inputs/DemographicsForm";
 
@@ -11,27 +11,8 @@ type Option = {
 
 type FilingStatusOption = "single" | "married_joint" | "married_separate" | "head_of_household";
 
-type DemographicsUpdates = {
-  beneficiaryName?: string;
-  stateOfResidence?: string;
-  filingStatus?: FilingStatusOption;
-  agi?: string;
-  annualReturn?: string;
-  isSsiEligible?: boolean;
-};
-
-type AccountActivityUpdates = {
-  timeHorizonYears?: string;
-  startingBalance?: string;
-  monthlyContribution?: string;
-  contributionEndYear?: string;
-  contributionEndMonth?: string;
-  monthlyWithdrawal?: string;
-  withdrawalStartYear?: string;
-  withdrawalStartMonth?: string;
-  contributionIncreasePct?: string;
-  withdrawalIncreasePct?: string;
-};
+type DemographicsUpdates = Parameters<NonNullable<ComponentProps<typeof DemographicsForm>["onChange"]>>[0];
+type AccountActivityUpdates = Parameters<NonNullable<ComponentProps<typeof AccountActivityForm>["onChange"]>>[0];
 
 type InputsLabels = {
   [key: string]: unknown;

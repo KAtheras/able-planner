@@ -1,32 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import ScheduleView from "@/components/schedule/ScheduleView";
 import type { TaxableYearRow, YearRow } from "@/lib/amortization";
 
 type Props = {
   hasTimeHorizon: boolean;
   language: "en" | "es";
-  labels: {
-    headerTitle?: string;
-    ableTab?: string;
-    taxableTab?: string;
-    downloadAble?: string;
-    downloadTaxable?: string;
-    month?: string;
-    year?: string;
-    contribution?: string;
-    withdrawal?: string;
-    earnings?: string;
-    endingBalance?: string;
-    fedTax?: string;
-    stateTax?: string;
-    yearlyTotals?: string;
-    yearSummary?: string;
-    ssi?: string;
-    title?: string;
-    yearTotalLabel?: string;
-  } | undefined;
+  labels: ComponentProps<typeof ScheduleView>["labels"];
   view: "able" | "taxable";
   onViewChange: (view: "able" | "taxable") => void;
   onDownloadAble: () => void;

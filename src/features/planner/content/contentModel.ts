@@ -76,10 +76,11 @@ export function buildInputsContentModel({
   const hasDriverForProjection =
     (Number.isFinite(startingBalanceNumber) && startingBalanceNumber > 0) ||
     (Number.isFinite(monthlyContributionNumber) && monthlyContributionNumber > 0);
-  const residencyMismatch =
+  const residencyMismatch = Boolean(
     beneficiaryStateOfResidence &&
     planState &&
-    beneficiaryStateOfResidence !== planState;
+    beneficiaryStateOfResidence !== planState,
+  );
   const residencyBlocking =
     residencyMismatch && (planResidencyRequired || !nonResidentProceedAck);
   const isNextDisabled =

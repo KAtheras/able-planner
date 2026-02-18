@@ -1997,7 +1997,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const handleDemographicsFormChange = (updates: {
       beneficiaryName?: string;
       stateOfResidence?: string;
-      filingStatus?: FilingStatusOption;
+      filingStatus?: string;
       agi?: string;
       annualReturn?: string;
       isSsiEligible?: boolean;
