@@ -2138,11 +2138,21 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       formatCurrency,
       formatMonthYearLabel,
     });
+    const monthsRemainingForWtaResolution = getMonthsRemainingInCurrentCalendarYear(startIndex);
+    const plannedCurrentYearContributionForWtaResolution =
+      monthlyContributionValue * monthsRemainingForWtaResolution;
+    const plannedAnnualContributionForWtaResolution = monthlyContributionValue * 12;
+    const isWtaResolutionPendingForEndingValue =
+      !wtaDismissed &&
+      (wtaMode === "initialPrompt" || wtaMode === "wtaQuestion") &&
+      (plannedCurrentYearContributionForWtaResolution > WTA_BASE_ANNUAL_LIMIT ||
+        plannedAnnualContributionForWtaResolution > WTA_BASE_ANNUAL_LIMIT);
     const renderAccountEndingBlock = () => {
       return (
         <AccountEndingValueCard
           label={copy?.messages?.accountEndingValueLabel ?? ""}
           value={endingValueInfo.endingLabel}
+          freeze={isWtaResolutionPendingForEndingValue}
         />
       );
     };
