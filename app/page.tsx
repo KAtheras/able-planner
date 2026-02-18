@@ -2035,6 +2035,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           onDismiss={() => {
             setWtaDismissed(true);
             setWtaMode("idle");
+            if (
+              typeof window !== "undefined" &&
+              window.matchMedia("(max-width: 767px)").matches
+            ) {
+              window.setTimeout(() => {
+                scrollMobileElementWithOffset(inputsColumnRef.current, "smooth");
+              }, 0);
+            }
           }}
           deriveMonthlyCaps={deriveMonthlyCaps}
           formatMonthlyLabel={formatMonthlyLabel}
