@@ -158,7 +158,8 @@ function computeStateBenefitCapped(
   if (taxBefore <= 0) return 0;
 
   if (type === "credit") {
-    const qualifying = amount > 0 ? Math.min(contrib, amount) : 0;
+    // amount <= 0 means no contribution cap for credit qualification.
+    const qualifying = amount > 0 ? Math.min(contrib, amount) : contrib;
     const rawCredit = qualifying * creditPercent;
     return Math.max(0, Math.min(taxBefore, rawCredit));
   }
