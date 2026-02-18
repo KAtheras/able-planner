@@ -5,24 +5,68 @@ import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
 import { getClientConfig } from "@/config/clients";
-import AccountActivityForm from "@/components/inputs/AccountActivityForm";
 import AccountEndingValueCard from "@/components/inputs/AccountEndingValueCard";
-import DisclosuresView from "@/components/inputs/DisclosuresView";
 import ResidencyWarningCard from "@/components/inputs/ResidencyWarningCard";
 import Screen2MessagesPanel from "@/components/inputs/Screen2MessagesPanel";
 import Screen2WtaPanel from "@/components/inputs/Screen2WtaPanel";
 import QualifiedWithdrawalsBudgetPanel from "@/components/inputs/QualifiedWithdrawalsBudgetPanel";
-import DemographicsForm from "@/components/inputs/DemographicsForm";
 import PlannerNoticeCard from "@/components/inputs/PlannerNoticeCard";
-import SummaryView from "@/components/reports/SummaryView";
 import type { ReportView } from "@/components/reports/ReportsHeader";
-import ScheduleView from "@/components/schedule/ScheduleView";
+import { resetPlannerInputs } from "@/features/planner/actions/resetPlannerInputs";
+import {
+  buildInputsContentModel,
+  buildMonthOptions,
+  clampTimeHorizonYears,
+  deriveMonthlyCaps,
+} from "@/features/planner/content/contentModel";
+import DisclosuresSection from "@/features/planner/content/DisclosuresSection";
+import InputsLeftPane from "@/features/planner/content/InputsLeftPane";
+import InputsRightPane from "@/features/planner/content/InputsRightPane";
+import { InputsDesktopHeader, InputsTwoColumnShell } from "@/features/planner/content/InputsSectionLayout";
+import ReportsSection from "@/features/planner/content/ReportsSection";
+import ScheduleSection from "@/features/planner/content/ScheduleSection";
+import WelcomeSection from "@/features/planner/content/WelcomeSection";
+import { usePlannerUiEffects } from "@/features/planner/effects/usePlannerUiEffects";
+import {
+  buildFscQuestions,
+  EMPTY_FSC,
+  getFscButtonLabel,
+  getVisibleFscQuestions,
+  isLastFscQuestion,
+  shouldDisqualifyFscAnswer,
+  type FscAnswers,
+} from "@/features/planner/inputs/fscFlow";
+import {
+  getBaseLimitBreaches,
+  getMonthsRemainingInCurrentCalendarYear,
+  getWtaEligibilityOutcome,
+  isWtaResolutionPendingForEndingValue as computeWtaResolutionPendingForEndingValue,
+  WTA_BASE_ANNUAL_LIMIT,
+  type WtaMode,
+  type WtaStatus,
+} from "@/features/planner/inputs/wtaFlow";
+import { buildMobileNavModel } from "@/features/planner/navigation/mobileNavModel";
+import {
+  buildReportWindowModel,
+  getEnabledReportViews,
+  type ReportWindowOption,
+} from "@/features/planner/report/reportViewModel";
+import {
+  buildReportAbleRows,
+  buildReportTaxableRows,
+  getAbleMonthlyForDisplay,
+  getTaxableMonthlyForDisplay,
+} from "@/features/planner/report/reportRows";
+import { enrichScheduleRowsWithBenefits } from "@/features/planner/report/scheduleModel";
+import {
+  computeStateBenefitCapped,
+  getFederalIncomeTaxLiability,
+  getStateTaxBenefitConfig,
+} from "@/features/planner/tax/taxMath";
 import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrackets.json";
 import federalSaversContributionLimits from "@/config/rules/federalSaversContributionLimits.json";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 import ssiIncomeWarningThresholds from "@/config/rules/ssiIncomeWarningThresholds.json";
-import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
-import stateTaxRates from "@/config/rules/stateTaxRates.json";
 import { buildAccountGrowthNarrative } from "@/lib/report/buildAccountGrowthNarrative";
 import { formatMonthYearFromIndex } from "@/lib/date/formatMonthYear";
 import {
@@ -36,11 +80,6 @@ import {
 } from "@/lib/planner/messages";
 import { useQualifiedWithdrawalBudget } from "@/lib/inputs/useQualifiedWithdrawalBudget";
 
-// TAX LIABILITY HELPERS (PROGRESSIVE BRACKETS)
-type TaxBracket = { min: number; max?: number; rate: number };
-type TaxBracketInput = { min?: number; max?: number; rate?: number };
-type TaxBracketMap = Record<string, TaxBracketInput[]>;
-type StateTaxBracketMap = Record<string, TaxBracketMap>;
 type ClientBlocks = Partial<
   Record<
     "landingWelcome" | "disclosuresAssumptions" | "rightCardPrimary" | "rightCardSecondary",
@@ -61,14 +100,6 @@ type ClientLandingContent = Partial<{
   termsOfUseBody: string;
 }>;
 type ClientLandingOverrides = Partial<Record<SupportedLanguage, ClientLandingContent>>;
-type ReportWindowOption = 3 | 10 | 20 | 40 | "max";
-const REPORT_WINDOW_OPTIONS: ReportWindowOption[] = [3, 10, 20, 40, "max"];
-const ALL_REPORT_VIEWS: ReportView[] = [
-  "account_growth",
-  "tax_benefits",
-  "taxable_growth",
-  "able_vs_taxable",
-];
 
 function resolveDefaultMessages(
   override: string,
@@ -84,103 +115,6 @@ function resolveDefaultMessages(
   return [...(fallback ?? defaultMessages)];
 }
 
-function clampMoney(x: number): number {
-  if (!Number.isFinite(x)) return 0;
-  return Math.max(0, x);
-}
-
-function computeProgressiveTax(income: number, brackets: TaxBracket[]): number {
-  const y = clampMoney(income);
-  if (y <= 0) return 0;
-
-  const sorted = (Array.isArray(brackets) ? brackets : [])
-    .filter((b) => b && Number.isFinite(b.min) && Number.isFinite(b.rate))
-    .map((b) => ({
-      min: Number(b.min),
-      max: typeof b.max === "number" && Number.isFinite(b.max) ? Number(b.max) : undefined,
-      rate: Number(b.rate),
-    }))
-    .sort((a, b) => a.min - b.min);
-
-  let tax = 0;
-
-  for (const b of sorted) {
-    const minEff = b.min > 0 ? b.min - 1 : 0; // handles JSON that uses 0..X then X+1..Y
-    const upper = b.max === undefined ? y : Math.min(y, b.max);
-    const taxable = Math.max(0, upper - minEff);
-    if (taxable <= 0) continue;
-    tax += taxable * Math.max(0, b.rate);
-    if (b.max !== undefined && y <= b.max) break;
-  }
-
-  return clampMoney(tax);
-}
-
-function getFederalIncomeTaxLiability(filingStatus: FilingStatusOption, agi: number): number {
-  const key = filingStatus as keyof typeof federalTaxBrackets;
-  const rows = (federalTaxBrackets as TaxBracketMap)[key] ?? [];
-  const brackets: TaxBracket[] = rows.map((r) => ({
-    min: Number(r.min ?? 0),
-    max: typeof r.max === "number" && Number.isFinite(r.max) ? Number(r.max) : undefined,
-    rate: Number(r.rate ?? 0),
-  }));
-  return computeProgressiveTax(agi, brackets);
-}
-
-function getStateIncomeTaxLiability(stateCode: string, filingStatus: FilingStatusOption, agi: number): number {
-  const st = (stateCode || "").toUpperCase();
-  const byState = (stateTaxRates as StateTaxBracketMap)[st];
-  const rows = byState?.[filingStatus] ?? [];
-  const brackets: TaxBracket[] = rows.map((r) => ({
-    min: Number(r.min ?? 0),
-    max: typeof r.max === "number" && Number.isFinite(r.max) ? Number(r.max) : undefined,
-    rate: Number(r.rate ?? 0),
-  }));
-  return computeProgressiveTax(agi, brackets);
-}
-
-function computeStateBenefitCapped(
-  benefit: ReturnType<typeof getStateTaxBenefitConfig> | null,
-  contributionsForYear: number,
-  agi: number,
-  filingStatus: FilingStatusOption,
-  stateCode: string,
-): number {
-  const contrib = clampMoney(contributionsForYear);
-  const income = clampMoney(agi);
-  const st = (stateCode || "").toUpperCase();
-
-  if (!benefit) return 0;
-
-  const type = benefit.type;
-  const amount = clampMoney(benefit.amount ?? 0);
-  const creditPercent = clampMoney(benefit.creditPercent ?? 0);
-
-  if (type === "none") return 0;
-
-  // State tax liability used to cap NON-refundable credits (and is also the ceiling for tax savings).
-  const taxBefore = getStateIncomeTaxLiability(st, filingStatus, income);
-  if (taxBefore <= 0) return 0;
-
-  if (type === "credit") {
-    // amount <= 0 means no contribution cap for credit qualification.
-    const qualifying = amount > 0 ? Math.min(contrib, amount) : contrib;
-    const rawCredit = qualifying * creditPercent;
-    return Math.max(0, Math.min(taxBefore, rawCredit));
-  }
-
-  // type === "deduction"
-  // Deduction base cannot exceed income (AGI-as-taxable-income model).
-  const deductibleBase = amount > 0 ? Math.min(contrib, amount, income) : 0;
-  if (deductibleBase <= 0) return 0;
-
-  const taxAfter = getStateIncomeTaxLiability(st, filingStatus, Math.max(0, income - deductibleBase));
-  const savings = Math.max(0, taxBefore - taxAfter);
-  return Math.max(0, Math.min(taxBefore, savings));
-}
-
-import wtaPovertyLevel from "@/config/rules/wtaPovertyLevel.json";
-import federalTaxBrackets from "@/config/rules/federalTaxBrackets.json";
 import { buildPlannerSchedule } from "@/lib/calc/usePlannerSchedule";
 
 const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
@@ -188,41 +122,10 @@ const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
 type FilingStatusOption = "single" | "married_joint" | "married_separate" | "head_of_household";
 type PlannerState = string;
 
-type FscAnswers = {
-  hasTaxLiability: boolean | null;
-  isOver18: boolean | null;
-  isStudent: boolean | null;
-  isDependent: boolean | null;
-};
-
-const EMPTY_FSC: FscAnswers = {
-  hasTaxLiability: null,
-  isOver18: null,
-  isStudent: null,
-  isDependent: null,
-};
-const FSC_REQUIRED_ANSWERS: Record<keyof FscAnswers, boolean> = {
-  hasTaxLiability: true,
-  isOver18: true,
-  isStudent: false,
-  isDependent: false,
-};
-
 const INITIAL_MESSAGES: string[] = ["", "", "", ""];
 
 const SCREEN2_DEFAULT_MESSAGES: string[] = ["", "", "", "", ""];
 
-const WTA_BASE_ANNUAL_LIMIT = 20000;
-const getMonthsRemainingInCurrentCalendarYear = (startIndex: number) => {
-  if (!Number.isFinite(startIndex)) {
-    return 12;
-  }
-  const monthOfYearIndex = ((startIndex % 12) + 12) % 12;
-  const remaining = 12 - monthOfYearIndex;
-  return remaining > 0 ? remaining : 12;
-};
-type WtaMode = "idle" | "initialPrompt" | "wtaQuestion" | "noPath" | "combinedLimit";
-type WtaStatus = "unknown" | "ineligible" | "eligible";
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", {
@@ -231,12 +134,6 @@ const formatCurrency = (value: number) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-
-const getPovertyLevel = (state: PlannerState) => {
-  const entry = (wtaPovertyLevel as Record<string, { onePerson: number }>)[state];
-  if (entry?.onePerson) return entry.onePerson;
-  return wtaPovertyLevel.default.onePerson;
-};
 
 type FederalSaverBracketEntry = (typeof federalSaversCreditBrackets)[number];
 
@@ -256,29 +153,6 @@ function getFederalSaverCreditPercent(status: FilingStatusOption, agi: number) {
   }
   return 0;
 }
-
-type StateTaxBenefitType = "none" | "deduction" | "credit";
-
-type StateTaxBenefitConfig = {
-  type: StateTaxBenefitType;
-  amount: number;
-  creditPercent: number;
-};
-
-type StateTaxDeductionEntry = {
-  name: string;
-  benefits: Record<string, StateTaxBenefitConfig>;
-};
-
-const getStateTaxBenefitConfig = (
-  stateCode: string,
-  filingStatus: FilingStatusOption,
-): StateTaxBenefitConfig | null => {
-  const entries = stateTaxDeductions as Record<string, StateTaxDeductionEntry>;
-  const entry = entries[stateCode];
-  if (!entry) return null;
-  return entry.benefits[filingStatus] ?? entry.benefits.single ?? null;
-};
 
 export default function Home() {
   const [language, setLanguage] = useState<SupportedLanguage>("en");
@@ -362,12 +236,7 @@ export default function Home() {
   const configuredReportTabs =
     (currentClientConfig as { features?: { reports?: { tabs?: string[] } } })?.features?.reports?.tabs ??
     [];
-  const enabledReportViews = (() => {
-    const sanitized = configuredReportTabs.filter((tab): tab is ReportView =>
-      ALL_REPORT_VIEWS.includes(tab as ReportView),
-    );
-    return sanitized.length ? Array.from(new Set(sanitized)) : ALL_REPORT_VIEWS;
-  })();
+  const enabledReportViews = getEnabledReportViews(configuredReportTabs);
   const defaultReportView = enabledReportViews[0] ?? "account_growth";
   const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
   const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
@@ -1207,168 +1076,31 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     [],
   );
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile || showWelcome || active !== "inputs" || inputStep !== 1) {
-      lastMobileConsoleModeRef.current = null;
-      return;
-    }
-
-    const mode: "annual" | "residency" | "fsc" | "ssi" | null = residencyBlocking
-      ? "residency"
-      : showSsiIncomeEligibilityWarning
-        ? "ssi"
-      : showFscQuestionnaire
-        ? "fsc"
-        : annualReturnWarningText
-          ? "annual"
-          : null;
-
-    if (!mode || lastMobileConsoleModeRef.current === mode) {
-      if (!mode) {
-        lastMobileConsoleModeRef.current = null;
-      }
-      return;
-    }
-
-    lastMobileConsoleModeRef.current = mode;
-    scrollMobileElementWithOffset(consoleCardRef.current, "smooth");
-
-    if (mode === "annual") {
-      window.setTimeout(() => {
-        const annualReturnInput = document.getElementById("demographics-annual-return") as HTMLInputElement | null;
-        annualReturnInput?.focus({ preventScroll: true });
-        annualReturnInput?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 500);
-    }
-  }, [
-    active,
-    annualReturnWarningText,
-    inputStep,
-    residencyBlocking,
-    scrollMobileElementWithOffset,
-    showSsiIncomeEligibilityWarning,
-    showFscQuestionnaire,
-    showWelcome,
-  ]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile || showWelcome || active !== "inputs" || inputStep !== 1 || !showFscQuestionnaire) {
-      return;
-    }
-    window.setTimeout(() => {
-      fscQuestionnaireRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
-  }, [active, inputStep, showFscQuestionnaire, showWelcome]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile || showWelcome || active !== "inputs" || inputStep !== 2) {
-      lastMobileScreen2PanelRef.current = null;
-      return;
-    }
-
-    if (budgetMode === "qualifiedWithdrawals") {
-      const panelKey = "qualifiedWithdrawals";
-      if (lastMobileScreen2PanelRef.current === panelKey) {
-        return;
-      }
-      lastMobileScreen2PanelRef.current = panelKey;
-      window.setTimeout(() => {
-        scrollMobileElementWithOffset(consoleCardRef.current, "smooth");
-      }, 0);
-      return;
-    }
-
-    const shouldFocusWtaPanel =
-      !wtaDismissed &&
-      (wtaMode === "initialPrompt" ||
-        wtaMode === "wtaQuestion" ||
-        wtaMode === "noPath" ||
-        wtaMode === "combinedLimit");
-    const panelKey = shouldFocusWtaPanel ? `${wtaMode}:${wtaStatus}` : null;
-    if (!panelKey) {
-      lastMobileScreen2PanelRef.current = null;
-      return;
-    }
-    if (lastMobileScreen2PanelRef.current === panelKey) {
-      return;
-    }
-    lastMobileScreen2PanelRef.current = panelKey;
-
-    window.setTimeout(() => {
-      scrollMobileElementWithOffset(consoleCardRef.current, "smooth");
-    }, 0);
-  }, [
-    active,
-    budgetMode,
-    inputStep,
-    scrollMobileElementWithOffset,
-    showWelcome,
-    wtaDismissed,
-    wtaMode,
-    wtaStatus,
-  ]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const measureSidebarOffset = () => {
-      if (window.innerWidth < 768) return;
-      const shellTop = shellRef.current?.getBoundingClientRect().top;
-      const cardTop = consoleCardRef.current?.getBoundingClientRect().top;
-      if (!Number.isFinite(shellTop) || !Number.isFinite(cardTop)) return;
-      const next = Math.max(0, Math.round((cardTop as number) - (shellTop as number)));
-      setSidebarDesktopTopOffset((prev) => (prev === next ? prev : next));
-    };
-
-    const rafId = window.requestAnimationFrame(measureSidebarOffset);
-    window.addEventListener("resize", measureSidebarOffset);
-
-    let observer: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined") {
-      observer = new ResizeObserver(() => measureSidebarOffset());
-      if (shellRef.current) observer.observe(shellRef.current);
-      if (consoleCardRef.current) observer.observe(consoleCardRef.current);
-    }
-
-    return () => {
-      window.cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", measureSidebarOffset);
-      observer?.disconnect();
-    };
-  }, [
+  usePlannerUiEffects({
     active,
     inputStep,
     reportView,
-    showWelcome,
     language,
-    messagesMode,
-    annualReturnWarningText,
+    showWelcome,
+    showWelcomeTermsOfUse,
     residencyBlocking,
+    showSsiIncomeEligibilityWarning,
     showFscQuestionnaire,
-  ]);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !showWelcome || !showWelcomeTermsOfUse) return;
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile) return;
-
-    const rafId = window.requestAnimationFrame(() => {
-      const card = welcomeTermsCardRef.current;
-      if (!card) return;
-      const topNav = document.querySelector("header");
-      const topNavHeight = topNav instanceof HTMLElement ? topNav.getBoundingClientRect().height : 0;
-      const targetTop = card.getBoundingClientRect().top + window.scrollY - topNavHeight - 8;
-      window.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: "smooth" });
-    });
-
-    return () => window.cancelAnimationFrame(rafId);
-  }, [showWelcome, showWelcomeTermsOfUse]);
+    annualReturnWarningText,
+    budgetMode,
+    wtaDismissed,
+    wtaMode,
+    wtaStatus,
+    messagesMode,
+    shellRef,
+    consoleCardRef,
+    fscQuestionnaireRef,
+    welcomeTermsCardRef,
+    lastMobileConsoleModeRef,
+    lastMobileScreen2PanelRef,
+    setSidebarDesktopTopOffset,
+    scrollMobileElementWithOffset,
+  });
 
   const handleWelcomeContinue = () => {
     if (!welcomeTermsAgreed) return;
@@ -1393,61 +1125,55 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       </select>
   );
 
-  const resetInputs = () => {
-    setInputStep(1);
-    setBeneficiaryName("");
-    setBeneficiaryStateOfResidence(plannerStateCode === "default" ? "" : plannerStateCode);
-    setPlannerFilingStatus("single");
-    setPlannerAgi("");
-    const client = getClientConfig(plannerStateCode);
-    const candidateAnnualReturn = client?.defaults?.annualReturn;
-    const defaultAnnualReturn =
-      typeof candidateAnnualReturn === "number" && Number.isFinite(candidateAnnualReturn)
-        ? formatDecimalToPercentString(candidateAnnualReturn)
-        : "";
-    const candidateTimeHorizon = client?.defaults?.timeHorizonYears ?? null;
-    const defaultTimeHorizon =
-      typeof candidateTimeHorizon === "number" && Number.isFinite(candidateTimeHorizon)
-        ? String(Math.round(candidateTimeHorizon))
-        : "40";
-    setAnnualReturn(defaultAnnualReturn);
-    setAnnualReturnEdited(false);
-    setAnnualReturnWarningMax(null);
-    setIsSsiEligible(false);
-    setStartingBalance("");
-    setMonthlyContribution("");
-    setMonthlyContributionFuture("");
-    setContributionEndYear("");
-    setContributionEndMonth("");
-    setMonthlyWithdrawal("");
-    resetQualifiedWithdrawalBudget();
-    setWithdrawalStartYear("");
-    setWithdrawalStartMonth("");
-    setNonResidentProceedAck(false);
-    resetWtaFlow();
-    setFscStatus("idle");
-    setFscQ({ ...EMPTY_FSC });
-    fscPassedRef.current = false;
-    setSsiIncomeWarningDismissed(false);
-    setMessagesMode("intro");
-    setAgiGateEligible(null);
-    setScreen1Messages([...screen1DefaultMessages]);
-    setContributionIncreasePct("");
-    setHasUserEnteredContributionIncrease(false);
-    setWithdrawalIncreasePct("");
-    setContributionIncreaseHelperText(undefined);
-    setContributionBreachYear(null);
-    setStopContributionIncreasesAfterYear(null);
-    setWtaAutoPromptedForIncrease(false);
-    setScreen2Messages([...screen2DefaultMessages]);
-    setTimeHorizonYears(defaultTimeHorizon);
-    setTimeHorizonEdited(false);
-    setContributionEndTouched(false);
-    setWithdrawalStartTouched(false);
-    setWtaAutoApplied(false);
-    setWtaDismissed(false);
-    setReportWindowYears("max");
-  };
+  const resetInputs = () =>
+    resetPlannerInputs({
+      plannerStateCode,
+      formatDecimalToPercentString,
+      resetQualifiedWithdrawalBudget,
+      resetWtaFlow,
+      fscPassedRef,
+      screen1DefaultMessages,
+      screen2DefaultMessages,
+      setInputStep,
+      setBeneficiaryName,
+      setBeneficiaryStateOfResidence,
+      setPlannerFilingStatus,
+      setPlannerAgi,
+      setAnnualReturn,
+      setAnnualReturnEdited,
+      setAnnualReturnWarningMax,
+      setIsSsiEligible,
+      setStartingBalance,
+      setMonthlyContribution,
+      setMonthlyContributionFuture,
+      setContributionEndYear,
+      setContributionEndMonth,
+      setMonthlyWithdrawal,
+      setWithdrawalStartYear,
+      setWithdrawalStartMonth,
+      setNonResidentProceedAck,
+      setFscStatus,
+      setFscQ,
+      setSsiIncomeWarningDismissed,
+      setMessagesMode,
+      setAgiGateEligible,
+      setScreen1Messages,
+      setContributionIncreasePct,
+      setHasUserEnteredContributionIncrease,
+      setWithdrawalIncreasePct,
+      setContributionIncreaseHelperText,
+      setContributionBreachYear,
+      setStopContributionIncreasesAfterYear,
+      setWtaAutoPromptedForIncrease,
+      setScreen2Messages,
+      setTimeHorizonYears,
+      setTimeHorizonEdited,
+      setContributionEndTouched,
+      setWithdrawalStartTouched,
+      setWtaAutoApplied,
+      setWtaDismissed,
+      setReportWindowYears,
+    });
   const refreshButton = (
     <button
       type="button"
@@ -1530,54 +1256,31 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     wtaStatus,
   ]);
 
-  const agiValueForInputNav = Number(plannerAgi);
-  const agiValidForInputNav =
-    plannerAgi !== "" &&
-    !Number.isNaN(agiValueForInputNav) &&
-    (agiValueForInputNav > 0 || agiValueForInputNav === 0);
-  const monthlyContributionNumberForInputNav =
-    monthlyContribution === "" ? 0 : Number(monthlyContribution);
-  const monthlyContributionFutureNumberForInputNav =
-    typeof monthlyContributionFuture === "string" && monthlyContributionFuture !== ""
-      ? Number(monthlyContributionFuture)
-      : NaN;
-  const annualMonthlyBasisForInputNav = Number.isFinite(monthlyContributionFutureNumberForInputNav)
-    ? monthlyContributionFutureNumberForInputNav
-    : monthlyContributionNumberForInputNav;
-  const plannedAnnualContributionForInputNav = Number.isFinite(annualMonthlyBasisForInputNav)
-    ? annualMonthlyBasisForInputNav * 12
-    : 0;
   const horizonConfigForInputNav = getHorizonConfig();
-  const monthsRemainingForInputNav = getMonthsRemainingInCurrentCalendarYear(
-    horizonConfigForInputNav.startIndex,
-  );
-  const plannedCurrentYearContributionForInputNav =
-    monthlyContributionNumberForInputNav * monthsRemainingForInputNav;
-  const allowedAnnualLimitForInputNav =
-    wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
-  const contributionBreachesNowForInputNav =
-    plannedCurrentYearContributionForInputNav > allowedAnnualLimitForInputNav;
-  const contributionBreachesFutureForInputNav =
-    plannedAnnualContributionForInputNav > allowedAnnualLimitForInputNav;
-  const hasContributionIssueForInputNav =
-    inputStep === 2 && (contributionBreachesNowForInputNav || contributionBreachesFutureForInputNav);
-  const startingBalanceNumberForInputNav = startingBalance === "" ? 0 : Number(startingBalance);
-  const hasDriverForProjectionForInputNav =
-    (Number.isFinite(startingBalanceNumberForInputNav) && startingBalanceNumberForInputNav > 0) ||
-    (Number.isFinite(monthlyContributionNumberForInputNav) && monthlyContributionNumberForInputNav > 0);
-  const residencyMismatchForInputNav =
-    beneficiaryStateOfResidence &&
-    planState &&
-    beneficiaryStateOfResidence !== planState;
-  const residencyBlockingForInputNav =
-    residencyMismatchForInputNav &&
-    (planResidencyRequired || !nonResidentProceedAck);
-  const isInputNextDisabledForInputNav =
-    (inputStep === 1 && (!agiValidForInputNav || residencyBlockingForInputNav)) ||
-    (inputStep === 2 && (hasContributionIssueForInputNav || !hasDriverForProjectionForInputNav));
-  const reportViewIndexForInputNav = Math.max(0, enabledReportViews.indexOf(reportView));
-  const defaultLastReportViewForInputNav =
-    enabledReportViews[enabledReportViews.length - 1] ?? defaultReportView;
+  const {
+    isInputNextDisabled: isInputNextDisabledForInputNav,
+    reportViewIndex: reportViewIndexForInputNav,
+    defaultLastReportView: defaultLastReportViewForInputNav,
+    mobileBackDisabled,
+    mobileNextDisabled,
+  } = buildMobileNavModel({
+    active,
+    inputStep,
+    plannerAgi,
+    monthlyContribution,
+    monthlyContributionFuture,
+    startingBalance,
+    beneficiaryStateOfResidence,
+    planState,
+    planResidencyRequired,
+    nonResidentProceedAck,
+    wtaStatus,
+    wtaCombinedLimit,
+    horizonStartIndex: horizonConfigForInputNav.startIndex,
+    enabledReportViews,
+    reportView,
+    defaultReportView,
+  });
 
   const goToPreviousInputStep = () => {
     if (inputStep === 2) {
@@ -1659,94 +1362,42 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     }
   };
 
-  const mobileBackDisabled = active === "inputs" && inputStep === 1;
-  const mobileNextDisabled =
-    (active === "inputs" && isInputNextDisabledForInputNav) ||
-    active === "disclosures";
-
   const content = (() => {
     const agiValue = Number(plannerAgi);
-    const agiValid =
-      plannerAgi !== "" && !Number.isNaN(agiValue) && (agiValue > 0 || agiValue === 0);
-
-    const monthlyContributionNumber = monthlyContribution === "" ? 0 : Number(monthlyContribution);
-
-    // If we have a future-monthly override (used for full future calendar years),
-    // use that for 12-month annual calculations and breach logic.
-    const monthlyContributionFutureNumber =
-      typeof monthlyContributionFuture === "string" && monthlyContributionFuture !== ""
-        ? Number(monthlyContributionFuture)
-        : NaN;
-
-    const annualMonthlyBasis = Number.isFinite(monthlyContributionFutureNumber)
-      ? monthlyContributionFutureNumber
-      : monthlyContributionNumber;
-
-    const plannedAnnualContribution = Number.isFinite(annualMonthlyBasis)
-      ? annualMonthlyBasis * 12
-      : 0;
     const horizonConfig = getHorizonConfig();
-    const monthsRemainingInCurrentCalendarYear = getMonthsRemainingInCurrentCalendarYear(
-      horizonConfig.startIndex,
-    );
-    const plannedCurrentYearContribution = monthlyContributionNumber * monthsRemainingInCurrentCalendarYear;
-    const allowedAnnualLimit =
-      wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
-    const breachNow = plannedCurrentYearContribution > allowedAnnualLimit;
-    const breachFuture = plannedAnnualContribution > allowedAnnualLimit;
-    const baseMeetsOrExceedsLimitNow = (() => {
-      if (!Number.isFinite(monthlyContributionNumber) || monthlyContributionNumber <= 0) return false;
-      if (!Number.isFinite(allowedAnnualLimit) || allowedAnnualLimit <= 0) return false;
-      const currentSliceTotal = monthlyContributionNumber * monthsRemainingInCurrentCalendarYear;
-      const futureYearTotal = monthlyContributionNumber * 12;
-      return currentSliceTotal >= allowedAnnualLimit || futureYearTotal >= allowedAnnualLimit;
-    })();
-    const contributionIncreaseDisabledNow = baseMeetsOrExceedsLimitNow;
-    const hasContributionIssue =
-      inputStep === 2 && (breachNow || breachFuture);
-    const startingBalanceNumber = startingBalance === "" ? 0 : Number(startingBalance);
-    const hasDriverForProjection =
-      (Number.isFinite(startingBalanceNumber) && startingBalanceNumber > 0) ||
-      (Number.isFinite(monthlyContributionNumber) && monthlyContributionNumber > 0);
-    const residencyMismatch =
-      beneficiaryStateOfResidence &&
-      planState &&
-      beneficiaryStateOfResidence !== planState;
-    const residencyBlocking =
-      residencyMismatch &&
-      (planResidencyRequired || !nonResidentProceedAck);
-    const isNextDisabled =
-      (inputStep === 1 && (!agiValid || residencyBlocking)) ||
-      (inputStep === 2 && (hasContributionIssue || !hasDriverForProjection));
-    const deriveMonthlyCaps = (limit: number) => {
-      const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(horizonConfig.startIndex);
-      const currentYearMaxMonthly = Math.floor(limit / monthsRemaining);
-      const futureYearMaxMonthly = Math.floor(limit / 12);
-      return { currentYearMaxMonthly, futureYearMaxMonthly };
-    };
+    const {
+      agiValid,
+      contributionIncreaseDisabledNow,
+      hasContributionIssue,
+      hasDriverForProjection,
+      residencyBlocking,
+      residencyMismatch,
+      isNextDisabled,
+    } = buildInputsContentModel({
+      plannerAgi,
+      monthlyContribution,
+      monthlyContributionFuture,
+      startingBalance,
+      inputStep,
+      beneficiaryStateOfResidence,
+      planState,
+      planResidencyRequired,
+      nonResidentProceedAck,
+      wtaStatus,
+      wtaCombinedLimit,
+      horizonStartIndex: horizonConfig.startIndex,
+    });
     const formatMonthlyLabel = (value: number) => formatCurrency(value).replace(".00", "");
     const horizonLimits = getTimeHorizonLimits();
-    const monthOptions = Array.from({ length: 12 }, (_, i) => {
-  const date = new Date(2020, i, 1);
-  return {
-    value: String(i + 1).padStart(2, "0"),
-    label: new Intl.DateTimeFormat(language === "es" ? "es" : "en", { month: "long" }).format(date),
-  };
-});
+    const monthOptions = buildMonthOptions(language);
     const enforceTimeHorizonLimits = () => {
-      const { minYears, maxYears } = horizonLimits;
-      if (timeHorizonYears === "") {
-        return;
-      }
-      const parsed = parseIntegerInput(timeHorizonYears);
-      if (parsed === null) {
-        return;
-      }
-      let next = parsed;
-      if (next < minYears) next = minYears;
-      if (next > maxYears) next = maxYears;
-      if (String(next) !== timeHorizonYears) {
-        setTimeHorizonYears(String(next));
+      const next = clampTimeHorizonYears({
+        timeHorizonYears,
+        horizonLimits,
+        parseIntegerInput,
+      });
+      if (next !== timeHorizonYears) {
+        setTimeHorizonYears(next);
       }
     };
 
@@ -1762,12 +1413,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       setReportView(defaultReportView);
     };
 
-    const questions: Array<{ key: keyof FscAnswers; label: string }> = [
-      { key: "hasTaxLiability", label: (copy.labels?.fsc?.taxLiability ?? "")},
-      { key: "isOver18", label: (copy.labels?.fsc?.age18 ?? "")},
-      { key: "isStudent", label: (copy.labels?.fsc?.student ?? "")},
-      { key: "isDependent", label: (copy.labels?.fsc?.dependent ?? "")},
-    ];
+    const questions = buildFscQuestions({
+      taxLiability: copy.labels?.fsc?.taxLiability ?? "",
+      age18: copy.labels?.fsc?.age18 ?? "",
+      student: copy.labels?.fsc?.student ?? "",
+      dependent: copy.labels?.fsc?.dependent ?? "",
+    });
 
     const finalizeFscEvaluation = (eligible: boolean) => {
       setFscStatus(eligible ? "eligible" : "ineligible");
@@ -1780,18 +1431,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       }
     };
 
-    const currentQuestionIndexRaw = questions.findIndex((question) => fscQ[question.key] === null);
-    const visibleQuestionCount = currentQuestionIndexRaw === -1 ? questions.length : currentQuestionIndexRaw + 1;
-    const visibleQuestions = questions.slice(0, visibleQuestionCount);
+    const visibleQuestions = getVisibleFscQuestions(questions, fscQ);
     const answerFscQuestion = (key: keyof FscAnswers, value: boolean) => {
       setFscQ((prev) => ({ ...prev, [key]: value }));
-      const required = FSC_REQUIRED_ANSWERS[key];
-      if (value !== required) {
+      if (shouldDisqualifyFscAnswer(key, value)) {
         finalizeFscEvaluation(false);
         return;
       }
-      const answeredQuestionIndex = questions.findIndex((question) => question.key === key);
-      if (answeredQuestionIndex >= questions.length - 1) {
+      if (isLastFscQuestion(key, questions)) {
         finalizeFscEvaluation(true);
       }
     };
@@ -1806,13 +1453,17 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           ?? copy?.labels?.inputs?.accountActivityTitle
           ?? "Account Activity";
 
-    const getFscButtonLabel = () => {
-      if (agiGateEligible === null) return copy?.buttons?.enterAgiToTestEligibility ?? "";
-      if (agiGateEligible === false) return copy?.buttons?.notEligibleBasedOnAgi ?? "";
-      if (fscStatus === "eligible") return copy?.buttons?.eligibleRetest ?? "";
-      if (fscStatus === "ineligible") return copy?.buttons?.notEligibleRetest ?? "";
-      return copy?.buttons?.eligibleToEvaluate ?? "";
-    };
+    const fscButtonLabel = getFscButtonLabel({
+      agiGateEligible,
+      fscStatus,
+      labels: {
+        enterAgiToTestEligibility: copy?.buttons?.enterAgiToTestEligibility ?? "",
+        notEligibleBasedOnAgi: copy?.buttons?.notEligibleBasedOnAgi ?? "",
+        eligibleRetest: copy?.buttons?.eligibleRetest ?? "",
+        notEligibleRetest: copy?.buttons?.notEligibleRetest ?? "",
+        eligibleToEvaluate: copy?.buttons?.eligibleToEvaluate ?? "",
+      },
+    });
 
     const horizonYearOptions = getYearOptions(
       horizonConfig.startIndex,
@@ -1849,15 +1500,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     };
 
     const handleOverLimitNo = () => {
-      const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
       const { startIndex } = getHorizonConfig();
-      const monthsRemainingInCurrentCalendarYear = getMonthsRemainingInCurrentCalendarYear(startIndex);
-      const plannedCurrentYear = Number.isFinite(numeric)
-        ? numeric * monthsRemainingInCurrentCalendarYear
-        : 0;
-      const plannedAnnual = Number.isFinite(numeric) ? numeric * 12 : 0;
-      const breachNow = plannedCurrentYear > WTA_BASE_ANNUAL_LIMIT;
-      const breachFuture = plannedAnnual > WTA_BASE_ANNUAL_LIMIT;
+      const { breachNow, breachFuture } = getBaseLimitBreaches(monthlyContribution, startIndex);
       setWtaStatus("ineligible");
       setWtaAdditionalAllowed(0);
       setWtaCombinedLimit(WTA_BASE_ANNUAL_LIMIT);
@@ -1877,27 +1521,21 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
     const evaluateWtaEligibility = (retirementAnswer: boolean) => {
       setWtaRetirementPlan(retirementAnswer);
-      const earnedIncomeValue = Number(wtaEarnedIncome);
-      if (!wtaHasEarnedIncome || Number.isNaN(earnedIncomeValue) || earnedIncomeValue <= 0) {
-        setWtaStatus("ineligible");
-        setWtaAdditionalAllowed(0);
-        setWtaCombinedLimit(WTA_BASE_ANNUAL_LIMIT);
-        setWtaMode("noPath");
-        return;
-      }
-      if (retirementAnswer) {
+      const outcome = getWtaEligibilityOutcome({
+        hasEarnedIncome: wtaHasEarnedIncome,
+        earnedIncome: wtaEarnedIncome,
+        retirementAnswer,
+        plannerStateCode,
+        monthlyContribution,
+      });
+      if (outcome.delegateToOverLimitNo) {
         handleOverLimitNo();
         return;
       }
-      const povertyLevel = getPovertyLevel(plannerStateCode);
-      const additionalAllowed = Math.min(earnedIncomeValue, povertyLevel);
-      const combinedLimitValue = WTA_BASE_ANNUAL_LIMIT + additionalAllowed;
-      setWtaAdditionalAllowed(additionalAllowed);
-      setWtaCombinedLimit(combinedLimitValue);
-      setWtaStatus("eligible");
-      const monthlyNumeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
-      const plannedAnnual = Number.isFinite(monthlyNumeric) ? monthlyNumeric * 12 : 0;
-      setWtaMode(plannedAnnual > combinedLimitValue ? "combinedLimit" : "idle");
+      setWtaAdditionalAllowed(outcome.additionalAllowed);
+      setWtaCombinedLimit(outcome.combinedLimit);
+      setWtaStatus(outcome.status);
+      setWtaMode(outcome.mode);
     };
 
     const changeResidencyToPlan = () => {
@@ -2081,7 +1719,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               }, 0);
             }
           }}
-          deriveMonthlyCaps={deriveMonthlyCaps}
+          deriveMonthlyCaps={(limit) => deriveMonthlyCaps(limit, horizonConfig.startIndex)}
           formatMonthlyLabel={formatMonthlyLabel}
           formatCurrency={formatCurrency}
         />
@@ -2157,11 +1795,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       monthlyContributionValue * monthsRemainingForWtaResolution;
     const plannedAnnualContributionForWtaResolution =
       annualMonthlyBasisForWtaResolution * 12;
-    const isWtaResolutionPendingForEndingValue =
-      !wtaDismissed &&
-      (wtaMode === "initialPrompt" || wtaMode === "wtaQuestion") &&
-      (plannedCurrentYearContributionForWtaResolution > WTA_BASE_ANNUAL_LIMIT ||
-        plannedAnnualContributionForWtaResolution > WTA_BASE_ANNUAL_LIMIT);
+    const isWtaResolutionPendingForEndingValue = computeWtaResolutionPendingForEndingValue({
+      wtaDismissed,
+      wtaMode,
+      plannedCurrentYearContribution: plannedCurrentYearContributionForWtaResolution,
+      plannedAnnualContribution: plannedAnnualContributionForWtaResolution,
+    });
 
     // While WTA is unresolved, clamp projection contributions to base-limit monthly caps
     // so reports/schedules do not reflect over-limit contributions prematurely.
@@ -2248,148 +1887,39 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       fscContributionLimit > 0;
     const benefitStateCode = (beneficiaryStateOfResidence || planState || "").toUpperCase();
     const stateBenefitConfig = getStateTaxBenefitConfig(benefitStateCode, plannerFilingStatus);
-    const scheduleRowsWithBenefits = scheduleRows.map((yearRow) => {
-      const contributionsForYear = Math.max(0, yearRow.contribution);
-      const federalTaxLiability = showFederalSaverCredit
-        ? getFederalIncomeTaxLiability(plannerFilingStatus, agiValid ? agiValue : 0)
-        : 0;
-      const federalCreditRaw = showFederalSaverCredit
-        ? Math.min(contributionsForYear, fscContributionLimit) * fscCreditPercent
-        : 0;
-      const federalCredit = showFederalSaverCredit
-        ? Math.min(federalCreditRaw, federalTaxLiability)
-        : 0;
-      const stateBenefitAmount = computeStateBenefitCapped(
-        stateBenefitConfig,
-        contributionsForYear,
-        agiValid ? agiValue : 0,
-        plannerFilingStatus,
-        benefitStateCode,
-      );
-      const months = yearRow.months.map((monthRow) => {
-        const monthNumber = (monthRow.monthIndex % 12) + 1;
-        const isDecember = monthNumber === 12;
-        return {
-          ...monthRow,
-          saversCredit: isDecember ? federalCredit : 0,
-          stateBenefit: isDecember ? stateBenefitAmount : 0,
-        };
-      });
-      return {
-        ...yearRow,
-        saversCredit: federalCredit,
-        stateBenefit: stateBenefitAmount,
-        months,
-      };
+    const scheduleRowsWithBenefits = enrichScheduleRowsWithBenefits({
+      rows: scheduleRows,
+      showFederalSaverCredit,
+      fscContributionLimit,
+      fscCreditPercent,
+      getFederalTaxLiability: () =>
+        getFederalIncomeTaxLiability(plannerFilingStatus, agiValid ? agiValue : 0),
+      getStateBenefitForYear: (contributionsForYear) =>
+        computeStateBenefitCapped(
+          stateBenefitConfig,
+          contributionsForYear,
+          agiValid ? agiValue : 0,
+          plannerFilingStatus,
+          benefitStateCode,
+        ),
     });
-    const getDisplayEndIndex = (
-      months: Array<{ monthIndex: number; endingBalance: number }>,
-      fallbackEndIndex: number,
-    ) => {
-      const depletionMonth = months.find((month) => month.endingBalance <= 0);
-      return depletionMonth ? depletionMonth.monthIndex : fallbackEndIndex;
-    };
-    const ableMonthlyForDisplay = scheduleRowsWithBenefits
-      .filter((row) => row.year >= 0)
-      .flatMap((row) => row.months)
-      .sort((a, b) => a.monthIndex - b.monthIndex);
-    const taxableMonthlyForDisplay = taxableRows
-      .filter((row) => row.year >= 0)
-      .flatMap((row) => row.months)
-      .sort((a, b) => a.monthIndex - b.monthIndex);
-    const ableDisplayEndIndex = getDisplayEndIndex(
-      ableMonthlyForDisplay,
-      horizonConfig.horizonEndIndex,
+    const ableMonthlyForDisplay = getAbleMonthlyForDisplay(scheduleRowsWithBenefits);
+    const taxableMonthlyForDisplay = getTaxableMonthlyForDisplay(taxableRows);
+    const { reportWindowMaxYears, reportWindowYearsValue, reportWindowEndIndex } =
+      buildReportWindowModel({
+        reportView,
+        reportWindowYears,
+        startIndex,
+        horizonEndIndex: horizonConfig.horizonEndIndex,
+        horizonSafeYears: horizonConfig.safeYears,
+        ableMonthly: ableMonthlyForDisplay,
+        taxableMonthly: taxableMonthlyForDisplay,
+      });
+    const reportAbleRows = buildReportAbleRows(
+      scheduleRowsWithBenefits,
+      reportWindowEndIndex,
     );
-    const taxableDisplayEndIndex = getDisplayEndIndex(
-      taxableMonthlyForDisplay,
-      horizonConfig.horizonEndIndex,
-    );
-    const reportDisplayEndIndex =
-      reportView === "tax_benefits"
-        ? ableDisplayEndIndex
-        : reportView === "taxable_growth"
-          ? taxableDisplayEndIndex
-          : Math.max(ableDisplayEndIndex, taxableDisplayEndIndex);
-    const reportDisplayMonths = Math.max(1, reportDisplayEndIndex - startIndex + 1);
-    const reportDisplayYearsRaw = Math.ceil(reportDisplayMonths / 12);
-    const reportDisplayYearsEvenRounded =
-      reportDisplayYearsRaw % 2 === 0 ? reportDisplayYearsRaw : reportDisplayYearsRaw + 1;
-    const reportWindowMaxYears = clampNumber(
-      reportDisplayYearsEvenRounded,
-      1,
-      horizonConfig.safeYears,
-    );
-    const reportWindowYearsValue =
-      reportWindowYears === "max"
-        ? reportWindowMaxYears
-        : Math.min(reportWindowYears, reportWindowMaxYears);
-    const reportWindowEndIndex =
-      reportWindowYearsValue > 0 ? startIndex + reportWindowYearsValue * 12 - 1 : startIndex - 1;
-    const reportAbleRows = scheduleRowsWithBenefits
-      .filter((row) => row.year >= 0)
-      .map((row) => {
-        const months = row.months.filter((month) => month.monthIndex <= reportWindowEndIndex);
-        if (!months.length) return null;
-        let contribution = 0;
-        let withdrawal = 0;
-        let earnings = 0;
-        let fedTax = 0;
-        let stateTax = 0;
-        let saversCredit = 0;
-        let stateBenefit = 0;
-        for (const month of months) {
-          contribution += Number.isFinite(month.contribution) ? month.contribution : 0;
-          withdrawal += Number.isFinite(month.withdrawal) ? month.withdrawal : 0;
-          earnings += Number.isFinite(month.earnings) ? month.earnings : 0;
-          fedTax += Number.isFinite(month.fedTax) ? month.fedTax : 0;
-          stateTax += Number.isFinite(month.stateTax) ? month.stateTax : 0;
-          saversCredit += Number.isFinite(month.saversCredit) ? month.saversCredit : 0;
-          stateBenefit += Number.isFinite(month.stateBenefit) ? month.stateBenefit : 0;
-        }
-        return {
-          ...row,
-          months,
-          contribution,
-          withdrawal,
-          earnings,
-          fedTax,
-          stateTax,
-          saversCredit,
-          stateBenefit,
-          endingBalance: months[months.length - 1]?.endingBalance ?? row.endingBalance,
-        };
-      })
-      .filter(Boolean) as typeof scheduleRowsWithBenefits;
-    const reportTaxableRows = taxableRows
-      .filter((row) => row.year >= 0)
-      .map((row) => {
-        const months = row.months.filter((month) => month.monthIndex <= reportWindowEndIndex);
-        if (!months.length) return null;
-        let contribution = 0;
-        let withdrawal = 0;
-        let investmentReturn = 0;
-        let federalTaxOnEarnings = 0;
-        let stateTaxOnEarnings = 0;
-        for (const month of months) {
-          contribution += Number.isFinite(month.contribution) ? month.contribution : 0;
-          withdrawal += Number.isFinite(month.withdrawal) ? month.withdrawal : 0;
-          investmentReturn += Number.isFinite(month.investmentReturn) ? month.investmentReturn : 0;
-          federalTaxOnEarnings += Number.isFinite(month.federalTaxOnEarnings) ? month.federalTaxOnEarnings : 0;
-          stateTaxOnEarnings += Number.isFinite(month.stateTaxOnEarnings) ? month.stateTaxOnEarnings : 0;
-        }
-        return {
-          ...row,
-          months,
-          contribution,
-          withdrawal,
-          investmentReturn,
-          federalTaxOnEarnings,
-          stateTaxOnEarnings,
-          endingBalance: months[months.length - 1]?.endingBalance ?? row.endingBalance,
-        };
-      })
-      .filter(Boolean) as typeof taxableRows;
+    const reportTaxableRows = buildReportTaxableRows(taxableRows, reportWindowEndIndex);
     const accountGrowthNarrative = buildAccountGrowthNarrative({
       language,
       ableRows: reportAbleRows,
@@ -2407,68 +1937,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     };
 
     if (active === "reports") {
-      const reportTitle = copy?.labels?.reports?.title ?? "";
-      const accountGrowthTabLabel = copy?.labels?.reports?.accountGrowthTab ?? "";
-      const ableGrowthTabLabel = copy?.labels?.reports?.taxBenefitsTab ?? "";
-      const taxableGrowthTabLabel = copy?.labels?.reports?.taxableGrowthTab ?? "";
-      const ableVsTaxableTabLabel = copy?.labels?.reports?.ableVsTaxableTab ?? "";
-      const reportWindowLabel = copy?.labels?.reports?.reportWindowLabel ?? "";
-      const ableVsTaxablePanelLabels = {
-        title: copy?.labels?.reports?.ableVsTaxableTitle ?? "",
-        metricLabel: copy?.labels?.reports?.ableVsTaxableMetricLabel ?? "",
-        ableLabel: copy?.labels?.reports?.ableVsTaxableAbleLabel ?? "",
-        taxableLabel: copy?.labels?.reports?.ableVsTaxableTaxableLabel ?? "",
-        naLabel: copy?.labels?.reports?.ableVsTaxableNaLabel ?? "—",
-        rows: {
-          startingBalance: copy?.labels?.reports?.ableVsTaxableRows?.startingBalance ?? "",
-          contributions: copy?.labels?.reports?.ableVsTaxableRows?.contributions ?? "",
-          withdrawals: copy?.labels?.reports?.ableVsTaxableRows?.withdrawals ?? "",
-          investmentReturns: copy?.labels?.reports?.ableVsTaxableRows?.investmentReturns ?? "",
-          federalTaxes: copy?.labels?.reports?.ableVsTaxableRows?.federalTaxes ?? "",
-          stateTaxes: copy?.labels?.reports?.ableVsTaxableRows?.stateTaxes ?? "",
-          endingBalance: copy?.labels?.reports?.ableVsTaxableRows?.endingBalance ?? "",
-          federalSaversCredit: copy?.labels?.reports?.ableVsTaxableRows?.federalSaversCredit ?? "",
-          stateTaxBenefits: copy?.labels?.reports?.ableVsTaxableRows?.stateTaxBenefits ?? "",
-          totalEconomicValue: copy?.labels?.reports?.ableVsTaxableRows?.totalEconomicValue ?? "",
-          totalEconomicBenefit: copy?.labels?.reports?.ableVsTaxableRows?.totalEconomicBenefit ?? "",
-        },
-      };
-      const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
-        (option) => option !== "max" && option === reportWindowMaxYears,
-      );
-      const showMaxOption = !hasPresetMatchingHorizon;
-      const optionsToRender = REPORT_WINDOW_OPTIONS.filter(
-        (option) =>
-          option === "max"
-            ? showMaxOption
-            : option <= reportWindowMaxYears,
-      );
-      const reportWindowOptions = optionsToRender.map((option) => {
-        const isMax = option === "max";
-        const optionYears = isMax ? reportWindowMaxYears : option;
-        const isActive = reportWindowYearsValue === optionYears;
-        const label = isMax
-          ? language === "es"
-            ? `${reportWindowMaxYears}A`
-            : `${reportWindowMaxYears}Y`
-          : language === "es"
-            ? `${optionYears}A`
-            : `${optionYears}Y`;
-        return {
-          key: `report-window-${option}`,
-          label,
-          isActive,
-          onClick: () => setReportWindowYears(option),
-        };
-      });
       return (
-        <SummaryView
-          reportTitle={reportTitle}
-          accountGrowthTabLabel={accountGrowthTabLabel}
-          ableGrowthTabLabel={ableGrowthTabLabel}
-          taxableGrowthTabLabel={taxableGrowthTabLabel}
-          ableVsTaxableTabLabel={ableVsTaxableTabLabel}
-          ableVsTaxablePanelLabels={ableVsTaxablePanelLabels}
+        <ReportsSection
+          labels={copy?.labels?.reports}
+          placeholderText={copy?.labels?.ui?.placeholderComingSoon ?? ""}
           reportView={reportView}
           enabledReportViews={enabledReportViews}
           onReportViewChange={(nextView) => {
@@ -2476,21 +1948,21 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               setReportView(nextView);
             }
           }}
-          reportWindowLabel={reportWindowLabel}
-          reportWindowOptions={reportWindowOptions}
-          languageToggle={languageToggle}
+          reportWindowYearsValue={reportWindowYearsValue}
+          reportWindowMaxYears={reportWindowMaxYears}
+          onReportWindowYearsChange={setReportWindowYears}
           language={language}
+          languageToggle={languageToggle}
           accountGrowthNarrativeParagraphs={accountGrowthNarrativeParagraphs}
           ableRows={reportAbleRows}
           taxableRows={reportTaxableRows}
-          placeholderText={copy?.labels?.ui?.placeholderComingSoon ?? ""}
         />
       );
     }
 
     if (active === "schedule") {
       return (
-        <ScheduleView
+        <ScheduleSection
           hasTimeHorizon={hasTimeHorizon}
           language={language}
           labels={copy?.labels?.schedule}
@@ -2513,119 +1985,160 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         : [];
       const disclosuresAssumptionsOverride = getClientBlock("disclosuresAssumptions");
       return (
-        <DisclosuresView
-          title={assumptionTitle}
-          items={assumptionItems}
-          overrideText={disclosuresAssumptionsOverride}
+        <DisclosuresSection
+          assumptionTitle={assumptionTitle}
+          assumptionItems={assumptionItems}
+          disclosuresAssumptionsOverride={disclosuresAssumptionsOverride}
           languageToggle={languageToggle}
         />
       );
     }
 
+    const handleDemographicsFormChange = (updates: {
+      beneficiaryName?: string;
+      stateOfResidence?: string;
+      filingStatus?: FilingStatusOption;
+      agi?: string;
+      annualReturn?: string;
+      isSsiEligible?: boolean;
+    }) => {
+      if ("beneficiaryName" in updates) setBeneficiaryName(updates.beneficiaryName ?? "");
+      if ("stateOfResidence" in updates)
+        setBeneficiaryStateOfResidence(updates.stateOfResidence ?? "");
+      if ("filingStatus" in updates)
+        setPlannerFilingStatus((updates.filingStatus ?? "single") as FilingStatusOption);
+      if ("agi" in updates) setPlannerAgi(sanitizeAgiInput(updates.agi ?? ""));
+      if ("annualReturn" in updates) {
+        setAnnualReturnEdited(true);
+
+        const raw = (updates.annualReturn ?? "").toString();
+        const dec = parsePercentStringToDecimal(raw);
+
+        if (dec === null) {
+          setAnnualReturn("");
+          setAnnualReturnWarningMax(null);
+        } else {
+          const client = getClientConfig(plannerStateCode);
+          const warningMax = client?.constraints?.annualReturnWarningMax;
+          const hardMax = client?.constraints?.annualReturnHardMax;
+
+          let nextDec = Math.max(0, dec);
+
+          if (typeof hardMax === "number" && Number.isFinite(hardMax)) {
+            if (nextDec > hardMax) nextDec = hardMax;
+          }
+
+          setAnnualReturn(formatDecimalToPercentString(nextDec));
+
+          if (typeof warningMax === "number" && Number.isFinite(warningMax)) {
+            if (nextDec > warningMax) {
+              setAnnualReturnWarningMax(warningMax);
+            } else {
+              setAnnualReturnWarningMax(null);
+            }
+          } else {
+            setAnnualReturnWarningMax(null);
+          }
+        }
+      }
+      if ("isSsiEligible" in updates) setIsSsiEligible(Boolean(updates.isSsiEligible));
+    };
+
+    const handleAccountActivityFormChange = (updates: {
+      timeHorizonYears?: string;
+      startingBalance?: string;
+      monthlyContribution?: string;
+      contributionEndYear?: string;
+      contributionEndMonth?: string;
+      monthlyWithdrawal?: string;
+      withdrawalStartYear?: string;
+      withdrawalStartMonth?: string;
+      contributionIncreasePct?: string;
+      withdrawalIncreasePct?: string;
+    }) => {
+      if ("timeHorizonYears" in updates) {
+        const raw = (updates.timeHorizonYears ?? "").replace(".00", "");
+        setTimeHorizonYears(raw);
+        setTimeHorizonEdited(true);
+      }
+      if ("startingBalance" in updates)
+        setStartingBalance(sanitizeAmountInput(updates.startingBalance ?? ""));
+      if ("monthlyContribution" in updates) {
+        const sanitized = sanitizeAmountInput(updates.monthlyContribution ?? "");
+        setMonthlyContribution(sanitized);
+        setMonthlyContributionFuture("");
+      }
+      if ("contributionEndYear" in updates) {
+        setContributionEndTouched(true);
+        setContributionEndYear(updates.contributionEndYear ?? "");
+      }
+      if ("contributionEndMonth" in updates) {
+        setContributionEndTouched(true);
+        setContributionEndMonth(updates.contributionEndMonth ?? "");
+      }
+      if ("monthlyWithdrawal" in updates) {
+        handleManualWithdrawalOverride(updates.monthlyWithdrawal ?? "");
+      }
+      if ("withdrawalStartYear" in updates) {
+        setWithdrawalStartTouched(true);
+        setWithdrawalStartYear(updates.withdrawalStartYear ?? "");
+      }
+      if ("withdrawalStartMonth" in updates) {
+        setWithdrawalStartTouched(true);
+        setWithdrawalStartMonth(updates.withdrawalStartMonth ?? "");
+      }
+      if ("contributionIncreasePct" in updates) {
+        const nextValue = updates.contributionIncreasePct ?? "";
+        setContributionIncreasePct(nextValue);
+        const nextNumeric = Number(nextValue);
+        setHasUserEnteredContributionIncrease(
+          Number.isFinite(nextNumeric) && nextNumeric > 0,
+        );
+      }
+      if ("withdrawalIncreasePct" in updates) {
+        setWithdrawalIncreasePct(updates.withdrawalIncreasePct ?? "");
+      }
+    };
+
     return (
       <div className="space-y-3">
-        <div className="hidden md:flex md:items-center md:justify-between md:text-xs md:font-semibold">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              {desktopInputPageTitle}
-            </h1>
-          </div>
-          <div className="flex items-center gap-3">
-            {inputStep === 2 && (
-              <button
-                type="button"
-                className="inline-flex rounded-full border border-zinc-200 px-4 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
-                onClick={goToPreviousInputStep}
-              >
-                {copy?.buttons?.back ?? ""}
-              </button>
-            )}
-            <button
-              type="button"
-              disabled={isNextDisabled}
-              className={[
-                "inline-flex rounded-full px-4 py-1 text-xs font-semibold transition",
-                isNextDisabled
-                  ? "border border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
-                  : "bg-[var(--brand-primary)] text-white",
-              ].join(" ")}
-              onClick={goToNextStep}
-            >
-              {copy?.buttons?.next ?? ""}
-            </button>
-            <div className="hidden md:block">{refreshButton}</div>
-            <div className="hidden md:block">{languageToggle}</div>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-6 items-stretch md:grid-cols-2">
-          <div ref={inputsColumnRef} className="flex-1">
-            {inputStep === 1 ? (
-              <DemographicsForm
-                beneficiaryName={beneficiaryName}
-                stateOfResidence={beneficiaryStateOfResidence}
-                filingStatus={plannerFilingStatus}
-                agi={plannerAgi}
-                annualReturn={annualReturn}
-                isSsiEligible={isSsiEligible}
-                fscStatus={fscStatus}
-                fscButtonLabel={getFscButtonLabel()}
-                fscDisabled={agiGateEligible !== true}
-                copy={{
-                  title: copy.ui?.inputs?.demographics?.title,
-                  labels: copy.labels?.inputs,
-                }}
-                headerRightSlot={mobileInputsHeaderActions}
-                onChange={(updates) => {
-                  if ("beneficiaryName" in updates) setBeneficiaryName(updates.beneficiaryName ?? "");
-                  if ("stateOfResidence" in updates)
-                    setBeneficiaryStateOfResidence(updates.stateOfResidence ?? "");
-                  if ("filingStatus" in updates)
-                    setPlannerFilingStatus((updates.filingStatus ?? "single") as FilingStatusOption);
-                  if ("agi" in updates) setPlannerAgi(sanitizeAgiInput(updates.agi ?? ""));
-                  if ("annualReturn" in updates) {
-                    setAnnualReturnEdited(true);
-
-                    const raw = (updates.annualReturn ?? "").toString();
-                    const dec = parsePercentStringToDecimal(raw);
-
-                    if (dec === null) {
-                      setAnnualReturn("");
-                      setAnnualReturnWarningMax(null);
-                    } else {
-                      const client = getClientConfig(plannerStateCode);
-                      const warningMax = client?.constraints?.annualReturnWarningMax;
-                      const hardMax = client?.constraints?.annualReturnHardMax;
-
-                      let nextDec = Math.max(0, dec);
-
-                      if (typeof hardMax === "number" && Number.isFinite(hardMax)) {
-                        if (nextDec > hardMax) nextDec = hardMax;
-                      }
-
-                      setAnnualReturn(formatDecimalToPercentString(nextDec));
-
-                      if (typeof warningMax === "number" && Number.isFinite(warningMax)) {
-                        if (nextDec > warningMax) {
-                          setAnnualReturnWarningMax(warningMax);
-} else {
-                          setAnnualReturnWarningMax(null);
-                        }
-                      } else {
-                        setAnnualReturnWarningMax(null);
-                      }
-                    }
-                  }
-                  if ("isSsiEligible" in updates) setIsSsiEligible(Boolean(updates.isSsiEligible));
-                }}
-                onFscClick={() => {
-                  if (agiGateEligible) {
-                    setMessagesMode("fsc");
-                    setFscQ({ ...EMPTY_FSC });
-                  }
-                }}
-              />
-            ) : (
-            <AccountActivityForm
+        <InputsDesktopHeader
+          title={desktopInputPageTitle}
+          inputStep={inputStep}
+          backLabel={copy?.buttons?.back ?? ""}
+          nextLabel={copy?.buttons?.next ?? ""}
+          isNextDisabled={isNextDisabled}
+          onBack={goToPreviousInputStep}
+          onNext={goToNextStep}
+          refreshButton={refreshButton}
+          languageToggle={languageToggle}
+        />
+        <InputsTwoColumnShell
+          inputsColumnRef={inputsColumnRef}
+          consoleCardRef={consoleCardRef}
+          plannerConsoleTitle={copy?.labels?.inputs?.plannerConsoleTitle ?? ""}
+          leftContent={
+            <InputsLeftPane
+              inputStep={inputStep}
+              mobileInputsHeaderActions={mobileInputsHeaderActions}
+              beneficiaryName={beneficiaryName}
+              beneficiaryStateOfResidence={beneficiaryStateOfResidence}
+              plannerFilingStatus={plannerFilingStatus}
+              plannerAgi={plannerAgi}
+              annualReturn={annualReturn}
+              isSsiEligible={isSsiEligible}
+              fscStatus={fscStatus}
+              fscButtonLabel={fscButtonLabel}
+              fscDisabled={agiGateEligible !== true}
+              demographicsTitle={copy.ui?.inputs?.demographics?.title ?? ""}
+              inputLabels={copy.labels?.inputs}
+              onDemographicsChange={handleDemographicsFormChange}
+              onDemographicsFscClick={() => {
+                if (agiGateEligible) {
+                  setMessagesMode("fsc");
+                  setFscQ({ ...EMPTY_FSC });
+                }
+              }}
               timeHorizonYears={timeHorizonYears}
               startingBalance={startingBalance}
               monthlyContribution={monthlyContribution}
@@ -2634,337 +2147,83 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               monthlyWithdrawal={monthlyWithdrawal}
               withdrawalStartYear={withdrawalStartYear}
               withdrawalStartMonth={withdrawalStartMonth}
-              contributionIncreaseDisabled={contributionIncreaseDisabledNow}
-              contributionIncreaseHelperText={
-                hasUserEnteredContributionIncrease ? contributionIncreaseHelperText : undefined
-              }
+              contributionIncreaseDisabledNow={contributionIncreaseDisabledNow}
+              contributionIncreaseHelperText={contributionIncreaseHelperText}
+              hasUserEnteredContributionIncrease={hasUserEnteredContributionIncrease}
               contributionIncreasePct={contributionIncreasePct}
               withdrawalIncreasePct={withdrawalIncreasePct}
-              contributionIncreaseStopYear={stopContributionIncreasesAfterYear}
+              stopContributionIncreasesAfterYear={stopContributionIncreasesAfterYear}
               monthOptions={monthOptions}
               contributionMonthOptions={contributionMonthOptions}
               contributionYearOptions={contributionYearOptions}
-              withdrawalYearOptions={horizonYearOptions}
-              onChange={(updates) => {
-                if ("timeHorizonYears" in updates) {
-                  const raw = (updates.timeHorizonYears ?? "").replace(".00","");
-                  setTimeHorizonYears(raw);
-                  setTimeHorizonEdited(true);
-                }
-                if ("startingBalance" in updates)
-                  setStartingBalance(sanitizeAmountInput(updates.startingBalance ?? ""));
-                if ("monthlyContribution" in updates) {
-                  const sanitized = sanitizeAmountInput(updates.monthlyContribution ?? "");
-                  setMonthlyContribution(sanitized);
-                  setMonthlyContributionFuture("");
-                }
-                if ("contributionEndYear" in updates) {
-                  setContributionEndTouched(true);
-                  setContributionEndYear(updates.contributionEndYear ?? "");
-                }
-                if ("contributionEndMonth" in updates) {
-                  setContributionEndTouched(true);
-                  setContributionEndMonth(updates.contributionEndMonth ?? "");
-                }
-                if ("monthlyWithdrawal" in updates)
-                  {
-                    handleManualWithdrawalOverride(updates.monthlyWithdrawal ?? "");
-                  }
-                if ("withdrawalStartYear" in updates) {
-                  setWithdrawalStartTouched(true);
-                  setWithdrawalStartYear(updates.withdrawalStartYear ?? "");
-                }
-                if ("withdrawalStartMonth" in updates) {
-                  setWithdrawalStartTouched(true);
-                  setWithdrawalStartMonth(updates.withdrawalStartMonth ?? "");
-                }
-                if ("contributionIncreasePct" in updates) {
-                  const nextValue = updates.contributionIncreasePct ?? "";
-                  setContributionIncreasePct(nextValue);
-                  const nextNumeric = Number(nextValue);
-                  setHasUserEnteredContributionIncrease(
-                    Number.isFinite(nextNumeric) && nextNumeric > 0,
-                  );
-                }
-                if ("withdrawalIncreasePct" in updates) {
-                  setWithdrawalIncreasePct(updates.withdrawalIncreasePct ?? "");
-                }
-              }}
-              onAdvancedClick={() => {
-                toggleBudgetMode();
-              }}
-              advancedButtonLabel={
-                copy?.labels?.inputs?.qualifiedWithdrawalsBudgetButtonLabel ?? ""
-              }
+              horizonYearOptions={horizonYearOptions}
+              onAccountActivityChange={handleAccountActivityFormChange}
+              onAdvancedClick={toggleBudgetMode}
+              advancedButtonLabel={copy?.labels?.inputs?.qualifiedWithdrawalsBudgetButtonLabel ?? ""}
               onTimeHorizonBlur={enforceTimeHorizonLimits}
               timeHorizonLabel={
                 language === "es"
                   ? `Horizonte temporal (MÁX ${horizonLimits.maxYears} AÑOS)`
                   : `Time Horizon (MAX ${horizonLimits.maxYears} YEARS)`
               }
-              copy={{
-                title: copy?.ui?.inputs?.accountActivity?.title,
-                labels: copy.labels?.inputs,
-              }}
-              headerRightSlot={mobileInputsHeaderActions}
+              accountActivityTitle={copy?.ui?.inputs?.accountActivity?.title ?? ""}
             />
-            )}
-          </div>
-          <div className="flex-1">
-            <div className="h-full">
-              <div ref={consoleCardRef} className="h-full rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
-                <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-                  {copy?.labels?.inputs?.plannerConsoleTitle ?? ""}
-                </h2>
-                <div className="mb-4 mt-2 border-b border-zinc-200 dark:border-zinc-800" />
-                {inputStep === 1 ? (
-                  <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
-                    {showResidencyWarning && (
-                      <div role="status" aria-live="polite">
-                        {renderResidencyWarning()}
-                      </div>
-                    )}
-                    {!showResidencyWarning && ssiIncomeEligibilityWarningText && !ssiIncomeWarningDismissed && (
-                      <div
-                        role="status"
-                        aria-live="polite"
-                        className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm leading-relaxed text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100"
-                      >
-                        <p>{ssiIncomeEligibilityWarningText}</p>
-                        <button
-                          type="button"
-                          className="mt-3 w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
-                          onClick={() => {
-                            setSsiIncomeWarningDismissed(true);
-                            if (
-                              typeof window !== "undefined" &&
-                              window.matchMedia("(max-width: 767px)").matches
-                            ) {
-                              window.setTimeout(() => {
-                                scrollMobileElementWithOffset(inputsColumnRef.current, "smooth");
-                              }, 0);
-                            }
-                          }}
-                        >
-                          OK
-                        </button>
-                      </div>
-                    )}
-                    {annualReturnWarningText && (
-                      <div
-                        role="status"
-                        aria-live="polite"
-                        className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm leading-relaxed text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100"
-                      >
-                        {annualReturnWarningText}
-                      </div>
-                    )}
-                    {ssiSelectionPlannerMessageText && (
-                      <div className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm leading-relaxed text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100">
-                        {ssiSelectionPlannerMessageText}
-                      </div>
-                    )}
-                    {showQuestionnaire && !showResidencyWarning && (
-                      <div
-                        ref={fscQuestionnaireRef}
-                        className="space-y-4 rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_10%,white)] p-4 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_20%,black)]"
-                      >
-                        <div>
-                          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">{copy?.labels?.inputs?.fscEligibilityTitle ?? ""}</h2>
-                          <p className="text-xs text-zinc-500">
-                            {copy?.labels?.fsc?.intro ?? ""}
-                          </p>
-                        </div>
-                        <div className="space-y-3">
-                          {visibleQuestions.map((question) => {
-                            const selectedAnswer = fscQ[question.key];
-                            const isAnswered = selectedAnswer !== null;
-                            return (
-                              <fieldset key={question.key} className="space-y-2">
-                                <legend className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">
-                                  {question.label}
-                                </legend>
-                                <div className="flex gap-2">
-                                  <button
-                                    type="button"
-                                    className={[
-                                      "flex-1 rounded-full border px-3 py-2 text-xs font-semibold transition",
-                                      selectedAnswer === true
-                                        ? "border-transparent bg-[var(--brand-primary)] text-white"
-                                        : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900",
-                                    ].join(" ")}
-                                    onClick={() => answerFscQuestion(question.key, true)}
-                                    disabled={isAnswered}
-                                  >
-                                    {copy?.buttons?.yes ?? ""}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={[
-                                      "flex-1 rounded-full border px-3 py-2 text-xs font-semibold transition",
-                                      selectedAnswer === false
-                                        ? "border-transparent bg-[var(--brand-primary)] text-white"
-                                        : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900",
-                                    ].join(" ")}
-                                    onClick={() => answerFscQuestion(question.key, false)}
-                                    disabled={isAnswered}
-                                  >
-                                    {copy?.buttons?.no ?? ""}
-                                  </button>
-                                </div>
-                              </fieldset>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                    {screen1Messages.map((message, index) => (
-                      <p
-                        key={`${message}-${index}`}
-                        className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
-                      >
-                        {message}
-                      </p>
-                    ))}
-                  </div>
-                ) : (
-                  renderScreen2Panel()
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+          }
+          rightContent={
+            <InputsRightPane
+              inputStep={inputStep}
+              showResidencyWarning={showResidencyWarning}
+              renderResidencyWarning={renderResidencyWarning}
+              ssiIncomeEligibilityWarningText={ssiIncomeEligibilityWarningText}
+              ssiIncomeWarningDismissed={ssiIncomeWarningDismissed}
+              onDismissSsiIncomeWarning={() => {
+                setSsiIncomeWarningDismissed(true);
+                if (
+                  typeof window !== "undefined" &&
+                  window.matchMedia("(max-width: 767px)").matches
+                ) {
+                  window.setTimeout(() => {
+                    scrollMobileElementWithOffset(inputsColumnRef.current, "smooth");
+                  }, 0);
+                }
+              }}
+              annualReturnWarningText={annualReturnWarningText}
+              ssiSelectionPlannerMessageText={ssiSelectionPlannerMessageText}
+              showQuestionnaire={showQuestionnaire}
+              fscQuestionnaireRef={fscQuestionnaireRef}
+              fscEligibilityTitle={copy?.labels?.inputs?.fscEligibilityTitle ?? ""}
+              fscIntro={copy?.labels?.fsc?.intro ?? ""}
+              visibleQuestions={visibleQuestions}
+              fscAnswers={fscQ}
+              onAnswerFscQuestion={answerFscQuestion}
+              yesLabel={copy?.buttons?.yes ?? ""}
+              noLabel={copy?.buttons?.no ?? ""}
+              screen1Messages={screen1Messages}
+              renderScreen2Panel={renderScreen2Panel}
+            />
+          }
+        />
       </div>
     );
   })();
 
   if (showWelcome) {
     return (
-      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
-        <TopNav
-          title={copy.app?.title ?? ""}
-          tagline={copy.app?.tagline}
-          rightSlot={
-            <div className="flex items-center gap-2">
-              {planSelector}
-              <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-800 dark:border-zinc-800 dark:bg-black dark:text-zinc-200">
-                WELCOME
-              </span>
-            </div>
-          }
-        />
-
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-1.5">
-          <div className="flex justify-center">{languageToggle}</div>
-          <div className="mt-4" />
-          <div className="text-center">
-            <h1 className="text-2xl font-semibold">
-              {landingCopy.heroTitle}
-            </h1>
-
-            <p className="mt-4 max-w-6xl mx-auto text-left text-base text-zinc-600 dark:text-zinc-400">
-              {landingCopy.heroBody}
-            </p>
-
-            {!useLegacyLandingWelcomeOverride && (
-              <>
-                {landingCopy.heroBullets.length > 0 && (
-                  <ul className="mt-4 flex flex-col items-center gap-2 text-base text-zinc-600 dark:text-zinc-400">
-                    {landingCopy.heroBullets.map((bullet, index) => (
-                      <li
-                        key={`hero-bullet-${index}`}
-                        className="w-full max-w-xl list-inside list-disc text-left"
-                      >
-                        {bullet}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            )}
-
-            <div className="mt-6 space-y-4">
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <div className="flex items-start gap-2 text-left">
-                  <input
-                    id="welcome-terms-consent"
-                    type="checkbox"
-                    checked={welcomeTermsAgreed}
-                    onChange={(event) => setWelcomeTermsAgreed(event.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-zinc-300 text-[var(--brand-primary)] focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)] dark:border-zinc-700"
-                  />
-                  <label htmlFor="welcome-terms-consent" className="text-sm text-zinc-700 dark:text-zinc-300">
-                    {landingCopy.agreeToTermsPrefix || "I agree to the"}{" "}
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        setShowWelcomeTermsOfUse((prev) => !prev);
-                      }}
-                      aria-controls="welcome-terms-of-use-card"
-                      aria-expanded={showWelcomeTermsOfUse}
-                      className="font-semibold text-[var(--brand-primary)] underline underline-offset-2 hover:text-[var(--brand-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]"
-                    >
-                      {landingCopy.termsOfUseLinkLabel || "Terms of Use"}
-                    </button>
-                  </label>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleWelcomeContinue}
-                  disabled={!welcomeTermsAgreed}
-                  className={[
-                    "rounded-full px-6 py-2 text-xs font-semibold transition",
-                    welcomeTermsAgreed
-                      ? "bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)]"
-                      : "cursor-not-allowed bg-zinc-300 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
-                  ].join(" ")}
-                >
-                  {landingCopy.agreeAndContinueLabel || "Agree and Continue"}
-                </button>
-              </div>
-
-              {showWelcomeTermsOfUse && (
-                <section
-                  id="welcome-terms-of-use-card"
-                  ref={welcomeTermsCardRef}
-                  className="max-h-72 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-4 text-left dark:border-zinc-800 dark:bg-zinc-950"
-                >
-                  <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
-                    {landingCopy.termsOfUseTitle || landingCopy.termsOfUseLinkLabel || "Terms of Use"}
-                  </h2>
-                  <div className="mt-3 space-y-2 text-sm leading-relaxed text-zinc-700 dark:text-zinc-200">
-                    {termsOfUseParagraphs.map((paragraph, index) => {
-                      const [leadIn, ...restParts] = paragraph.split("\n");
-                      const rest = restParts.join("\n").trim();
-                      if (!restParts.length) {
-                        return (
-                          <p key={`terms-of-use-${index}`} className="whitespace-pre-line">
-                            {paragraph}
-                          </p>
-                        );
-                      }
-                      return (
-                        <p key={`terms-of-use-${index}`} className="whitespace-pre-line">
-                          <strong className="font-semibold text-[var(--brand-primary)]">{leadIn.trim()}</strong>
-                          {rest ? ` ${rest}` : null}
-                        </p>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
-
-            </div>
-            <div className="mt-4" />
-          </div>
-        </main>
-        <footer className="px-4 pb-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
-          © 2026 Spectra Professional Services, LLC. All rights reserved.
-        </footer>
-      </div>
+      <WelcomeSection
+        appTitle={copy.app?.title ?? ""}
+        appTagline={copy.app?.tagline}
+        planSelector={planSelector}
+        languageToggle={languageToggle}
+        landingCopy={landingCopy}
+        useLegacyLandingWelcomeOverride={useLegacyLandingWelcomeOverride}
+        welcomeTermsAgreed={welcomeTermsAgreed}
+        showWelcomeTermsOfUse={showWelcomeTermsOfUse}
+        onWelcomeTermsAgreedChange={setWelcomeTermsAgreed}
+        onToggleWelcomeTerms={() => setShowWelcomeTermsOfUse((prev) => !prev)}
+        onWelcomeContinue={handleWelcomeContinue}
+        termsOfUseParagraphs={termsOfUseParagraphs}
+        welcomeTermsCardRef={welcomeTermsCardRef}
+      />
     );
   }
 
