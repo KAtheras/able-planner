@@ -359,7 +359,7 @@ export default function AccountActivityForm({
             placeholder={copy?.labels?.requiredFieldPlaceholder ?? "Required field"}
             value={monthlyContribution}
             onChange={(e) => onChange?.({ monthlyContribution: e.target.value })}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base placeholder:font-medium placeholder:text-[var(--brand-primary)] md:text-sm"
+            className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base placeholder:text-[13px] placeholder:font-medium placeholder:text-[var(--brand-primary)] md:text-sm"
           />
         </div>
 

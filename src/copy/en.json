@@ -235,15 +235,13 @@
     "screen1": {
       "defaultMessages": [
         "This is where the ABLE planner shares updates, alerts, and guidance based on your inputs and may ask for additional information.",
-        "Please use the input fields to provide the requested information for the ABLE planner.",
-        "Use the information icons next to each input for field-specific guidance."
+        "Please use the input fields to provide the requested information for the ABLE planner."
       ]
     },
     "screen2": {
       "defaultMessages": [
         "This is where the ABLE planner shares updates, alerts, and guidance based on your inputs and may ask for additional information.",
-        "Please use the Account Activity input fields to define your planning assumptions.",
-        "Use the information icons next to each input for field-specific guidance."
+        "Please use the Account Activity input fields to define your planning assumptions."
       ]
     }
   },

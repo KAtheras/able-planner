@@ -448,9 +448,9 @@ export default function DemographicsForm({
               className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
             {agi === "" ? (
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[11px] font-medium text-[var(--brand-primary)] md:text-sm">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] font-medium text-[var(--brand-primary)]">
                 {copy?.labels?.agiRequiredInlineLabel ?? "Required field"}
-                <sup className="ml-px text-[11px] leading-none align-[0.15em] md:text-[12px]">*</sup>
+                <sup className="ml-px text-[13px] leading-none align-[0.1em]">*</sup>
               </span>
             ) : null}
           </div>
