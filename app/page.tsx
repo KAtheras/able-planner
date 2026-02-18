@@ -333,6 +333,7 @@ export default function Home() {
   const [agiGateEligible, setAgiGateEligible] = useState<boolean | null>(null);
   const [wtaAutoApplied, setWtaAutoApplied] = useState(false);
   const [wtaDismissed, setWtaDismissed] = useState(false);
+  const [ssiIncomeWarningDismissed, setSsiIncomeWarningDismissed] = useState(false);
   useEffect(() => {
     setWtaAutoApplied(false);
     setWtaDismissed(false);
@@ -489,6 +490,12 @@ export default function Home() {
     ? (copy?.messages?.ssiSelectionPlannerMessage ??
       "Checking this box will instruct the planner to stop contributions and implement withdrawals where necessary to keep your projected account balance under $100,000.")
     : "";
+
+  useEffect(() => {
+    if (!showSsiIncomeEligibilityWarning) {
+      setSsiIncomeWarningDismissed(false);
+    }
+  }, [showSsiIncomeEligibilityWarning]);
 
   const landingWelcomeOverride = getClientBlock("landingWelcome");
   const useLegacyLandingWelcomeOverride = Boolean(landingWelcomeOverride) && !hasLandingOverride;
@@ -1352,7 +1359,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   const resetInputs = () => {
     setInputStep(1);
     setBeneficiaryName("");
-    setBeneficiaryStateOfResidence("");
+    setBeneficiaryStateOfResidence(plannerStateCode === "default" ? "" : plannerStateCode);
     setPlannerFilingStatus("single");
     setPlannerAgi("");
     const client = getClientConfig(plannerStateCode);
@@ -1383,6 +1390,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     resetWtaFlow();
     setFscStatus("idle");
     setFscQ({ ...EMPTY_FSC });
+    fscPassedRef.current = false;
+    setSsiIncomeWarningDismissed(false);
     setMessagesMode("intro");
     setAgiGateEligible(null);
     setScreen1Messages([...screen1DefaultMessages]);
@@ -2610,13 +2619,28 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                         {renderResidencyWarning()}
                       </div>
                     )}
-                    {!showResidencyWarning && ssiIncomeEligibilityWarningText && (
+                    {!showResidencyWarning && ssiIncomeEligibilityWarningText && !ssiIncomeWarningDismissed && (
                       <div
                         role="status"
                         aria-live="polite"
                         className="rounded-2xl border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] p-3 text-sm leading-relaxed text-zinc-900 dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)] dark:text-zinc-100"
                       >
-                        {ssiIncomeEligibilityWarningText}
+                        <p>{ssiIncomeEligibilityWarningText}</p>
+                        <button
+                          type="button"
+                          className="mt-3 w-full rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white"
+                          onClick={() => {
+                            setSsiIncomeWarningDismissed(true);
+                            if (
+                              typeof window !== "undefined" &&
+                              window.matchMedia("(max-width: 767px)").matches
+                            ) {
+                              window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+                            }
+                          }}
+                        >
+                          OK
+                        </button>
                       </div>
                     )}
                     {annualReturnWarningText && (
