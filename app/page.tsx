@@ -2635,7 +2635,9 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
                               typeof window !== "undefined" &&
                               window.matchMedia("(max-width: 767px)").matches
                             ) {
-                              window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+                              window.setTimeout(() => {
+                                scrollMobileElementWithOffset(inputsColumnRef.current, "smooth");
+                              }, 0);
                             }
                           }}
                         >
