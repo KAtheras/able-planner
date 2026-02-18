@@ -317,7 +317,6 @@ export default function AbleVsTaxablePanel({
       taxableNumeric: null,
       able: formatCurrencyOrDash(ableTotals.federalSaversCredit, labels.naLabel),
       taxable: NA_DISPLAY,
-      forceShow: true,
     },
     {
       key: "stateTaxBenefits",
