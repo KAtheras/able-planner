@@ -54,6 +54,11 @@ type ClientLandingContent = Partial<{
   disclosuresTitle: string;
   disclosuresIntro: string;
   disclosuresBody: string;
+  agreeToTermsPrefix: string;
+  agreeAndContinueLabel: string;
+  termsOfUseLinkLabel: string;
+  termsOfUseTitle: string;
+  termsOfUseBody: string;
 }>;
 type ClientLandingOverrides = Partial<Record<SupportedLanguage, ClientLandingContent>>;
 type ReportWindowOption = 3 | 10 | 20 | 40 | "max";
@@ -341,6 +346,8 @@ export default function Home() {
   }, [monthlyContribution, monthlyContributionFuture]);
 
   const [showWelcome, setShowWelcome] = useState(true);
+  const [welcomeTermsAgreed, setWelcomeTermsAgreed] = useState(false);
+  const [showWelcomeTermsOfUse, setShowWelcomeTermsOfUse] = useState(false);
   const [amortizationView, setAmortizationView] = useState<"able" | "taxable">("able");
   const [sidebarDesktopTopOffset, setSidebarDesktopTopOffset] = useState(0);
   const fscPassedRef = useRef(false);
@@ -376,6 +383,11 @@ export default function Home() {
         landingOverride.disclosuresTitle?.trim() ||
         landingOverride.disclosuresIntro?.trim() ||
         landingOverride.disclosuresBody?.trim() ||
+        landingOverride.agreeToTermsPrefix?.trim() ||
+        landingOverride.agreeAndContinueLabel?.trim() ||
+        landingOverride.termsOfUseLinkLabel?.trim() ||
+        landingOverride.termsOfUseTitle?.trim() ||
+        landingOverride.termsOfUseBody?.trim() ||
         (Array.isArray(landingOverride.heroBullets) && landingOverride.heroBullets.length > 0)),
   );
   const rightCardPrimaryOverride = getClientBlock("rightCardPrimary");
@@ -514,9 +526,14 @@ export default function Home() {
     disclosuresTitle: landingOverride?.disclosuresTitle?.trim() || copy.landing?.disclosuresTitle || "",
     disclosuresIntro: landingOverride?.disclosuresIntro?.trim() || copy.landing?.disclosuresIntro || "",
     disclosuresBody: landingOverride?.disclosuresBody?.trim() || copy.landing?.disclosuresBody || "",
+    agreeToTermsPrefix: landingOverride?.agreeToTermsPrefix?.trim() || copy.landing?.agreeToTermsPrefix || "",
+    agreeAndContinueLabel: landingOverride?.agreeAndContinueLabel?.trim() || copy.landing?.agreeAndContinueLabel || "",
+    termsOfUseLinkLabel: landingOverride?.termsOfUseLinkLabel?.trim() || copy.landing?.termsOfUseLinkLabel || "",
+    termsOfUseTitle: landingOverride?.termsOfUseTitle?.trim() || copy.landing?.termsOfUseTitle || "",
+    termsOfUseBody: landingOverride?.termsOfUseBody?.trim() || copy.landing?.termsOfUseBody || "",
   };
 
-  const disclosuresBodyParagraphs = (landingCopy.disclosuresBody || "").split("\n\n").filter(Boolean);
+  const termsOfUseParagraphs = (landingCopy.termsOfUseBody || "").split("\n\n").filter(Boolean);
 
   const sanitizeAgiInput = (value: string) => {
     if (value === "") return "";
@@ -1336,6 +1353,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   ]);
 
   const handleWelcomeContinue = () => {
+    if (!welcomeTermsAgreed) return;
     sessionStorage.setItem(WELCOME_KEY, "true");
     setShowWelcome(false);
     setActive("inputs");
@@ -2811,43 +2829,80 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                     ))}
                   </ul>
                 )}
-
-                <section className="mt-6 space-y-2 text-left text-sm text-zinc-600 dark:text-zinc-400">
-                  <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
-                    {landingCopy.disclosuresTitle}
-                  </p>
-                  {landingCopy.disclosuresIntro && (
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                      {landingCopy.disclosuresIntro}
-                    </p>
-                  )}
-                  {disclosuresBodyParagraphs.map((paragraph, index) => {
-                    const [leadIn, ...restParts] = paragraph.split("\n");
-                    const rest = restParts.join("\n").trim();
-                    return (
-                      <p key={`disclosure-${index}`} className="text-sm text-zinc-600 dark:text-zinc-400">
-                        {restParts.length > 0 ? (
-                          <>
-                            <strong>{leadIn.trim()}</strong>
-                            {rest ? ` ${rest}` : null}
-                          </>
-                        ) : (
-                          paragraph
-                        )}
-                      </p>
-                    );
-                  })}
-                </section>
               </>
             )}
 
-            <button
-              type="button"
-              onClick={handleWelcomeContinue}
-              className="mt-6 mb-6 rounded-full bg-[var(--brand-primary)] px-6 py-2 text-xs font-semibold text-white"
-            >
-              {copy?.buttons?.welcomeContinue}
-            </button>
+            <div className="mt-6 space-y-4 text-left">
+              <div className="flex items-start gap-2">
+                <input
+                  id="welcome-terms-consent"
+                  type="checkbox"
+                  checked={welcomeTermsAgreed}
+                  onChange={(event) => setWelcomeTermsAgreed(event.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-zinc-300 text-[var(--brand-primary)] focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)] dark:border-zinc-700"
+                />
+                <label htmlFor="welcome-terms-consent" className="text-sm text-zinc-700 dark:text-zinc-300">
+                  {landingCopy.agreeToTermsPrefix || "I agree to the"}{" "}
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setShowWelcomeTermsOfUse((prev) => !prev);
+                    }}
+                    aria-controls="welcome-terms-of-use-card"
+                    aria-expanded={showWelcomeTermsOfUse}
+                    className="font-semibold text-[var(--brand-primary)] underline underline-offset-2 hover:text-[var(--brand-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]"
+                  >
+                    {landingCopy.termsOfUseLinkLabel || "Terms of Use"}
+                  </button>
+                </label>
+              </div>
+
+              {showWelcomeTermsOfUse && (
+                <section
+                  id="welcome-terms-of-use-card"
+                  className="max-h-72 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-4 text-left dark:border-zinc-800 dark:bg-zinc-950"
+                >
+                  <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
+                    {landingCopy.termsOfUseTitle || landingCopy.termsOfUseLinkLabel || "Terms of Use"}
+                  </h2>
+                  <div className="mt-3 space-y-2 text-sm leading-relaxed text-zinc-700 dark:text-zinc-200">
+                    {termsOfUseParagraphs.map((paragraph, index) => {
+                      const [leadIn, ...restParts] = paragraph.split("\n");
+                      const rest = restParts.join("\n").trim();
+                      if (!restParts.length) {
+                        return (
+                          <p key={`terms-of-use-${index}`} className="whitespace-pre-line">
+                            {paragraph}
+                          </p>
+                        );
+                      }
+                      return (
+                        <p key={`terms-of-use-${index}`} className="whitespace-pre-line">
+                          <strong className="font-semibold text-[var(--brand-primary)]">{leadIn.trim()}</strong>
+                          {rest ? ` ${rest}` : null}
+                        </p>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+              <button
+                type="button"
+                onClick={handleWelcomeContinue}
+                disabled={!welcomeTermsAgreed}
+                className={[
+                  "mb-6 rounded-full px-6 py-2 text-xs font-semibold transition",
+                  welcomeTermsAgreed
+                    ? "bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)]"
+                    : "cursor-not-allowed bg-zinc-300 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
+                ].join(" ")}
+              >
+                {landingCopy.agreeAndContinueLabel || "Agree and Continue"}
+              </button>
+            </div>
             <div className="mt-4" />
           </div>
         </main>
