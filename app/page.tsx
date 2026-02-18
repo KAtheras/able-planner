@@ -347,6 +347,7 @@ export default function Home() {
   const consoleCardRef = useRef<HTMLDivElement | null>(null);
   const fscQuestionnaireRef = useRef<HTMLDivElement | null>(null);
   const lastMobileConsoleModeRef = useRef<"annual" | "residency" | "fsc" | "ssi" | null>(null);
+  const lastMobileScreen2PanelRef = useRef<string | null>(null);
   const currentClientConfig = getClientConfig(plannerStateCode);
   const configuredReportTabs =
     (currentClientConfig as { features?: { reports?: { tabs?: string[] } } })?.features?.reports?.tabs ??
@@ -1165,6 +1166,21 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     }
   }, [showWelcome, active, inputStep]);
 
+  const scrollMobileElementWithOffset = useCallback(
+    (element: HTMLElement | null, behavior: ScrollBehavior = "smooth") => {
+      if (!element || typeof window === "undefined") return;
+      const topNav = document.querySelector("header");
+      const topNavHeight = topNav instanceof HTMLElement ? topNav.getBoundingClientRect().height : 0;
+      const inputHeader = document.querySelector("[data-mobile-input-header='true']");
+      const inputHeaderHeight =
+        inputHeader instanceof HTMLElement ? inputHeader.getBoundingClientRect().height : 0;
+      const offset = topNavHeight + inputHeaderHeight + 8;
+      const targetTop = element.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior });
+    },
+    [],
+  );
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
@@ -1191,7 +1207,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     }
 
     lastMobileConsoleModeRef.current = mode;
-    consoleCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollMobileElementWithOffset(consoleCardRef.current, "smooth");
 
     if (mode === "annual") {
       window.setTimeout(() => {
@@ -1205,6 +1221,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     annualReturnWarningText,
     inputStep,
     residencyBlocking,
+    scrollMobileElementWithOffset,
     showSsiIncomeEligibilityWarning,
     showFscQuestionnaire,
     showWelcome,
@@ -1220,6 +1237,56 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       fscQuestionnaireRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
   }, [active, inputStep, showFscQuestionnaire, showWelcome]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile || showWelcome || active !== "inputs" || inputStep !== 2) {
+      lastMobileScreen2PanelRef.current = null;
+      return;
+    }
+
+    if (budgetMode === "qualifiedWithdrawals") {
+      const panelKey = "qualifiedWithdrawals";
+      if (lastMobileScreen2PanelRef.current === panelKey) {
+        return;
+      }
+      lastMobileScreen2PanelRef.current = panelKey;
+      window.setTimeout(() => {
+        scrollMobileElementWithOffset(consoleCardRef.current, "smooth");
+      }, 0);
+      return;
+    }
+
+    const shouldFocusWtaPanel =
+      !wtaDismissed &&
+      (wtaMode === "initialPrompt" ||
+        wtaMode === "wtaQuestion" ||
+        wtaMode === "noPath" ||
+        wtaMode === "combinedLimit");
+    const panelKey = shouldFocusWtaPanel ? `${wtaMode}:${wtaStatus}` : null;
+    if (!panelKey) {
+      lastMobileScreen2PanelRef.current = null;
+      return;
+    }
+    if (lastMobileScreen2PanelRef.current === panelKey) {
+      return;
+    }
+    lastMobileScreen2PanelRef.current = panelKey;
+
+    window.setTimeout(() => {
+      scrollMobileElementWithOffset(consoleCardRef.current, "smooth");
+    }, 0);
+  }, [
+    active,
+    budgetMode,
+    inputStep,
+    scrollMobileElementWithOffset,
+    showWelcome,
+    wtaDismissed,
+    wtaMode,
+    wtaStatus,
+  ]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1904,7 +1971,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             values={qualifiedWithdrawalBudget}
             total={qualifiedWithdrawalTotal}
             onChange={handleBudgetFieldChange}
-            onClose={() => setBudgetMode("default")}
+            onClose={() => {
+              setBudgetMode("default");
+              if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+                window.setTimeout(() => {
+                  scrollMobileElementWithOffset(inputsColumnRef.current, "smooth");
+                }, 0);
+              }
+            }}
             formatCurrency={formatCurrency}
             copy={{
               title: copy?.labels?.inputs?.qualifiedWithdrawalsBudgetTitle ?? "",
