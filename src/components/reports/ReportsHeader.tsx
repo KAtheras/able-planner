@@ -74,7 +74,7 @@ export default function ReportsHeader({
                 role="tab"
                 aria-selected={reportView === tab.view}
                 className={[
-                  "rounded-full px-2.5 py-1 text-xs font-semibold transition md:px-4",
+                  "rounded-full px-2 py-1 text-xs font-semibold transition md:px-4",
                   reportView === tab.view
                     ? "bg-[var(--brand-primary)] text-white shadow-sm"
                     : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",

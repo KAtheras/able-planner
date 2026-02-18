@@ -2112,14 +2112,40 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return null;
     })();
 
-const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSchedule({
+    const monthsRemainingForWtaResolution = getMonthsRemainingInCurrentCalendarYear(startIndex);
+    const annualMonthlyBasisForWtaResolution = Number.isFinite(monthlyContributionFutureValue)
+      ? monthlyContributionFutureValue
+      : monthlyContributionValue;
+    const plannedCurrentYearContributionForWtaResolution =
+      monthlyContributionValue * monthsRemainingForWtaResolution;
+    const plannedAnnualContributionForWtaResolution =
+      annualMonthlyBasisForWtaResolution * 12;
+    const isWtaResolutionPendingForEndingValue =
+      !wtaDismissed &&
+      (wtaMode === "initialPrompt" || wtaMode === "wtaQuestion") &&
+      (plannedCurrentYearContributionForWtaResolution > WTA_BASE_ANNUAL_LIMIT ||
+        plannedAnnualContributionForWtaResolution > WTA_BASE_ANNUAL_LIMIT);
+
+    // While WTA is unresolved, clamp projection contributions to base-limit monthly caps
+    // so reports/schedules do not reflect over-limit contributions prematurely.
+    const projectionMonthlyContributionCurrent = isWtaResolutionPendingForEndingValue
+      ? Math.min(
+          monthlyContributionValue,
+          Math.floor(WTA_BASE_ANNUAL_LIMIT / monthsRemainingForWtaResolution),
+        )
+      : monthlyContributionValue;
+    const projectionMonthlyContributionFuture = isWtaResolutionPendingForEndingValue
+      ? Math.min(monthlyContributionFutureValue, Math.floor(WTA_BASE_ANNUAL_LIMIT / 12))
+      : monthlyContributionFutureValue;
+
+    const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSchedule({
         startMonthIndex: startIndex,
         totalMonths,
         horizonEndIndex,
         startingBalance: startingBalanceValue,
-      monthlyContribution: monthlyContributionValue,
-      monthlyContributionCurrentYear: monthlyContributionValue,
-      monthlyContributionFutureYears: monthlyContributionFutureValue,
+      monthlyContribution: projectionMonthlyContributionCurrent,
+      monthlyContributionCurrentYear: projectionMonthlyContributionCurrent,
+      monthlyContributionFutureYears: projectionMonthlyContributionFuture,
         monthlyWithdrawal: monthlyWithdrawalValue,
         contributionIncreasePct: Number.isFinite(contributionIncreaseValue)
           ? Math.max(0, contributionIncreaseValue)
@@ -2137,7 +2163,7 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
         stateOfResidence: beneficiaryStateOfResidence || null,
         enabled: hasTimeHorizon,
       planMaxBalance,
-      });     
+      });
     const hasWithdrawalLimitedMessage = hasWithdrawalLimitedPlanCode(scheduleRows);
     const endingValueInfo = buildEndingValueInfo({
       scheduleRows,
@@ -2146,15 +2172,6 @@ const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSch
       formatCurrency,
       formatMonthYearLabel,
     });
-    const monthsRemainingForWtaResolution = getMonthsRemainingInCurrentCalendarYear(startIndex);
-    const plannedCurrentYearContributionForWtaResolution =
-      monthlyContributionValue * monthsRemainingForWtaResolution;
-    const plannedAnnualContributionForWtaResolution = monthlyContributionValue * 12;
-    const isWtaResolutionPendingForEndingValue =
-      !wtaDismissed &&
-      (wtaMode === "initialPrompt" || wtaMode === "wtaQuestion") &&
-      (plannedCurrentYearContributionForWtaResolution > WTA_BASE_ANNUAL_LIMIT ||
-        plannedAnnualContributionForWtaResolution > WTA_BASE_ANNUAL_LIMIT);
     const renderAccountEndingBlock = () => {
       return (
         <AccountEndingValueCard
