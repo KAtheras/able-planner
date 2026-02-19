@@ -519,6 +519,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     toggleBudgetMode,
     qualifiedWithdrawalBudget,
     qualifiedWithdrawalTotal,
+    isBudgetApplied,
     handleBudgetFieldChange,
     handleManualWithdrawalOverride,
     resetQualifiedWithdrawalBudget,
@@ -527,7 +528,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setMonthlyWithdrawal,
     sanitizeAmountInput,
   });
-  const budgetButtonActive = budgetMode === "qualifiedWithdrawals";
+  const budgetButtonActive = isBudgetApplied;
   const budgetButtonLabel = budgetButtonActive
     ? `Budgeted for ${formatCurrency(qualifiedWithdrawalTotal).replace(".00", "")} - Click to revise.`
     : (copy?.labels?.inputs?.qualifiedWithdrawalsBudgetButtonLabel ?? "");

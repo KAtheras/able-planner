@@ -61,6 +61,7 @@ export function useQualifiedWithdrawalBudget({
       parseNonNegativeAmount(qualifiedWithdrawalBudget.other),
     [parseNonNegativeAmount, qualifiedWithdrawalBudget],
   );
+  const isBudgetApplied = qualifiedWithdrawalBudgetTouched;
 
   useEffect(() => {
     if (!qualifiedWithdrawalBudgetTouched) return;
@@ -110,6 +111,7 @@ export function useQualifiedWithdrawalBudget({
     toggleBudgetMode,
     qualifiedWithdrawalBudget,
     qualifiedWithdrawalTotal,
+    isBudgetApplied,
     handleBudgetFieldChange,
     handleManualWithdrawalOverride,
     resetQualifiedWithdrawalBudget,
