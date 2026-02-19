@@ -75,9 +75,13 @@ export default function WelcomeSection({
                   {landingCopy.heroBullets.map((bullet, index) => (
                     <li
                       key={`hero-bullet-${index}`}
-                      className="w-full max-w-xl list-inside list-disc text-left"
+                      className="flex w-full max-w-xl items-start gap-2 text-left"
                     >
-                      {bullet}
+                      <span
+                        aria-hidden="true"
+                        className="mt-[0.55em] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-500 dark:bg-zinc-400"
+                      />
+                      <span className="leading-relaxed">{bullet}</span>
                     </li>
                   ))}
                 </ul>
