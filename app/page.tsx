@@ -243,6 +243,7 @@ export default function Home() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [welcomeTermsAgreed, setWelcomeTermsAgreed] = useState(false);
   const [showWelcomeTermsOfUse, setShowWelcomeTermsOfUse] = useState(false);
+  const [mobileFloatingTopPx, setMobileFloatingTopPx] = useState<number | null>(null);
   const [amortizationView, setAmortizationView] = useState<"able" | "taxable">("able");
   const [sidebarDesktopTopOffset, setSidebarDesktopTopOffset] = useState(0);
   const fscPassedRef = useRef(false);
@@ -1118,6 +1119,32 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
   }, [showWelcome, active, inputStep]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (showWelcome || active !== "inputs" || inputStep !== 2) {
+      setMobileFloatingTopPx(null);
+      return;
+    }
+    if (!window.matchMedia("(max-width: 767px)").matches) {
+      setMobileFloatingTopPx(null);
+      return;
+    }
+
+    const measureTop = () => {
+      const horizonInput = document.getElementById("activity-horizon");
+      if (!(horizonInput instanceof HTMLElement)) return;
+      const nextTop = Math.max(0, Math.round(horizonInput.getBoundingClientRect().top));
+      setMobileFloatingTopPx((prev) => (prev === nextTop ? prev : nextTop));
+    };
+
+    const rafId = window.requestAnimationFrame(measureTop);
+    window.addEventListener("resize", measureTop);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", measureTop);
+    };
+  }, [active, inputStep, showWelcome]);
 
   const scrollMobileElementWithOffset = useCallback(
     (element: HTMLElement | null, behavior: ScrollBehavior = "smooth") => {
@@ -2294,16 +2321,25 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             />
           }
         />
-        <div className="pointer-events-none fixed right-2 top-[calc(env(safe-area-inset-top)+11rem)] z-30 w-[202px] md:hidden">
-          <div className="rounded-md border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] px-2 py-[0.6rem] shadow-sm backdrop-blur dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)]">
-            <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              {copy?.messages?.accountEndingValueLabel ?? "Ending Value"}
-            </div>
-            <div className="mt-1 text-center text-[12px] font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-              {endingValueInfo.endingLabel}
+        {inputStep === 2 && (
+          <div
+            className="pointer-events-none fixed right-2 z-30 w-[202px] md:hidden"
+            style={
+              mobileFloatingTopPx !== null
+                ? { top: `${mobileFloatingTopPx}px` }
+                : { top: "calc(env(safe-area-inset-top)+11rem)" }
+            }
+          >
+            <div className="rounded-md border border-[var(--brand-primary)] bg-[color:color-mix(in_srgb,var(--brand-primary)_12%,white)] px-2 py-[0.6rem] shadow-sm backdrop-blur dark:bg-[color:color-mix(in_srgb,var(--brand-primary)_24%,black)]">
+              <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                {copy?.messages?.accountEndingValueLabel ?? "Ending Value"}
+              </div>
+              <div className="mt-1 text-center text-[12px] font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                {endingValueInfo.endingLabel}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     );
   })();

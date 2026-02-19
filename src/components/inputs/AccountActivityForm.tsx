@@ -271,7 +271,7 @@ export default function AccountActivityForm({
             value={timeHorizonYears}
             onChange={(e) => onChange?.({ timeHorizonYears: e.target.value })}
             onBlur={() => onTimeHorizonBlur?.()}
-            className="mt-1 w-[54%] rounded-xl border border-zinc-200 px-3 py-2 text-base md:w-full md:text-sm"
+            className="mt-1 w-[51%] rounded-xl border border-zinc-200 px-3 py-2 text-base md:w-full md:text-sm"
           />
         </div>
         <div>
