@@ -51,6 +51,7 @@ type AccountActivityFormProps = {
   onChange?: (updates: Partial<AccountActivityFormProps>) => void;
   onAdvancedClick?: () => void;
   advancedButtonLabel?: string;
+  advancedButtonActive?: boolean;
   onTimeHorizonBlur?: () => void;
   timeHorizonLabel?: string;
   contributionIncreaseDisabled?: boolean;
@@ -99,6 +100,7 @@ export default function AccountActivityForm({
   onChange,
   onAdvancedClick,
   advancedButtonLabel,
+  advancedButtonActive = false,
   onTimeHorizonBlur,
   timeHorizonLabel,
   copy,
@@ -702,7 +704,12 @@ export default function AccountActivityForm({
           <button
             type="button"
             onClick={() => onAdvancedClick?.()}
-            className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-200 dark:bg-zinc-900/30 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+            className={[
+              "w-full rounded-2xl px-4 py-3 text-sm font-semibold transition",
+              advancedButtonActive
+                ? "border border-transparent bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)]"
+                : "border border-zinc-200 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-200 dark:bg-zinc-900/30 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-100",
+            ].join(" ")}
           >
             {advancedButtonLabel ?? "Budget for Qualified Withdrawals"}
           </button>

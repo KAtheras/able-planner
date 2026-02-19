@@ -57,6 +57,7 @@ type Props = {
   onAccountActivityChange: (updates: AccountActivityUpdates) => void;
   onAdvancedClick: () => void;
   advancedButtonLabel: string;
+  advancedButtonActive: boolean;
   onTimeHorizonBlur: () => void;
   timeHorizonLabel: string;
   accountActivityTitle: string;
@@ -99,6 +100,7 @@ export default function InputsLeftPane({
   onAccountActivityChange,
   onAdvancedClick,
   advancedButtonLabel,
+  advancedButtonActive,
   onTimeHorizonBlur,
   timeHorizonLabel,
   accountActivityTitle,
@@ -150,6 +152,7 @@ export default function InputsLeftPane({
       onChange={onAccountActivityChange}
       onAdvancedClick={onAdvancedClick}
       advancedButtonLabel={advancedButtonLabel}
+      advancedButtonActive={advancedButtonActive}
       onTimeHorizonBlur={onTimeHorizonBlur}
       timeHorizonLabel={timeHorizonLabel}
       copy={{

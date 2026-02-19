@@ -527,6 +527,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setMonthlyWithdrawal,
     sanitizeAmountInput,
   });
+  const budgetButtonActive = budgetMode === "qualifiedWithdrawals";
+  const budgetButtonLabel = budgetButtonActive
+    ? `Budgeted for ${formatCurrency(qualifiedWithdrawalTotal).replace(".00", "")} - Click to revise.`
+    : (copy?.labels?.inputs?.qualifiedWithdrawalsBudgetButtonLabel ?? "");
 
   const contributionConstraintHorizon = getHorizonConfig();
   const enforcedContributionStopIndex = (() => {
@@ -2187,7 +2191,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               horizonYearOptions={horizonYearOptions}
               onAccountActivityChange={handleAccountActivityFormChange}
               onAdvancedClick={toggleBudgetMode}
-              advancedButtonLabel={copy?.labels?.inputs?.qualifiedWithdrawalsBudgetButtonLabel ?? ""}
+              advancedButtonLabel={budgetButtonLabel}
+              advancedButtonActive={budgetButtonActive}
               onTimeHorizonBlur={enforceTimeHorizonLimits}
               timeHorizonLabel={
                 language === "es"
