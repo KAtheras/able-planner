@@ -47,6 +47,80 @@
         "Las decisiones de elegibilidad y cumplimiento deben confirmarse con profesionales calificados y con la guía oficial del programa ABLE antes de actuar."
       ]
     },
+    "resources": {
+      "title": "Recursos",
+      "intro": "Esta sección resume temas clave sobre ABLE e impuestos y le dirige a fuentes primarias para validación.",
+      "sections": [
+        {
+          "title": "Reglas de SSI, límites y riesgos comunes",
+          "paragraphs": [
+            "SSI se basa en necesidad económica. Los saldos ABLE hasta $100,000 generalmente se excluyen del conteo de recursos de SSI, pero montos por encima de ese umbral pueden afectar el beneficio en efectivo de SSI.",
+            "Riesgos frecuentes incluyen confundir el tratamiento de recursos, no monitorear cómo la actividad de la cuenta impacta elegibilidad y mezclar reglas de SSI con reglas de Medicaid."
+          ],
+          "links": [
+            {
+              "label": "SSA: SSI Spotlight sobre cuentas ABLE",
+              "url": "https://www.ssa.gov/ssi/spotlights/spot-able.html"
+            },
+            {
+              "label": "SSA Red Book (referencia de políticas)",
+              "url": "https://www.ssa.gov/redbook/"
+            }
+          ]
+        },
+        {
+          "title": "Crédito Federal del Ahorrador",
+          "paragraphs": [
+            "El Crédito Federal del Ahorrador es un crédito no reembolsable. La elegibilidad y el porcentaje dependen del ingreso imponible y del estado civil para impuestos.",
+            "Al ser no reembolsable, el crédito está limitado por su obligación tributaria federal."
+          ],
+          "links": [
+            {
+              "label": "IRS: guía sobre Saver’s Credit",
+              "url": "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-savings-contributions-savers-credit"
+            },
+            {
+              "label": "IRS Formulario 8880",
+              "url": "https://www.irs.gov/forms-pubs/about-form-8880"
+            }
+          ]
+        },
+        {
+          "title": "Reglas de ABLE to Work",
+          "paragraphs": [
+            "ABLE to Work puede permitir contribuciones adicionales por encima del límite anual base si se cumplen condiciones específicas de elegibilidad.",
+            "Los límites y la elegibilidad dependen de reglas federales y pueden interactuar con sus ingresos laborales y cobertura de plan de retiro."
+          ],
+          "links": [
+            {
+              "label": "IRS Publicación 907",
+              "url": "https://www.irs.gov/publications/p907"
+            },
+            {
+              "label": "ABLE National Resource Center",
+              "url": "https://www.ablenrc.org/"
+            }
+          ]
+        },
+        {
+          "title": "Límites anuales de contribución y tope de saldo del plan",
+          "paragraphs": [
+            "Los límites anuales de contribución se establecen bajo reglas fiscales federales y pueden cambiar cada año.",
+            "Los topes de saldo máximo son específicos de cada programa estatal ABLE y pueden variar entre estados."
+          ],
+          "links": [
+            {
+              "label": "IRS: resumen de cuentas ABLE",
+              "url": "https://www.irs.gov/publications/p907"
+            },
+            {
+              "label": "Buscador de programas estatales ABLE NRC",
+              "url": "https://www.ablenrc.org/select-a-state-program/"
+            }
+          ]
+        }
+      ]
+    },
     "inputs": {
       "accountActivity": {
         "startingBalanceLabel": "Saldo inicial",

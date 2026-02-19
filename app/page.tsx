@@ -2078,19 +2078,97 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     }
 
     if (active === "resources") {
+      const resourcesTitle =
+        copy?.ui?.resources?.title ??
+        copy?.ui?.sidebar?.resources ??
+        (language === "es" ? "Recursos" : "Resources");
+      const resourcesIntro = copy?.ui?.resources?.intro ?? "";
+      const resourcesSections = Array.isArray(copy?.ui?.resources?.sections)
+        ? copy.ui.resources.sections
+        : [];
+
       return (
         <div className="space-y-3">
           <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
             <div className="mb-3 flex items-center justify-between gap-2">
               <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                {copy?.ui?.sidebar?.resources ?? (language === "es" ? "Recursos" : "Resources")}
+                {resourcesTitle}
               </h1>
               {languageToggle}
             </div>
-            <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-              {copy?.labels?.ui?.placeholderComingSoon ?? ""}
-            </p>
+            {resourcesIntro ? (
+              <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+                {resourcesIntro}
+              </p>
+            ) : null}
           </div>
+          {resourcesSections.map((section, index) => {
+            const title = typeof section?.title === "string" ? section.title : "";
+            const paragraphs = Array.isArray(section?.paragraphs)
+              ? section.paragraphs.filter((item) => typeof item === "string" && item.trim())
+              : [];
+            const items = Array.isArray(section?.items)
+              ? section.items.filter((item) => typeof item === "string" && item.trim())
+              : [];
+            const links = Array.isArray(section?.links)
+              ? section.links.filter(
+                  (link) =>
+                    typeof link?.label === "string" &&
+                    link.label.trim() &&
+                    typeof link?.url === "string" &&
+                    link.url.trim(),
+                )
+              : [];
+
+            if (!title && paragraphs.length === 0 && items.length === 0 && links.length === 0) return null;
+
+            return (
+              <div
+                key={`${title || "resources-section"}-${index}`}
+                className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-black/80"
+              >
+                {title ? (
+                  <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
+                ) : null}
+                {paragraphs.map((paragraph, paragraphIndex) => (
+                  <p
+                    key={`${title || "resources"}-paragraph-${paragraphIndex}`}
+                    className="mb-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 last:mb-0"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+                {items.length > 0 ? (
+                  <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+                    {items.map((item, itemIndex) => (
+                      <li key={`${title || "resources"}-item-${itemIndex}`}>{item}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {links.length > 0 ? (
+                  <ul className="mt-4 space-y-1.5 text-sm leading-relaxed">
+                    {links.map((link, linkIndex) => (
+                      <li key={`${title || "resources"}-link-${linkIndex}`}>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-medium text-blue-600 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          {link.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            );
+          })}
+          {resourcesSections.length === 0 ? (
+            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm text-sm leading-relaxed text-zinc-700 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-300">
+              {copy?.labels?.ui?.placeholderComingSoon ?? ""}
+            </div>
+          ) : null}
         </div>
       );
     }

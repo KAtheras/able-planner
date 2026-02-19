@@ -47,6 +47,80 @@
         "Eligibility and compliance decisions should be confirmed with qualified professionals and official ABLE program guidance before acting."
       ]
     },
+    "resources": {
+      "title": "Resources",
+      "intro": "This section summarizes key ABLE and tax-planning topics and points you to primary guidance for verification.",
+      "sections": [
+        {
+          "title": "SSI Rules, Limits, and Pitfalls",
+          "paragraphs": [
+            "SSI is needs-based. ABLE balances up to $100,000 are generally excluded from SSI resource counting, but balances above that threshold can affect SSI cash benefits.",
+            "Common pitfalls include misunderstanding resource treatment, not tracking how account activity interacts with eligibility, and confusing SSI rules with Medicaid eligibility treatment."
+          ],
+          "links": [
+            {
+              "label": "SSA SSI Spotlight on ABLE Accounts",
+              "url": "https://www.ssa.gov/ssi/spotlights/spot-able.html"
+            },
+            {
+              "label": "SSA Red Book (Work and Disability Policy Reference)",
+              "url": "https://www.ssa.gov/redbook/"
+            }
+          ]
+        },
+        {
+          "title": "Federal Saver’s Credit",
+          "paragraphs": [
+            "The Federal Saver’s Credit is a non-refundable credit. Eligibility and credit percentage depend on taxable income and filing status.",
+            "Because it is non-refundable, the credit is limited by your federal tax liability."
+          ],
+          "links": [
+            {
+              "label": "IRS Saver’s Credit Guidance",
+              "url": "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-savings-contributions-savers-credit"
+            },
+            {
+              "label": "IRS Form 8880 (Credit for Qualified Retirement Savings Contributions)",
+              "url": "https://www.irs.gov/forms-pubs/about-form-8880"
+            }
+          ]
+        },
+        {
+          "title": "ABLE to Work Rules",
+          "paragraphs": [
+            "ABLE to Work can allow additional contributions above the base annual ABLE contribution limit if specific eligibility conditions are met.",
+            "Limits and eligibility depend on federal rules and may interact with your earnings and retirement plan coverage."
+          ],
+          "links": [
+            {
+              "label": "IRS Publication 907 (Tax Highlights for Persons With Disabilities)",
+              "url": "https://www.irs.gov/publications/p907"
+            },
+            {
+              "label": "ABLE National Resource Center",
+              "url": "https://www.ablenrc.org/"
+            }
+          ]
+        },
+        {
+          "title": "Annual Contribution Limits and Plan Account Balance Caps",
+          "paragraphs": [
+            "Annual contribution limits are set under federal tax rules and can change by year.",
+            "Plan account balance caps are state-plan specific and may differ from one ABLE program to another."
+          ],
+          "links": [
+            {
+              "label": "IRS ABLE Accounts Overview",
+              "url": "https://www.irs.gov/publications/p907"
+            },
+            {
+              "label": "ABLE NRC State Program Finder",
+              "url": "https://www.ablenrc.org/select-a-state-program/"
+            }
+          ]
+        }
+      ]
+    },
     "inputs": {
       "accountActivity": {
         "startingBalanceLabel": "Starting Balance",
