@@ -26,7 +26,7 @@ export default function DisclosuresView({
       <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
         <div className="max-h-[calc(100vh-16rem)] overflow-y-auto pr-1 md:max-h-[calc(100vh-13rem)]">
           {overrideText && (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-400">
               {overrideText}
             </p>
           )}
