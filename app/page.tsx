@@ -5,6 +5,7 @@ import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
 import { getClientConfig } from "@/config/clients";
+import AccountEndingValueCard from "@/components/inputs/AccountEndingValueCard";
 import ResidencyWarningCard from "@/components/inputs/ResidencyWarningCard";
 import Screen2MessagesPanel from "@/components/inputs/Screen2MessagesPanel";
 import Screen2WtaPanel from "@/components/inputs/Screen2WtaPanel";
@@ -1709,7 +1710,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           : null;
       return (
         <Screen2MessagesPanel
-          accountEndingNode={null}
+          accountEndingNode={desktopAccountEndingNode}
           depletionNoticeNode={renderAbleDepletionNotice()}
           showStandaloneWithdrawalLimitedMessage={showStandaloneWithdrawalLimitedMessage}
           withdrawalLimitedText={copy?.messages?.withdrawalLimitedToAvailable ?? ""}
@@ -1724,7 +1725,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       if (budgetMode === "qualifiedWithdrawals") {
         return (
           <QualifiedWithdrawalsBudgetPanel
-            accountEndingNode={null}
+            accountEndingNode={desktopAccountEndingNode}
             depletionNoticeNode={renderAbleDepletionNotice()}
             values={qualifiedWithdrawalBudget}
             total={qualifiedWithdrawalTotal}
@@ -1764,7 +1765,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           wtaAdditionalAllowed={wtaAdditionalAllowed}
           wtaCombinedLimit={wtaCombinedLimit}
           baseAnnualLimit={WTA_BASE_ANNUAL_LIMIT}
-          accountEndingNode={null}
+          accountEndingNode={desktopAccountEndingNode}
           depletionNoticeNode={renderAbleDepletionNotice()}
           renderDefaultPanel={renderScreen2Messages}
           workToAblePromptText={(copy?.messages?.workToAblePrompt ?? "").replace("{{cap}}", "$20,000")}
@@ -1930,6 +1931,15 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       formatCurrency,
       formatMonthYearLabel,
     });
+    const desktopAccountEndingNode = (
+      <div className="hidden md:block">
+        <AccountEndingValueCard
+          label={copy?.messages?.accountEndingValueLabel ?? ""}
+          value={endingValueInfo.endingLabel}
+          freeze={isWtaResolutionPendingForEndingValue}
+        />
+      </div>
+    );
     const renderAbleDepletionNotice = () => {
       if (!endingValueInfo.depletionEligible) return null;
       const depletionTemplate = endingValueInfo.withdrawalsStopAfterDepletion
