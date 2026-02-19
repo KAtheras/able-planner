@@ -379,10 +379,6 @@ export default function ChartsPanel({
       grid: { left: 24, right: 12, top: 16, bottom: 64, containLabel: true },
       xAxis: {
         type: "category",
-        name: language === "es" ? "Tiempo" : "Time",
-        nameLocation: "middle",
-        nameGap: 32,
-        nameTextStyle: { color: axisColor },
         axisLine: { show: false },
         axisLabel: {
           color: axisColor,
@@ -549,7 +545,7 @@ export default function ChartsPanel({
         : []),
       {
         key: "ending",
-        color: accountType === "able" ? "#ffffff" : accountType === "taxable" && isDarkMode ? "#ffffff" : "#111827",
+        color: isDarkMode ? "#ffffff" : "#111827",
         label:
           language === "es"
             ? accountType === "able"
