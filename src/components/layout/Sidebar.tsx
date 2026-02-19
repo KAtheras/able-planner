@@ -174,13 +174,13 @@ export default function Sidebar({
         aria-label="Primary"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:hidden"
       >
-        <div className="mx-auto flex max-w-4xl items-center gap-2 px-2 py-2">
+        <div className="mx-auto flex max-w-4xl items-center gap-1 px-2 py-2">
           <button
             type="button"
             disabled={mobileBackAction?.disabled}
             onClick={mobileBackAction?.onClick}
             className={[
-              "shrink-0 flex flex-col items-center justify-center gap-1 rounded-md px-2.5 py-2 text-[11px] font-semibold transition",
+              "shrink-0 flex flex-col items-center justify-center gap-0.5 rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
               mobileBackAction?.disabled
                 ? "bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
@@ -192,7 +192,7 @@ export default function Sidebar({
             </span>
             <span className="text-[9px] leading-none tracking-tight">{mobileBackAction?.label}</span>
           </button>
-          <div className="grid flex-1 grid-cols-5 gap-1">
+          <div className="grid flex-1 grid-cols-5 gap-0.5">
             {ITEMS.map((item) => {
               const isActive = item.key === active;
               const baseLabel = labels?.[item.key] ?? item.label;
@@ -217,7 +217,7 @@ export default function Sidebar({
                   onClick={() => onChange(item.key)}
                   aria-current={isActive ? "page" : undefined}
                   className={[
-                    "flex flex-col items-center justify-center gap-1 rounded-md px-2 py-2 text-[11px] font-semibold",
+                    "flex flex-col items-center justify-center gap-0.5 rounded-md px-2 py-1.5 text-[11px] font-semibold",
                     "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
                     isActive
                       ? "bg-[var(--brand-primary)] text-[var(--brand-on-primary)]"
@@ -239,7 +239,7 @@ export default function Sidebar({
             disabled={mobileNextAction?.disabled}
             onClick={mobileNextAction?.onClick}
             className={[
-              "shrink-0 flex flex-col items-center justify-center gap-1 rounded-md px-2.5 py-2 text-[11px] font-semibold transition",
+              "shrink-0 flex flex-col items-center justify-center gap-0.5 rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
               mobileNextAction?.disabled
                 ? "bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
