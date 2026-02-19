@@ -180,7 +180,7 @@ export default function Sidebar({
             disabled={mobileBackAction?.disabled}
             onClick={mobileBackAction?.onClick}
             className={[
-              "flex min-w-[72px] flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold transition",
+              "shrink-0 flex flex-col items-center justify-center gap-1 rounded-md px-2.5 py-2 text-[11px] font-semibold transition",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
               mobileBackAction?.disabled
                 ? "bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
@@ -217,7 +217,7 @@ export default function Sidebar({
                   onClick={() => onChange(item.key)}
                   aria-current={isActive ? "page" : undefined}
                   className={[
-                    "flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold",
+                    "flex flex-col items-center justify-center gap-1 rounded-md px-2 py-2 text-[11px] font-semibold",
                     "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
                     isActive
                       ? "bg-[var(--brand-primary)] text-[var(--brand-on-primary)]"
@@ -226,10 +226,7 @@ export default function Sidebar({
                 >
                   <span className="grid place-items-center">{item.icon}</span>
                   <span
-                    className={[
-                      "block w-full max-w-full text-center text-[9px] leading-none whitespace-nowrap tracking-tight",
-                      item.key === "resources" ? "-translate-x-[2px]" : "",
-                    ].join(" ")}
+                    className="block w-full max-w-full text-center text-[9px] leading-none whitespace-nowrap tracking-tight"
                   >
                     {mobileLabel}
                   </span>
@@ -242,7 +239,7 @@ export default function Sidebar({
             disabled={mobileNextAction?.disabled}
             onClick={mobileNextAction?.onClick}
             className={[
-              "flex min-w-[72px] flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold transition",
+              "shrink-0 flex flex-col items-center justify-center gap-1 rounded-md px-2.5 py-2 text-[11px] font-semibold transition",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
               mobileNextAction?.disabled
                 ? "bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
