@@ -26,9 +26,9 @@
     "reports": {
       "tabs": [
         "account_growth",
+        "able_vs_taxable",
         "tax_benefits",
-        "taxable_growth",
-        "able_vs_taxable"
+        "taxable_growth"
       ]
     }
   },

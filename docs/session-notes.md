@@ -70,6 +70,25 @@ Use this file to preserve working context between editor sessions.
 
 ## Session Log
 ### 2026-02-18
+- Additional fixes and copy/config updates completed (latest):
+- Mobile scroll behavior updates:
+- SSI high-income warning now has an `OK` dismiss action and mobile scroll-back behavior.
+- Account Activity now auto-scrolls to make WTA prompt/test visible when contributions exceed limits.
+- Qualified Withdrawals budget helper now scrolls into view when opened and scrolls back when closed (`OK`).
+- WTA resolution behavior:
+- During unresolved WTA (`initialPrompt` / `wtaQuestion`), projection inputs are clamped for calculations so over-limit contributions do not prematurely inflate report/schedule outputs.
+- WTA dismiss (`OK`) now triggers mobile scroll-back to input area.
+- State tax benefit fix:
+- Utah credit calculation bug fixed: credit states with `amount <= 0` now treat this as no contribution cap (instead of zero qualifying contribution), still capped by state tax liability.
+- Validation run confirmed this specific bug pattern affected UT only under current rules.
+- Copy updates:
+- Standardized user-facing terminology to `ABLE to Work` (EN/ES).
+- Moved market-volatility sentence from Assumptions list to landing-page disclosures (EN/ES).
+- Spanish copy synchronized with latest English assumption wording edits.
+- Client override work in progress (local, not yet committed at this checkpoint):
+- `IL` and `TX` `clientBlocks.disclosuresAssumptions` populated with full EN/ES assumptions text overrides.
+- `DisclosuresView` updated to preserve override paragraph line breaks (`whitespace-pre-line`).
+
 - Translation and mobile label consistency updates completed and pushed:
 - Fixed report tab/header translation gaps across mobile and desktop (including `ABLE vs Gravable` on ES report tabs).
 - Localized mobile bottom-nav short labels in ES (`Sig.` for next, `Tabla` for schedule, `Notas` for assumptions).
