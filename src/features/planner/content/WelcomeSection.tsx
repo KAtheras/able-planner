@@ -56,6 +56,7 @@ export default function WelcomeSection({
           </div>
         }
       />
+      <div aria-hidden="true" className="h-20 md:hidden" />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-1.5">
         <div className="flex justify-center">{languageToggle}</div>
