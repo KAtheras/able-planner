@@ -39,6 +39,7 @@ type Props = {
   onReportViewChange: (view: ReportView) => void;
   reportWindowLabel: string;
   reportWindowOptions: ReportWindowOptionItem[];
+  reportActions?: ReactNode;
   languageToggle: ReactNode;
   language: "en" | "es";
   accountGrowthNarrativeParagraphs: string[];
@@ -59,6 +60,7 @@ export default function SummaryView({
   onReportViewChange,
   reportWindowLabel,
   reportWindowOptions,
+  reportActions,
   languageToggle,
   language,
   accountGrowthNarrativeParagraphs,
@@ -79,6 +81,7 @@ export default function SummaryView({
         reportView={reportView}
         enabledReportViews={enabledReportViews}
         onReportViewChange={onReportViewChange}
+        reportActions={reportActions}
         languageToggle={languageToggle}
       />
       {reportView === "account_growth" ? (

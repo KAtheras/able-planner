@@ -1,6 +1,7 @@
 {
   "clientId": "il",
   "planStateCode": "IL",
+  "enrollmentPageUrl": "https://savewithable.com/enroll/il-navigator.html",
   "defaults": {
     "annualReturn": 0.06,
     "timeHorizonYears": 40

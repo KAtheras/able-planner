@@ -406,8 +406,7 @@ export default function AbleVsTaxablePanel({
         <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950/50">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              <span className="md:hidden">{language === "es" ? "ABLE vs. Gravable" : "Able vs. Taxable"}</span>
-              <span className="hidden md:inline">{labels.title}</span>
+              {labels.title}
             </h2>
             <div className="ml-auto">
               <ReportWindowToggle label={reportWindowLabel} options={reportWindowOptions} />

@@ -12,6 +12,7 @@ type Props = {
   onViewChange: (view: "able" | "taxable") => void;
   onDownloadAble: () => void;
   onDownloadTaxable: () => void;
+  refreshButton: ReactNode;
   languageToggle: ReactNode;
   rows: YearRow[];
   taxableRows: TaxableYearRow[];
@@ -25,6 +26,7 @@ export default function ScheduleSection({
   onViewChange,
   onDownloadAble,
   onDownloadTaxable,
+  refreshButton,
   languageToggle,
   rows,
   taxableRows,
@@ -38,6 +40,7 @@ export default function ScheduleSection({
       onViewChange={onViewChange}
       onDownloadAble={onDownloadAble}
       onDownloadTaxable={onDownloadTaxable}
+      refreshButton={refreshButton}
       languageToggle={languageToggle}
       rows={rows}
       taxableRows={taxableRows}

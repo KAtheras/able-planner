@@ -1,6 +1,7 @@
 {
   "clientId": "ut",
   "planStateCode": "UT",
+  "enrollmentPageUrl": "https://ableut.com/how-it-works/eligibility",
   "defaults": {
     "annualReturn": 0.045,
     "timeHorizonYears": 50

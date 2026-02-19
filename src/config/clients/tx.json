@@ -1,6 +1,7 @@
 {
   "clientId": "tx",
   "planStateCode": "TX",
+  "enrollmentPageUrl": "https://www.texasable.org/enrollment-process/",
   "defaults": {
     "annualReturn": 0.05,
     "timeHorizonYears": 40

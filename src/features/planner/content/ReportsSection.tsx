@@ -44,6 +44,7 @@ type Props = {
   reportWindowYearsValue: number;
   reportWindowMaxYears: number;
   onReportWindowYearsChange: (value: ReportWindowOption) => void;
+  reportActions?: ReactNode;
   language: "en" | "es";
   languageToggle: ReactNode;
   accountGrowthNarrativeParagraphs: string[];
@@ -60,6 +61,7 @@ export default function ReportsSection({
   reportWindowYearsValue,
   reportWindowMaxYears,
   onReportWindowYearsChange,
+  reportActions,
   language,
   languageToggle,
   accountGrowthNarrativeParagraphs,
@@ -132,6 +134,7 @@ export default function ReportsSection({
       onReportViewChange={onReportViewChange}
       reportWindowLabel={reportWindowLabel}
       reportWindowOptions={reportWindowOptions}
+      reportActions={reportActions}
       languageToggle={languageToggle}
       language={language}
       accountGrowthNarrativeParagraphs={accountGrowthNarrativeParagraphs}

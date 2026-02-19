@@ -118,6 +118,18 @@
               "url": "https://www.ablenrc.org/select-a-state-program/"
             }
           ]
+        },
+        {
+          "title": "Additional Resources",
+          "paragraphs": [
+            "Content and links to follow."
+          ],
+          "links": [
+            {
+              "label": "MSRB Investors’ Guide for ABLE Programs (PDF)",
+              "url": "https://www.msrb.org/sites/default/files/Investors-Guide-for-ABLE-Programs.pdf"
+            }
+          ]
         }
       ]
     },
@@ -152,11 +164,11 @@
     "reports": {
       "title": "Summary",
       "accountGrowthTab": "Summary",
-      "taxBenefitsTab": "ABLE Account Growth",
-      "taxableGrowthTab": "Taxable Account Growth",
+      "taxBenefitsTab": "ABLE Growth",
+      "taxableGrowthTab": "Taxable Growth",
       "ableVsTaxableTab": "ABLE vs Taxable",
       "reportWindowLabel": "Report Window",
-      "ableVsTaxableTitle": "ABLE vs Taxable Comparison",
+      "ableVsTaxableTitle": "ABLE vs Taxable",
       "ableVsTaxableMetricLabel": "Component",
       "ableVsTaxableAbleLabel": "ABLE",
       "ableVsTaxableTaxableLabel": "Taxable",

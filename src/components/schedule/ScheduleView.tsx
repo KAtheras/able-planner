@@ -35,6 +35,7 @@ type Props = {
   onViewChange: (view: ViewMode) => void;
   onDownloadAble: () => void;
   onDownloadTaxable: () => void;
+  refreshButton: ReactNode;
   languageToggle: ReactNode;
   rows: YearRow[];
   taxableRows: TaxableYearRow[];
@@ -48,6 +49,7 @@ export default function ScheduleView({
   onViewChange,
   onDownloadAble,
   onDownloadTaxable,
+  refreshButton,
   languageToggle,
   rows,
   taxableRows,
@@ -82,6 +84,7 @@ export default function ScheduleView({
           downloadAbleCsvAriaLabel={labels?.downloadAbleCsvAria ?? ""}
           downloadTaxableCsvAriaLabel={labels?.downloadTaxableCsvAria ?? ""}
           downloadCsvTitle={labels?.downloadCsvTitle ?? ""}
+          refreshButton={refreshButton}
           languageToggle={languageToggle}
         />
         <div className="mt-2">

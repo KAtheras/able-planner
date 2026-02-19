@@ -16,6 +16,7 @@ type Props = {
   downloadAbleCsvAriaLabel: string;
   downloadTaxableCsvAriaLabel: string;
   downloadCsvTitle: string;
+  refreshButton: ReactNode;
   languageToggle: ReactNode;
 };
 
@@ -41,6 +42,7 @@ export default function ScheduleHeader({
   downloadAbleCsvAriaLabel,
   downloadTaxableCsvAriaLabel,
   downloadCsvTitle,
+  refreshButton,
   languageToggle,
 }: Props) {
   return (
@@ -69,7 +71,7 @@ export default function ScheduleHeader({
               type="button"
               aria-label={downloadAbleCsvAriaLabel}
               title={downloadCsvTitle}
-              className="grid h-7 w-7 place-items-center rounded-full border border-zinc-200 bg-white/80 text-zinc-500 transition hover:border-slate-400 hover:text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
+              className="grid h-8 w-8 place-items-center rounded-full border border-zinc-200 bg-white/80 text-zinc-500 transition hover:border-slate-400 hover:text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
               onClick={onDownloadAble}
             >
               <DownloadIcon />
@@ -94,17 +96,25 @@ export default function ScheduleHeader({
               type="button"
               aria-label={downloadTaxableCsvAriaLabel}
               title={downloadCsvTitle}
-              className="grid h-7 w-7 place-items-center rounded-full border border-zinc-200 bg-white/80 text-zinc-500 transition hover:border-slate-400 hover:text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
+              className="grid h-8 w-8 place-items-center rounded-full border border-zinc-200 bg-white/80 text-zinc-500 transition hover:border-slate-400 hover:text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
               onClick={onDownloadTaxable}
             >
               <DownloadIcon />
             </button>
           </div>
         </div>
-        <div className="md:hidden">{languageToggle}</div>
+        <div className="md:hidden">
+          <div className="flex items-center gap-2">
+            {refreshButton}
+            {languageToggle}
+          </div>
+        </div>
       </div>
       <div className="order-3 hidden items-center justify-center md:ml-auto md:flex md:justify-end">
-        {languageToggle}
+        <div className="flex items-center gap-2">
+          {refreshButton}
+          {languageToggle}
+        </div>
       </div>
     </div>
   );

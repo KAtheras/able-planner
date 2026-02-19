@@ -600,8 +600,12 @@ export default function ChartsPanel({
           <div className="flex flex-wrap items-center gap-2 px-3 pt-3">
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               {language === "es"
-                ? "Crecimiento de la cuenta"
-                : "Account Growth"}
+                ? accountType === "able"
+                  ? "Crecimiento ABLE"
+                  : "Crecimiento gravable"
+                : accountType === "able"
+                  ? "ABLE Growth"
+                  : "Taxable Growth"}
             </h2>
             <div className="ml-auto">
               <ReportWindowToggle label={reportWindowLabel} options={reportWindowOptions} />

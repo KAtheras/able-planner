@@ -256,6 +256,12 @@ export default function Home() {
   const lastMobileConsoleModeRef = useRef<"annual" | "residency" | "fsc" | "ssi" | null>(null);
   const lastMobileScreen2PanelRef = useRef<string | null>(null);
   const currentClientConfig = getClientConfig(plannerStateCode);
+  const enrollmentPageUrlRaw = (currentClientConfig as { enrollmentPageUrl?: string } | undefined)
+    ?.enrollmentPageUrl;
+  const enrollmentPageUrl =
+    typeof enrollmentPageUrlRaw === "string" && enrollmentPageUrlRaw.trim()
+      ? enrollmentPageUrlRaw.trim()
+      : "";
   const configuredReportTabs =
     (currentClientConfig as { features?: { reports?: { tabs?: string[] } } })?.features?.reports?.tabs ??
     [];
@@ -310,7 +316,7 @@ export default function Home() {
         type="button"
         aria-pressed={language === "en"}
         className={[
-          "rounded-full px-2.5 py-1 text-[11px] font-semibold md:px-3 md:text-xs",
+          "rounded-full h-8 px-2.5 text-[11px] font-semibold md:px-3 md:text-xs",
           language === "en"
             ? "bg-[var(--brand-primary)] text-white"
             : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
@@ -323,7 +329,7 @@ export default function Home() {
         type="button"
         aria-pressed={language === "es"}
         className={[
-          "rounded-full px-2.5 py-1 text-[11px] font-semibold md:px-3 md:text-xs",
+          "rounded-full h-8 px-2.5 text-[11px] font-semibold md:px-3 md:text-xs",
           language === "es"
             ? "bg-[var(--brand-primary)] text-white"
             : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
@@ -333,6 +339,44 @@ export default function Home() {
         ES
       </button>
     </div>
+  );
+  const handleOpenEnrollmentPage = () => {
+    if (!enrollmentPageUrl) return;
+    window.open(enrollmentPageUrl, "_blank", "noopener,noreferrer");
+  };
+  const handlePrintReport = () => {
+    // Interim behavior until custom PDF layout/export is implemented.
+    window.print();
+  };
+  const reportActions = (
+    <>
+      <button
+        type="button"
+        onClick={handleOpenEnrollmentPage}
+        disabled={!enrollmentPageUrl}
+        className={[
+          "inline-flex h-8 items-center justify-center rounded-full border px-2.5 text-[11px] font-semibold md:px-3 md:text-xs",
+          enrollmentPageUrl
+            ? "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            : "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-500",
+        ].join(" ")}
+        title={enrollmentPageUrl ? (language === "es" ? "Abrir inscripción" : "Open enrollment") : (language === "es" ? "URL de inscripción no configurada" : "Enrollment URL not configured")}
+        aria-label={language === "es" ? "Inscribirse" : "Enroll"}
+      >
+        <span>{language === "es" ? "Inscribirse" : "Enroll"}</span>
+      </button>
+      <button
+        type="button"
+        onClick={handlePrintReport}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+        title={language === "es" ? "Imprimir / PDF" : "Print / PDF"}
+        aria-label={language === "es" ? "Imprimir / PDF" : "Print / PDF"}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-current">
+          <path d="M7 3a1 1 0 0 0-1 1v3h2V5h8v2h2V4a1 1 0 0 0-1-1H7Zm-2 6a3 3 0 0 0-3 3v5h4v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3h4v-5a3 3 0 0 0-3-3H5Zm3 8h8v2H8v-2Zm-2-2v-4h12v4H6Zm12-2h2v2h-2v-2Z" />
+        </svg>
+      </button>
+    </>
   );
   const planInfoMap = planLevelInfo as unknown as Record<
     string,
@@ -1239,7 +1283,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       type="button"
       aria-label={copy?.buttons?.refresh ?? "Refresh"}
       title={copy?.buttons?.refresh ?? "Refresh"}
-      className="rounded-full border border-zinc-200 p-2 text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
       onClick={resetInputs}
     >
       <svg
@@ -1257,6 +1301,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       {refreshButton}
       {languageToggle}
     </div>
+  );
+  const reportHeaderActions = (
+    <>
+      {reportActions}
+      {refreshButton}
+    </>
   );
   useEffect(() => {
     const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
@@ -2034,6 +2084,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           reportWindowYearsValue={reportWindowYearsValue}
           reportWindowMaxYears={reportWindowMaxYears}
           onReportWindowYearsChange={setReportWindowYears}
+          reportActions={reportHeaderActions}
           language={language}
           languageToggle={languageToggle}
           accountGrowthNarrativeParagraphs={accountGrowthNarrativeParagraphs}
@@ -2053,6 +2104,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           onViewChange={setAmortizationView}
           onDownloadAble={downloadAbleScheduleCsv}
           onDownloadTaxable={downloadTaxableScheduleCsv}
+          refreshButton={refreshButton}
           languageToggle={languageToggle}
           rows={scheduleRowsWithBenefits}
           taxableRows={taxableRows}
@@ -2089,96 +2141,98 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
       return (
         <div className="space-y-3">
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                {resourcesTitle}
-              </h1>
-              {languageToggle}
-            </div>
-            {resourcesIntro ? (
-              <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                {resourcesIntro}
-              </p>
-            ) : null}
+          <div className="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-30 flex items-center justify-between gap-3 bg-zinc-50 dark:bg-black">
+            <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
+              {resourcesTitle}
+            </h1>
+            <div>{languageToggle}</div>
           </div>
-          {resourcesSections.map((section, index) => {
-            const sectionValue = section as {
-              title?: unknown;
-              paragraphs?: unknown;
-              items?: unknown;
-              links?: unknown;
-            };
-            const title = typeof sectionValue.title === "string" ? sectionValue.title : "";
-            const paragraphs = Array.isArray(sectionValue.paragraphs)
-              ? sectionValue.paragraphs.filter(
-                  (item: unknown): item is string => typeof item === "string" && item.trim().length > 0,
-                )
-              : [];
-            const items = Array.isArray(sectionValue.items)
-              ? sectionValue.items.filter(
-                  (item: unknown): item is string => typeof item === "string" && item.trim().length > 0,
-                )
-              : [];
-            const links = Array.isArray(sectionValue.links)
-              ? sectionValue.links.filter(
-                  (link) =>
-                    typeof link?.label === "string" &&
-                    link.label.trim() &&
-                    typeof link?.url === "string" &&
-                    link.url.trim(),
-                )
-              : [];
+          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
+            <div className="max-h-[calc(100vh-16rem)] space-y-3 overflow-y-auto pr-1 md:max-h-[calc(100vh-13rem)]">
+              {resourcesIntro ? (
+                <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+                  {resourcesIntro}
+                </p>
+              ) : null}
+              {resourcesSections.map((section, index) => {
+                const sectionValue = section as {
+                  title?: unknown;
+                  paragraphs?: unknown;
+                  items?: unknown;
+                  links?: unknown;
+                };
+                const title = typeof sectionValue.title === "string" ? sectionValue.title : "";
+                const paragraphs = Array.isArray(sectionValue.paragraphs)
+                  ? sectionValue.paragraphs.filter(
+                      (item: unknown): item is string => typeof item === "string" && item.trim().length > 0,
+                    )
+                  : [];
+                const items = Array.isArray(sectionValue.items)
+                  ? sectionValue.items.filter(
+                      (item: unknown): item is string => typeof item === "string" && item.trim().length > 0,
+                    )
+                  : [];
+                const links = Array.isArray(sectionValue.links)
+                  ? sectionValue.links.filter(
+                      (link) =>
+                        typeof link?.label === "string" &&
+                        link.label.trim() &&
+                        typeof link?.url === "string" &&
+                        link.url.trim(),
+                    )
+                  : [];
 
-            if (!title && paragraphs.length === 0 && items.length === 0 && links.length === 0) return null;
+                if (!title && paragraphs.length === 0 && items.length === 0 && links.length === 0) return null;
 
-            return (
-              <div
-                key={`${title || "resources-section"}-${index}`}
-                className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-black/80"
-              >
-                {title ? (
-                  <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
-                ) : null}
-                {paragraphs.map((paragraph, paragraphIndex) => (
-                  <p
-                    key={`${title || "resources"}-paragraph-${paragraphIndex}`}
-                    className="mb-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 last:mb-0"
+                return (
+                  <div
+                    key={`${title || "resources-section"}-${index}`}
+                    className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-black/80"
                   >
-                    {paragraph}
-                  </p>
-                ))}
-                {items.length > 0 ? (
-                  <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                    {items.map((item: string, itemIndex: number) => (
-                      <li key={`${title || "resources"}-item-${itemIndex}`}>{item}</li>
+                    {title ? (
+                      <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
+                    ) : null}
+                    {paragraphs.map((paragraph, paragraphIndex) => (
+                      <p
+                        key={`${title || "resources"}-paragraph-${paragraphIndex}`}
+                        className="mb-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 last:mb-0"
+                      >
+                        {paragraph}
+                      </p>
                     ))}
-                  </ul>
-                ) : null}
-                {links.length > 0 ? (
-                  <ul className="mt-4 space-y-1.5 text-sm leading-relaxed">
-                    {links.map((link, linkIndex) => (
-                      <li key={`${title || "resources"}-link-${linkIndex}`}>
-                        <a
-                          href={link.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="font-medium text-blue-600 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                        >
-                          {link.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-            );
-          })}
-          {resourcesSections.length === 0 ? (
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm text-sm leading-relaxed text-zinc-700 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-300">
-              {copy?.labels?.ui?.placeholderComingSoon ?? ""}
+                    {items.length > 0 ? (
+                      <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+                        {items.map((item: string, itemIndex: number) => (
+                          <li key={`${title || "resources"}-item-${itemIndex}`}>{item}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {links.length > 0 ? (
+                      <ul className="mt-4 space-y-1.5 text-sm leading-relaxed">
+                        {links.map((link, linkIndex) => (
+                          <li key={`${title || "resources"}-link-${linkIndex}`}>
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="font-medium text-blue-600 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              {link.label}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                );
+              })}
+              {resourcesSections.length === 0 ? (
+                <div className="rounded-xl border border-zinc-200 bg-white p-6 text-sm leading-relaxed text-zinc-700 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-300">
+                  {copy?.labels?.ui?.placeholderComingSoon ?? ""}
+                </div>
+              ) : null}
             </div>
-          ) : null}
+          </div>
         </div>
       );
     }

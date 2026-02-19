@@ -1,6 +1,7 @@
 {
   "clientId": "default",
   "planStateCode": "TX",
+  "enrollmentPageUrl": "https://www.ablenrc.org/state-plan-search/",
   "defaults": {
     "annualReturn": 0.05,
     "timeHorizonYears": 50
