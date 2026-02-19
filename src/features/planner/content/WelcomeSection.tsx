@@ -110,7 +110,7 @@ export default function WelcomeSection({
                     }}
                     aria-controls="welcome-terms-of-use-card"
                     aria-expanded={showWelcomeTermsOfUse}
-                    className="font-semibold text-[var(--brand-primary)] underline underline-offset-2 hover:text-[var(--brand-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]"
+                    className="font-semibold text-zinc-800 underline underline-offset-2 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)] dark:text-zinc-100 dark:hover:text-white"
                   >
                     {landingCopy.termsOfUseLinkLabel || "Terms of Use"}
                   </button>
