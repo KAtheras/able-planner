@@ -22,6 +22,7 @@ export default function Screen2MessagesPanel({
   ssiBalanceCapWarningText,
   screen2Messages,
 }: Props) {
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const ssiWarningCardRef = useRef<HTMLDivElement | null>(null);
   const [dismissedSsiWarningKey, setDismissedSsiWarningKey] = useState<string | null>(null);
   const activeSsiWarningKey = ssiBalanceCapWarningText ?? null;
@@ -34,8 +35,13 @@ export default function Screen2MessagesPanel({
     if (!isMobile) return;
 
     window.setTimeout(() => {
+      const panel = panelRef.current;
       const card = ssiWarningCardRef.current;
       if (!card) return;
+      if (panel) {
+        panel.scrollTo({ top: Math.max(0, card.offsetTop - 8), behavior: "smooth" });
+        return;
+      }
       const topNav = document.querySelector("header");
       const topNavHeight = topNav instanceof HTMLElement ? topNav.getBoundingClientRect().height : 0;
       const inputHeader = document.querySelector("[data-mobile-input-header='true']");
@@ -53,12 +59,14 @@ export default function Screen2MessagesPanel({
     if (!isMobile) return;
 
     window.setTimeout(() => {
+      const panel = panelRef.current;
+      if (panel) {
+        panel.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
       const inputsHeader = document.querySelector("[data-mobile-input-header='true']");
       if (inputsHeader instanceof HTMLElement) {
-        const topNav = document.querySelector("header");
-        const topNavHeight = topNav instanceof HTMLElement ? topNav.getBoundingClientRect().height : 0;
-        const targetTop = inputsHeader.getBoundingClientRect().top + window.scrollY - topNavHeight - 8;
-        window.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: "smooth" });
+        inputsHeader.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
       window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
@@ -66,7 +74,7 @@ export default function Screen2MessagesPanel({
   };
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+    <div ref={panelRef} className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
       {accountEndingNode}
       {depletionNoticeNode}
       {showStandaloneWithdrawalLimitedMessage && (
