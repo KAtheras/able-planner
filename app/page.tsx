@@ -79,6 +79,7 @@ import {
   shouldShowStandaloneWithdrawalLimitedMessage,
 } from "@/lib/planner/messages";
 import { useQualifiedWithdrawalBudget } from "@/lib/inputs/useQualifiedWithdrawalBudget";
+import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 
 type ClientBlocks = Partial<
   Record<
@@ -118,6 +119,7 @@ function resolveDefaultMessages(
 import { buildPlannerSchedule } from "@/lib/calc/usePlannerSchedule";
 
 const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
+const INPUT_DEBOUNCE_MS = 900;
 
 type FilingStatusOption = "single" | "married_joint" | "married_separate" | "head_of_household";
 type PlannerState = string;
@@ -214,6 +216,26 @@ export default function Home() {
   const [wtaAutoApplied, setWtaAutoApplied] = useState(false);
   const [wtaDismissed, setWtaDismissed] = useState(false);
   const [ssiIncomeWarningDismissed, setSsiIncomeWarningDismissed] = useState(false);
+  const calcStartingBalanceInput = useDebouncedValue(startingBalance, INPUT_DEBOUNCE_MS);
+  const calcMonthlyContributionInput = useDebouncedValue(monthlyContribution, INPUT_DEBOUNCE_MS);
+  const calcMonthlyContributionFutureInput = useDebouncedValue(monthlyContributionFuture, INPUT_DEBOUNCE_MS);
+  const calcMonthlyWithdrawalInput = useDebouncedValue(monthlyWithdrawal, INPUT_DEBOUNCE_MS);
+  const calcContributionIncreasePctInput = useDebouncedValue(contributionIncreasePct, INPUT_DEBOUNCE_MS);
+  const calcWithdrawalIncreasePctInput = useDebouncedValue(withdrawalIncreasePct, INPUT_DEBOUNCE_MS);
+  const calcPlannerAgiInput = useDebouncedValue(plannerAgi, INPUT_DEBOUNCE_MS);
+  const calcAnnualReturnInput = useDebouncedValue(annualReturn, INPUT_DEBOUNCE_MS);
+  const calcContributionEndSelection = useDebouncedValue(
+    `${contributionEndYear}:${contributionEndMonth}`,
+    INPUT_DEBOUNCE_MS,
+  );
+  const [calcContributionEndYearInput = "", calcContributionEndMonthInput = ""] =
+    calcContributionEndSelection.split(":");
+  const calcWithdrawalStartSelection = useDebouncedValue(
+    `${withdrawalStartYear}:${withdrawalStartMonth}`,
+    INPUT_DEBOUNCE_MS,
+  );
+  const [calcWithdrawalStartYearInput = "", calcWithdrawalStartMonthInput = ""] =
+    calcWithdrawalStartSelection.split(":");
   useEffect(() => {
     setWtaAutoApplied(false);
     setWtaDismissed(false);
@@ -330,15 +352,15 @@ export default function Home() {
   const residencyBlocking = residencyMismatch && (planResidencyRequired || !nonResidentProceedAck);
   const showFscQuestionnaire = messagesMode === "fsc" && agiGateEligible === true;
   const startingBalanceNum =
-    Number((startingBalance ?? "").replace(".00", "")) || 0;
+    Number((calcStartingBalanceInput ?? "").replace(".00", "")) || 0;
   const monthlyContributionNum =
-    Number((monthlyContribution ?? "").replace(".00","")) || 0;
+    Number((calcMonthlyContributionInput ?? "").replace(".00","")) || 0;
   const hasProjectionDriver = startingBalanceNum > 0 || monthlyContributionNum > 0;
   const annualContributionLimit =
     wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
-  const agiValueForSsiWarning = Number(plannerAgi);
+  const agiValueForSsiWarning = Number(calcPlannerAgiInput);
   const agiValidForSsiWarning =
-    plannerAgi !== "" &&
+    calcPlannerAgiInput !== "" &&
     !Number.isNaN(agiValueForSsiWarning) &&
     (agiValueForSsiWarning > 0 || agiValueForSsiWarning === 0);
   const canAccessProjectionViews =
@@ -520,6 +542,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     qualifiedWithdrawalBudget,
     qualifiedWithdrawalTotal,
     isBudgetApplied,
+    applyBudgetToWithdrawal,
     handleBudgetFieldChange,
     handleManualWithdrawalOverride,
     resetQualifiedWithdrawalBudget,
@@ -552,18 +575,18 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return Math.max(0, numeric);
     };
 
-    const startingBalanceValue = parseAmount(startingBalance);
-    const monthlyContributionValue = parseAmount(monthlyContribution);
+    const startingBalanceValue = parseAmount(calcStartingBalanceInput);
+    const monthlyContributionValue = parseAmount(calcMonthlyContributionInput);
     const monthlyContributionFutureValue =
-      monthlyContributionFuture !== ""
-        ? parseAmount(monthlyContributionFuture)
+      calcMonthlyContributionFutureInput !== ""
+        ? parseAmount(calcMonthlyContributionFutureInput)
         : monthlyContributionValue;
-    const monthlyWithdrawalValue = parseAmount(monthlyWithdrawal);
-    const contributionIncreaseValue = Number(contributionIncreasePct);
-    const withdrawalIncreaseValue = Number(withdrawalIncreasePct);
+    const monthlyWithdrawalValue = parseAmount(calcMonthlyWithdrawalInput);
+    const contributionIncreaseValue = Number(calcContributionIncreasePctInput);
+    const withdrawalIncreaseValue = Number(calcWithdrawalIncreasePctInput);
 
     const computedStopContributionIncreasesAfterYear = (() => {
-      const pctRaw = Number(contributionIncreasePct);
+      const pctRaw = Number(calcContributionIncreasePctInput);
       if (monthlyContributionNum <= 0 || !Number.isFinite(pctRaw) || pctRaw <= 0) return null;
       const horizonInput = Number(timeHorizonYears);
       if (!Number.isFinite(horizonInput) || horizonInput <= 0) return null;
@@ -584,9 +607,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return null;
     })();
 
-    const agiValue = Number(plannerAgi);
+    const agiValue = Number(calcPlannerAgiInput);
     const agiIsValid =
-      plannerAgi !== "" && !Number.isNaN(agiValue) && (agiValue > 0 || agiValue === 0);
+      calcPlannerAgiInput !== "" && !Number.isNaN(agiValue) && (agiValue > 0 || agiValue === 0);
+    const defaultWithdrawalStartIndex = Math.min(horizonEndIndex, startIndex + 1);
 
     const { scheduleRows: unconstrainedContributionRows } = buildPlannerSchedule({
       startMonthIndex: startIndex,
@@ -605,8 +629,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         ? Math.max(0, withdrawalIncreaseValue)
         : 0,
       contributionEndIndex: horizonEndIndex,
-      withdrawalStartIndex: startIndex,
-      annualReturnDecimal: parsePercentStringToDecimal(annualReturn) ?? 0,
+      withdrawalStartIndex: defaultWithdrawalStartIndex,
+      annualReturnDecimal: parsePercentStringToDecimal(calcAnnualReturnInput) ?? 0,
       isSsiEligible,
       agi: agiIsValid ? agiValue : null,
       filingStatus: plannerFilingStatus,
@@ -974,12 +998,13 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const { startIndex, horizonEndIndex } = getHorizonConfig();
     const minIndex = startIndex;
     const contributionMaxIndex = Math.max(startIndex, contributionEndMaxIndex);
+    const defaultWithdrawalStartIndex = Math.min(horizonEndIndex, startIndex + 1);
     const withdrawalEnforcedIndex =
       enforcedWithdrawalStartIndex != null
         ? clampNumber(enforcedWithdrawalStartIndex, startIndex, horizonEndIndex)
         : null;
     const withdrawalMaxIndex = withdrawalEnforcedIndex ?? Math.max(startIndex, horizonEndIndex);
-    const withdrawalDefaultIndex = withdrawalEnforcedIndex ?? minIndex;
+    const withdrawalDefaultIndex = withdrawalEnforcedIndex ?? defaultWithdrawalStartIndex;
 
     const setContributionFromIndex = (index: number) => {
       const { year, month } = monthIndexToParts(index);
@@ -1408,6 +1433,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
   const content = (() => {
     const agiValue = Number(plannerAgi);
+    const calcAgiValue = Number(calcPlannerAgiInput);
+    const calcAgiValid =
+      calcPlannerAgiInput !== "" &&
+      !Number.isNaN(calcAgiValue) &&
+      (calcAgiValue > 0 || calcAgiValue === 0);
     const horizonConfig = getHorizonConfig();
     const {
       agiValid,
@@ -1700,6 +1730,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             total={qualifiedWithdrawalTotal}
             onChange={handleBudgetFieldChange}
             onClose={() => {
+              applyBudgetToWithdrawal();
               setBudgetMode("default");
               if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
                 window.setTimeout(() => {
@@ -1782,31 +1813,38 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       if (!Number.isFinite(numeric)) return 0;
       return Math.max(0, numeric);
     };
-    const startingBalanceValue = parseAmount(startingBalance);
-    const monthlyContributionValue = parseAmount(monthlyContribution);
+    const startingBalanceValue = parseAmount(calcStartingBalanceInput);
+    const monthlyContributionValue = parseAmount(calcMonthlyContributionInput);
     const monthlyContributionFutureValue =
-      monthlyContributionFuture !== ""
-        ? parseAmount(monthlyContributionFuture)
+      calcMonthlyContributionFutureInput !== ""
+        ? parseAmount(calcMonthlyContributionFutureInput)
         : monthlyContributionValue;
-    const monthlyWithdrawalValue = parseAmount(monthlyWithdrawal);
+    const monthlyWithdrawalValue = parseAmount(calcMonthlyWithdrawalInput);
     const hasConfiguredWithdrawals = monthlyWithdrawalValue > 0;
-    const contributionEndRaw = parseMonthYearToIndex(contributionEndYear, contributionEndMonth);
+    const contributionEndRaw = parseMonthYearToIndex(
+      calcContributionEndYearInput,
+      calcContributionEndMonthInput,
+    );
     const contributionEndIndexValue =
       contributionEndRaw !== null
         ? clampNumber(contributionEndRaw, startIndex, horizonEndIndex)
         : horizonEndIndex;
-    const withdrawalStartRaw = parseMonthYearToIndex(withdrawalStartYear, withdrawalStartMonth);
+    const withdrawalStartRaw = parseMonthYearToIndex(
+      calcWithdrawalStartYearInput,
+      calcWithdrawalStartMonthInput,
+    );
+    const defaultWithdrawalStartIndex = Math.min(horizonEndIndex, startIndex + 1);
     const withdrawalStartIndexValue =
       withdrawalStartRaw !== null
         ? clampNumber(withdrawalStartRaw, startIndex, horizonEndIndex)
-        : startIndex;
-    const contributionIncreaseValue = Number(contributionIncreasePct);
-    const withdrawalIncreaseValue = Number(withdrawalIncreasePct);
+        : defaultWithdrawalStartIndex;
+    const contributionIncreaseValue = Number(calcContributionIncreasePctInput);
+    const withdrawalIncreaseValue = Number(calcWithdrawalIncreasePctInput);
     
 
     // Compute stop year synchronously so the schedule matches the helper message (no useEffect timing lag).
     const computedStopContributionIncreasesAfterYear = (() => {
-      const pctRaw = Number(contributionIncreasePct);
+      const pctRaw = Number(calcContributionIncreasePctInput);
       if (monthlyContributionNum <= 0 || !Number.isFinite(pctRaw) || pctRaw <= 0) return null;
 
       const horizonInput = Number(timeHorizonYears);
@@ -1876,9 +1914,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           : 0,
         contributionEndIndex: contributionEndIndexValue,
         withdrawalStartIndex: withdrawalStartIndexValue,
-        annualReturnDecimal: parsePercentStringToDecimal(annualReturn) ?? 0,
+        annualReturnDecimal: parsePercentStringToDecimal(calcAnnualReturnInput) ?? 0,
         isSsiEligible,
-        agi: agiValid ? agiValue : null,
+        agi: calcAgiValid ? calcAgiValue : null,
         filingStatus: plannerFilingStatus,
         stateOfResidence: beneficiaryStateOfResidence || null,
         enabled: hasTimeHorizon,

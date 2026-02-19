@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export type BudgetMode = "default" | "qualifiedWithdrawals";
 
@@ -63,19 +63,13 @@ export function useQualifiedWithdrawalBudget({
   );
   const isBudgetApplied = qualifiedWithdrawalBudgetTouched;
 
-  useEffect(() => {
-    if (!qualifiedWithdrawalBudgetTouched) return;
+  const applyBudgetToWithdrawal = useCallback(() => {
     const nextWithdrawal = formatAmountInput(qualifiedWithdrawalTotal);
     if (monthlyWithdrawal !== nextWithdrawal) {
       setMonthlyWithdrawal(nextWithdrawal);
     }
-  }, [
-    formatAmountInput,
-    monthlyWithdrawal,
-    qualifiedWithdrawalBudgetTouched,
-    qualifiedWithdrawalTotal,
-    setMonthlyWithdrawal,
-  ]);
+    setQualifiedWithdrawalBudgetTouched(true);
+  }, [formatAmountInput, monthlyWithdrawal, qualifiedWithdrawalTotal, setMonthlyWithdrawal]);
 
   const resetQualifiedWithdrawalBudget = useCallback(() => {
     setBudgetMode("default");
@@ -112,6 +106,7 @@ export function useQualifiedWithdrawalBudget({
     qualifiedWithdrawalBudget,
     qualifiedWithdrawalTotal,
     isBudgetApplied,
+    applyBudgetToWithdrawal,
     handleBudgetFieldChange,
     handleManualWithdrawalOverride,
     resetQualifiedWithdrawalBudget,
