@@ -78,7 +78,7 @@ function IconResources() {
 
 function IconArrowBack() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">
       <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z" />
     </svg>
   );
@@ -86,7 +86,7 @@ function IconArrowBack() {
 
 function IconArrowForward() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">
       <path fill="currentColor" d="m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
     </svg>
   );
@@ -180,17 +180,17 @@ export default function Sidebar({
             disabled={mobileBackAction?.disabled}
             onClick={mobileBackAction?.onClick}
             className={[
-              "border px-3 py-2 text-xs font-semibold transition",
+              "flex min-w-[72px] flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold transition",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
               mobileBackAction?.disabled
-                ? "border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
-                : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900",
+                ? "bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
+                : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900/60",
             ].join(" ")}
           >
-            <span className="flex flex-col items-center justify-center gap-1 text-[11px] leading-none">
+            <span className="grid place-items-center">
               <IconArrowBack />
-              <span className="tracking-wide">{mobileBackAction?.label}</span>
             </span>
+            <span className="text-[9px] leading-none tracking-tight">{mobileBackAction?.label}</span>
           </button>
           <div className="grid flex-1 grid-cols-5 gap-1">
             {ITEMS.map((item) => {
@@ -225,7 +225,12 @@ export default function Sidebar({
                   ].join(" ")}
                 >
                   <span className="grid place-items-center">{item.icon}</span>
-                  <span className="block w-full max-w-full text-center text-[9px] leading-none whitespace-nowrap tracking-tight">
+                  <span
+                    className={[
+                      "block w-full max-w-full text-center text-[9px] leading-none whitespace-nowrap tracking-tight",
+                      item.key === "resources" ? "-translate-x-[2px]" : "",
+                    ].join(" ")}
+                  >
                     {mobileLabel}
                   </span>
                 </button>
@@ -237,17 +242,17 @@ export default function Sidebar({
             disabled={mobileNextAction?.disabled}
             onClick={mobileNextAction?.onClick}
             className={[
-              "px-3 py-2 text-xs font-semibold transition",
+              "flex min-w-[72px] flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold transition",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
               mobileNextAction?.disabled
-                ? "border border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
-                : "bg-[var(--brand-primary)] text-white",
+                ? "bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
+                : "bg-[var(--brand-primary)] text-[var(--brand-on-primary)]",
             ].join(" ")}
           >
-            <span className="flex flex-col items-center justify-center gap-1 text-[11px] leading-none">
+            <span className="grid place-items-center">
               <IconArrowForward />
-              <span className="tracking-wide">{mobileNextAction?.label}</span>
             </span>
+            <span className="text-[9px] leading-none tracking-tight">{mobileNextAction?.label}</span>
           </button>
         </div>
       </nav>
