@@ -129,10 +129,11 @@ export default function Sidebar({
 }: SidebarProps) {
   return (
     <>
+      <div aria-hidden="true" className="hidden w-24 shrink-0 md:block" />
       {/* Desktop / wide: left sidebar */}
       <nav
         aria-label="Primary"
-        className="hidden h-[calc(100vh-3.5rem)] w-24 flex-col items-center gap-3 border-r border-zinc-200 bg-white px-2 pt-0 pb-4 dark:border-zinc-800 dark:bg-black md:flex"
+        className="hidden h-[calc(100vh-3.5rem)] w-24 flex-col items-center gap-3 border-r border-zinc-200 bg-white px-2 pt-0 pb-4 dark:border-zinc-800 dark:bg-black md:fixed md:top-[3.5rem] md:left-[max(0px,calc((100vw-72rem)/2))] md:flex"
         style={
           typeof desktopTopOffsetPx === "number"
             ? { paddingTop: `${desktopTopOffsetPx}px` }
