@@ -28,9 +28,25 @@ export default function Screen2MessagesPanel({
   const activeSsiWarningKey = ssiBalanceCapWarningText ?? null;
   const ssiWarningDismissed =
     Boolean(activeSsiWarningKey) && activeSsiWarningKey === dismissedSsiWarningKey;
+  const shouldShowSsiWarning = Boolean(ssiBalanceCapWarningText) && !ssiWarningDismissed;
+
+  const getMobileScrollOffset = () => {
+    if (typeof window === "undefined") return 0;
+    const topNav = document.querySelector("header");
+    const topNavHeight = topNav instanceof HTMLElement ? topNav.getBoundingClientRect().height : 0;
+    const inputHeader = document.querySelector("[data-mobile-input-header='true']");
+    const inputHeaderHeight =
+      inputHeader instanceof HTMLElement ? inputHeader.getBoundingClientRect().height : 0;
+    return topNavHeight + inputHeaderHeight + 8;
+  };
+
+  const canScrollPanel = () => {
+    const panel = panelRef.current;
+    return Boolean(panel && panel.scrollHeight > panel.clientHeight + 1);
+  };
 
   useEffect(() => {
-    if (!ssiBalanceCapWarningText || ssiWarningDismissed || typeof window === "undefined") return;
+    if (!shouldShowSsiWarning || typeof window === "undefined") return;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     if (!isMobile) return;
 
@@ -38,19 +54,16 @@ export default function Screen2MessagesPanel({
       const panel = panelRef.current;
       const card = ssiWarningCardRef.current;
       if (!card) return;
-      if (panel) {
+
+      if (panel && canScrollPanel()) {
         panel.scrollTo({ top: Math.max(0, card.offsetTop - 8), behavior: "smooth" });
         return;
       }
-      const topNav = document.querySelector("header");
-      const topNavHeight = topNav instanceof HTMLElement ? topNav.getBoundingClientRect().height : 0;
-      const inputHeader = document.querySelector("[data-mobile-input-header='true']");
-      const inputHeaderHeight =
-        inputHeader instanceof HTMLElement ? inputHeader.getBoundingClientRect().height : 0;
-      const targetTop = card.getBoundingClientRect().top + window.scrollY - topNavHeight - inputHeaderHeight - 8;
+
+      const targetTop = card.getBoundingClientRect().top + window.scrollY - getMobileScrollOffset();
       window.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: "smooth" });
     }, 0);
-  }, [ssiBalanceCapWarningText, ssiWarningDismissed]);
+  }, [shouldShowSsiWarning]);
 
   const handleDismissSsiWarning = () => {
     if (activeSsiWarningKey) setDismissedSsiWarningKey(activeSsiWarningKey);
@@ -60,13 +73,16 @@ export default function Screen2MessagesPanel({
 
     window.setTimeout(() => {
       const panel = panelRef.current;
-      if (panel) {
+      if (panel && canScrollPanel()) {
         panel.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
+
       const inputsHeader = document.querySelector("[data-mobile-input-header='true']");
       if (inputsHeader instanceof HTMLElement) {
-        inputsHeader.scrollIntoView({ behavior: "smooth", block: "start" });
+        const targetTop =
+          inputsHeader.getBoundingClientRect().top + window.scrollY - getMobileScrollOffset();
+        window.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: "smooth" });
         return;
       }
       window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
