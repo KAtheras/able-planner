@@ -63,7 +63,7 @@ export default function ReportsHeader({
   const mobileReportLabel = language === "es" ? "Informes" : "Reports";
 
   return (
-    <div className="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-30 -mx-4 mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 bg-zinc-50/95 px-3 py-2 backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:static md:mx-0 md:mb-0 md:gap-3 md:border-0 md:bg-transparent md:px-0 md:py-0">
+    <div className="sticky top-[calc(env(safe-area-inset-top)+5rem)] z-30 -mx-4 mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 bg-zinc-50/95 px-3 py-2 backdrop-blur dark:border-zinc-800 dark:bg-black/90 md:static md:mx-0 md:mb-0 md:gap-3 md:border-0 md:bg-transparent md:px-0 md:py-0">
       <div className="flex w-full items-center gap-1 md:w-auto md:gap-2 md:justify-start">
         <div className="min-w-0 flex-1 overflow-x-auto hidden md:block md:overflow-visible">
           <div

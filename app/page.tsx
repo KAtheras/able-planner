@@ -2141,7 +2141,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
       return (
         <div className="space-y-2 md:space-y-3">
-          <div className="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-30 flex items-center justify-between gap-3 bg-zinc-50 dark:bg-black">
+          <div className="flex items-center justify-between gap-3">
             <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
               {resourcesTitle}
             </h1>
