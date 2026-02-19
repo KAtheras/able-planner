@@ -180,7 +180,7 @@ export default function Sidebar({
             disabled={mobileBackAction?.disabled}
             onClick={mobileBackAction?.onClick}
             className={[
-              "rounded-full border px-3 py-2 text-xs font-semibold transition",
+              "border px-3 py-2 text-xs font-semibold transition",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
               mobileBackAction?.disabled
                 ? "border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
@@ -225,7 +225,7 @@ export default function Sidebar({
                   ].join(" ")}
                 >
                   <span className="grid place-items-center">{item.icon}</span>
-                  <span className="max-w-full text-center text-[9px] leading-none whitespace-nowrap tracking-tight">
+                  <span className="block w-full max-w-full text-center text-[9px] leading-none whitespace-nowrap tracking-tight">
                     {mobileLabel}
                   </span>
                 </button>
@@ -237,7 +237,7 @@ export default function Sidebar({
             disabled={mobileNextAction?.disabled}
             onClick={mobileNextAction?.onClick}
             className={[
-              "rounded-full px-3 py-2 text-xs font-semibold transition",
+              "px-3 py-2 text-xs font-semibold transition",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]",
               mobileNextAction?.disabled
                 ? "border border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 cursor-not-allowed"
