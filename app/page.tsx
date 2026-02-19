@@ -2140,7 +2140,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         : [];
 
       return (
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           <div className="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-30 flex items-center justify-between gap-3 bg-zinc-50 dark:bg-black">
             <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
               {resourcesTitle}
@@ -2148,7 +2148,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             <div>{languageToggle}</div>
           </div>
           <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
-            <div className="max-h-[calc(100vh-16rem)] space-y-3 overflow-y-auto pr-1 md:max-h-[calc(100vh-13rem)]">
+            <div className="max-h-[calc(100vh-16rem)] space-y-2 overflow-y-auto pr-1 md:max-h-[calc(100vh-13rem)] md:space-y-3">
               {resourcesIntro ? (
                 <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
                   {resourcesIntro}
@@ -2487,7 +2487,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           </div>
         }
       />
-      <div aria-hidden="true" className="h-24 md:hidden" />
+      <div aria-hidden="true" className="h-20 md:hidden" />
       <div ref={shellRef} className="mx-auto flex w-full max-w-6xl">
         <Sidebar
           active={active}
@@ -2506,9 +2506,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             onClick: goToMobileNext,
           }}
         />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-1.5 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:pb-6">{content}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-2 pt-1 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:px-4 md:pt-1.5 md:pb-6">{content}</main>
       </div>
-      <footer className="px-4 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-center text-xs text-zinc-500 dark:text-zinc-400 md:pb-4">
+      <footer className="px-2 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-center text-xs text-zinc-500 dark:text-zinc-400 md:px-4 md:pb-4">
         © 2026 Spectra Professional Services, LLC. All rights reserved.
       </footer>
     </div>

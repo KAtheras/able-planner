@@ -16,7 +16,7 @@ export default function DisclosuresView({
   languageToggle,
 }: Props) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 md:space-y-3">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
           {title}
