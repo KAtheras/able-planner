@@ -190,12 +190,109 @@ export default function ChartsPanel({
       runningAdditionalEconomicBenefit += monthlyAdditionalBenefit;
       additionalEconomicBenefitSeries.push(runningAdditionalEconomicBenefit);
     }
+    const hasAdditionalEconomicBenefitSeries = additionalEconomicBenefitSeries.some(
+      (value) => Math.abs(value) > 0.005,
+    );
+
+    const netContributionsName = language === "es" ? "Contribuciones netas" : "Net Contributions";
+    const investmentReturnsName =
+      language === "es"
+        ? "Rendimientos de inversión"
+        : "Investment Returns";
+    const taxableTaxDragName =
+      language === "es" ? "Impuestos sobre rendimientos (impacto)" : "Taxes on Earnings (Drag)";
+    const taxableEndingName = language === "es" ? "Saldo final gravable" : "Taxable Ending Balance";
+    const ableEndingName = language === "es" ? "Saldo final ABLE" : "ABLE Ending Balance";
+    const additionalBenefitName =
+      language === "es" ? "Beneficio económico adicional*" : "Additional Economic Benefit*";
+    const chartSeries = [
+      {
+        name: netContributionsName,
+        type: "line" as const,
+        stack: "components",
+        smooth: 0.2,
+        symbol: "none",
+        data: netContributionSeries,
+        lineStyle: { width: 0, color: "#1f6fd8" },
+        itemStyle: { color: "#1f6fd8" },
+        areaStyle: { color: "#1f6fd8" },
+      },
+      {
+        name: investmentReturnsName,
+        type: "line" as const,
+        stack: "components",
+        smooth: 0.2,
+        symbol: "none",
+        data: returnSeries,
+        lineStyle: { width: 0, color: "#14b8a6" },
+        itemStyle: { color: "#14b8a6" },
+        areaStyle: { color: "#14b8a6" },
+      },
+      ...(accountType === "taxable"
+        ? [
+            {
+              name: taxableTaxDragName,
+              type: "line" as const,
+              stack: "components",
+              smooth: 0.2,
+              symbol: "none",
+              data: taxDragSeries,
+                lineStyle: { width: 0, color: "#ef4444" },
+                itemStyle: { color: "#ef4444" },
+                areaStyle: { color: "#ef4444" },
+              },
+            {
+              name: taxableEndingName,
+              type: "line" as const,
+              smooth: 0.2,
+              symbol: "none",
+              data: endingBalanceSeries,
+              lineStyle: { width: 2, color: endingBalanceLineColor, type: "solid" },
+              itemStyle: { color: endingBalanceLineColor },
+            },
+          ]
+        : []),
+      ...(accountType === "able"
+        ? [
+            {
+              name: ableEndingName,
+              type: "line" as const,
+              smooth: 0.2,
+              symbol: "none",
+              data: endingBalanceSeries,
+              lineStyle: { width: 2, color: endingBalanceLineColor, type: "solid" },
+              itemStyle: { color: endingBalanceLineColor },
+            },
+            ...(hasAdditionalEconomicBenefitSeries
+              ? [
+                  {
+                    name: additionalBenefitName,
+                    type: "line" as const,
+                    stack: "components",
+                      smooth: 0.2,
+                      symbol: "none",
+                      data: additionalEconomicBenefitSeries,
+                      lineStyle: { width: 0, color: "#f59e0b" },
+                      itemStyle: { color: "#f59e0b" },
+                      areaStyle: { color: "#f59e0b" },
+                    },
+                  ]
+                : []),
+          ]
+        : []),
+    ];
 
     chart.setOption({
       animationDuration: 500,
       legend: {
         bottom: 4,
-        textStyle: { fontSize: 11, color: titleColor },
+        icon: "circle",
+        itemWidth: 8,
+        itemHeight: 8,
+        textStyle: {
+          fontSize: 11,
+          color: titleColor,
+        },
       },
       tooltip: {
         trigger: "axis",
@@ -286,7 +383,7 @@ export default function ChartsPanel({
         nameLocation: "middle",
         nameGap: 32,
         nameTextStyle: { color: axisColor },
-        axisLine: { lineStyle: { color: axisColor } },
+        axisLine: { show: false },
         axisLabel: {
           color: axisColor,
           fontSize: 11,
@@ -305,117 +402,7 @@ export default function ChartsPanel({
         splitLine: { lineStyle: { color: splitLineColor } },
         axisLabel: { formatter: formatCurrencyAxis, color: axisColor },
       },
-      series: [
-        {
-          name: language === "es" ? "Contribuciones netas" : "Net Contributions",
-          type: "line",
-          stack: "components",
-          smooth: 0.2,
-          symbol: "none",
-          data: netContributionSeries,
-          lineStyle: { width: 2, color: "#1f6fd8" },
-          itemStyle: { color: "#1f6fd8" },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: "rgba(31, 111, 216, 0.28)" },
-              { offset: 1, color: "rgba(31, 111, 216, 0.08)" },
-            ]),
-          },
-        },
-        {
-          name:
-            language === "es"
-              ? accountType === "taxable"
-                ? "Rendimientos brutos de inversión"
-                : "Rendimientos de inversión"
-              : accountType === "taxable"
-                ? "Gross Investment Returns"
-                : "Investment Returns",
-          type: "line",
-          stack: "components",
-          smooth: 0.2,
-          symbol: "none",
-          data: returnSeries,
-          lineStyle: { width: 2, color: "#14b8a6" },
-          itemStyle: { color: "#14b8a6" },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: "rgba(20, 184, 166, 0.28)" },
-              { offset: 1, color: "rgba(20, 184, 166, 0.08)" },
-            ]),
-          },
-        },
-        ...(accountType === "taxable"
-          ? [
-              {
-                name:
-                  language === "es"
-                    ? "Impuestos sobre rendimientos (impacto)"
-                    : "Taxes on Earnings (Drag)",
-                type: "line" as const,
-                stack: "components",
-                smooth: 0.2,
-                symbol: "none",
-                data: taxDragSeries,
-                lineStyle: { width: 2, color: "#ef4444" },
-                itemStyle: { color: "#ef4444" },
-                areaStyle: {
-                  color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                    { offset: 0, color: "rgba(239, 68, 68, 0.24)" },
-                    { offset: 1, color: "rgba(239, 68, 68, 0.07)" },
-                  ]),
-                },
-              },
-              {
-                name:
-                  language === "es"
-                    ? "Saldo final gravable"
-                    : "Taxable Ending Balance",
-                type: "line" as const,
-                smooth: 0.2,
-                symbol: "none",
-                data: endingBalanceSeries,
-                lineStyle: { width: 2, color: endingBalanceLineColor, type: "solid" },
-                itemStyle: { color: endingBalanceLineColor },
-              },
-            ]
-          : []),
-        ...(accountType === "able"
-          ? [
-              {
-                name:
-                  language === "es"
-                    ? "Saldo final ABLE"
-                    : "ABLE Ending Balance",
-                type: "line" as const,
-                smooth: 0.2,
-                symbol: "none",
-                data: endingBalanceSeries,
-                lineStyle: { width: 2, color: endingBalanceLineColor, type: "solid" },
-                itemStyle: { color: endingBalanceLineColor },
-              },
-              {
-                name:
-                  language === "es"
-                    ? "Beneficio económico adicional*"
-                    : "Additional Economic Benefit*",
-                type: "line" as const,
-                stack: "components",
-                smooth: 0.2,
-                symbol: "none",
-                data: additionalEconomicBenefitSeries,
-                lineStyle: { width: 2, color: "#f59e0b" },
-                itemStyle: { color: "#f59e0b" },
-                areaStyle: {
-                  color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                    { offset: 0, color: "rgba(245, 158, 11, 0.25)" },
-                    { offset: 1, color: "rgba(245, 158, 11, 0.06)" },
-                  ]),
-                },
-              },
-            ]
-          : []),
-      ],
+      series: chartSeries,
     });
 
     const resize = () => chart.resize();
@@ -543,12 +530,8 @@ export default function ChartsPanel({
         color: "#14b8a6",
         label:
           language === "es"
-            ? accountType === "taxable"
-              ? "Rendimientos brutos de inversión"
-              : "Rendimientos de inversión"
-            : accountType === "taxable"
-              ? "Gross Investment Returns"
-              : "Investment Returns",
+            ? "Rendimientos de inversión"
+            : "Investment Returns",
         value: latestInvestmentReturn,
       },
       ...(accountType === "taxable"
@@ -566,7 +549,7 @@ export default function ChartsPanel({
         : []),
       {
         key: "ending",
-        color: accountType === "taxable" && isDarkMode ? "#ffffff" : "#111827",
+        color: accountType === "able" ? "#ffffff" : accountType === "taxable" && isDarkMode ? "#ffffff" : "#111827",
         label:
           language === "es"
             ? accountType === "able"
@@ -577,7 +560,7 @@ export default function ChartsPanel({
               : "Taxable Ending Balance",
         value: latestEndingBalance,
       },
-      ...(accountType === "able"
+      ...(accountType === "able" && Math.abs(latestAdditionalBenefit) > 0.005
         ? [
             {
               key: "benefit",
@@ -646,11 +629,13 @@ export default function ChartsPanel({
                 className="rounded-md border border-zinc-200/80 px-2.5 py-2 dark:border-zinc-700/80"
               >
                 <div className="flex min-w-0 items-center gap-2">
-                  <span
-                    aria-hidden="true"
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: row.color }}
-                  />
+                  {row.key !== "contribTotal" && row.key !== "withdrawalTotal" ? (
+                    <span
+                      aria-hidden="true"
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: row.color }}
+                    />
+                  ) : null}
                   <span className="truncate text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
                     {row.label}
                   </span>
@@ -676,7 +661,7 @@ export default function ChartsPanel({
           )}
         </div>
       </div>
-      {accountType === "able" && (
+      {accountType === "able" && additionalEconomicBenefitValue > 0.005 && (
         <>
           <p className="mt-2 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
             {language === "es"
