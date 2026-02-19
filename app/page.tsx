@@ -2103,15 +2103,25 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             ) : null}
           </div>
           {resourcesSections.map((section, index) => {
-            const title = typeof section?.title === "string" ? section.title : "";
-            const paragraphs = Array.isArray(section?.paragraphs)
-              ? section.paragraphs.filter((item) => typeof item === "string" && item.trim())
+            const sectionValue = section as {
+              title?: unknown;
+              paragraphs?: unknown;
+              items?: unknown;
+              links?: unknown;
+            };
+            const title = typeof sectionValue.title === "string" ? sectionValue.title : "";
+            const paragraphs = Array.isArray(sectionValue.paragraphs)
+              ? sectionValue.paragraphs.filter(
+                  (item: unknown): item is string => typeof item === "string" && item.trim().length > 0,
+                )
               : [];
-            const items = Array.isArray(section?.items)
-              ? section.items.filter((item) => typeof item === "string" && item.trim())
+            const items = Array.isArray(sectionValue.items)
+              ? sectionValue.items.filter(
+                  (item: unknown): item is string => typeof item === "string" && item.trim().length > 0,
+                )
               : [];
-            const links = Array.isArray(section?.links)
-              ? section.links.filter(
+            const links = Array.isArray(sectionValue.links)
+              ? sectionValue.links.filter(
                   (link) =>
                     typeof link?.label === "string" &&
                     link.label.trim() &&
@@ -2140,7 +2150,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                 ))}
                 {items.length > 0 ? (
                   <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                    {items.map((item, itemIndex) => (
+                    {items.map((item: string, itemIndex: number) => (
                       <li key={`${title || "resources"}-item-${itemIndex}`}>{item}</li>
                     ))}
                   </ul>
