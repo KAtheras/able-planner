@@ -1314,8 +1314,13 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       return;
     }
 
-    if (active === "disclosures") {
+    if (active === "resources") {
       setActive("schedule");
+      return;
+    }
+
+    if (active === "disclosures") {
+      setActive("resources");
     }
   };
 
@@ -1358,6 +1363,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         setAmortizationView("taxable");
         return;
       }
+      setActive("resources");
+      return;
+    }
+
+    if (active === "resources") {
       setActive("disclosures");
     }
   };
@@ -1991,6 +2001,24 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           disclosuresAssumptionsOverride={disclosuresAssumptionsOverride}
           languageToggle={languageToggle}
         />
+      );
+    }
+
+    if (active === "resources") {
+      return (
+        <div className="space-y-3">
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                {copy?.ui?.sidebar?.resources ?? (language === "es" ? "Recursos" : "Resources")}
+              </h1>
+              {languageToggle}
+            </div>
+            <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+              {copy?.labels?.ui?.placeholderComingSoon ?? ""}
+            </p>
+          </div>
+        </div>
       );
     }
 

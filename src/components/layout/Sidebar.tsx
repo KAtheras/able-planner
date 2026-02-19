@@ -6,6 +6,7 @@ export type NavKey =
   | "inputs"
   | "reports"
   | "schedule"
+  | "resources"
   | "disclosures";
 
 type NavItem = {
@@ -64,6 +65,17 @@ function IconGear() {
   );
 }
 
+function IconResources() {
+  return (
+    <svg viewBox="0 -960 960 960" className="h-7 w-7" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M480-60q-72-68-165-104t-195-36v-440q101 0 194 36.5T480-498q73-69 166-105.5T840-640v440q-103 0-195.5 36T480-60Zm0-104q63-47 134-75t146-37v-276q-73 13-143.5 52.5T480-394q-66-66-136.5-105.5T200-552v276q75 9 146 37t134 75ZM367-647q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47Zm169.5-56.5Q560-727 560-760t-23.5-56.5Q513-840 480-840t-56.5 23.5Q400-793 400-760t23.5 56.5Q447-680 480-680t56.5-23.5ZM480-760Zm0 366Z"
+      />
+    </svg>
+  );
+}
+
 function IconArrowBack() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
@@ -84,6 +96,7 @@ const ITEMS: NavItem[] = [
   { key: "inputs", label: "Inputs", icon: <IconGrid /> },
   { key: "reports", label: "Reports", icon: <IconReports /> },
   { key: "schedule", label: "Schedule", icon: <IconChat /> },
+  { key: "resources", label: "Resources", icon: <IconResources /> },
   { key: "disclosures", label: "Disclosures", icon: <IconGear /> },
 ];
 
@@ -179,7 +192,7 @@ export default function Sidebar({
               <span className="tracking-wide">{mobileBackAction?.label}</span>
             </span>
           </button>
-          <div className="grid flex-1 grid-cols-4 gap-1">
+          <div className="grid flex-1 grid-cols-5 gap-1">
             {ITEMS.map((item) => {
               const isActive = item.key === active;
               const baseLabel = labels?.[item.key] ?? item.label;
@@ -188,6 +201,10 @@ export default function Sidebar({
                   ? language === "es"
                     ? "Tabla"
                     : "Schedule"
+                  : item.key === "resources"
+                    ? language === "es"
+                      ? "Recursos"
+                      : "Resources"
                   : item.key === "disclosures"
                     ? language === "es"
                       ? "Notas"
