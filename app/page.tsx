@@ -534,11 +534,16 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     : (copy?.labels?.inputs?.qualifiedWithdrawalsBudgetButtonLabel ?? "");
 
   const contributionConstraintHorizon = getHorizonConfig();
-  const enforcedContributionStopIndex = (() => {
+  const { enforcedContributionStopIndex, enforcedWithdrawalStartIndex } = (() => {
     const startIndex = contributionConstraintHorizon.startIndex;
     const horizonEndIndex = contributionConstraintHorizon.horizonEndIndex;
     const totalMonths = contributionConstraintHorizon.safeYears * 12;
-    if (totalMonths <= 0) return null;
+    if (totalMonths <= 0) {
+      return {
+        enforcedContributionStopIndex: null as number | null,
+        enforcedWithdrawalStartIndex: null as number | null,
+      };
+    }
 
     const parseAmount = (value: string) => {
       const cleaned = sanitizeAmountInput(value);
@@ -610,17 +615,35 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       planMaxBalance,
     });
 
+    let nextContributionStopIndex: number | null = null;
+    let nextWithdrawalStartIndex: number | null = null;
+
     for (const yearRow of unconstrainedContributionRows) {
       for (const monthRow of yearRow.months) {
         const hitSsiStop = monthRow.ssiCodes?.includes("SSI_CONTRIBUTIONS_STOPPED") ?? false;
         const hitPlanStop = monthRow.planCodes?.includes("PLAN_MAX_CONTRIBUTIONS_STOPPED") ?? false;
-        if (hitSsiStop || hitPlanStop) {
-          return monthRow.monthIndex;
+        const hitSsiForcedWithdrawal =
+          monthRow.ssiCodes?.includes("SSI_FORCED_WITHDRAWALS_APPLIED") ?? false;
+
+        if (nextContributionStopIndex === null && (hitSsiStop || hitPlanStop)) {
+          nextContributionStopIndex = monthRow.monthIndex;
         }
+        if (nextWithdrawalStartIndex === null && hitSsiForcedWithdrawal) {
+          nextWithdrawalStartIndex = monthRow.monthIndex;
+        }
+        if (nextContributionStopIndex !== null && nextWithdrawalStartIndex !== null) {
+          break;
+        }
+      }
+      if (nextContributionStopIndex !== null && nextWithdrawalStartIndex !== null) {
+        break;
       }
     }
 
-    return null;
+    return {
+      enforcedContributionStopIndex: nextContributionStopIndex,
+      enforcedWithdrawalStartIndex: nextWithdrawalStartIndex,
+    };
   })();
   const contributionEndMaxIndex = (() => {
     const startIndex = contributionConstraintHorizon.startIndex;
@@ -951,7 +974,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     const { startIndex, horizonEndIndex } = getHorizonConfig();
     const minIndex = startIndex;
     const contributionMaxIndex = Math.max(startIndex, contributionEndMaxIndex);
-    const withdrawalMaxIndex = Math.max(startIndex, horizonEndIndex);
+    const withdrawalEnforcedIndex =
+      enforcedWithdrawalStartIndex != null
+        ? clampNumber(enforcedWithdrawalStartIndex, startIndex, horizonEndIndex)
+        : null;
+    const withdrawalMaxIndex = withdrawalEnforcedIndex ?? Math.max(startIndex, horizonEndIndex);
+    const withdrawalDefaultIndex = withdrawalEnforcedIndex ?? minIndex;
 
     const setContributionFromIndex = (index: number) => {
       const { year, month } = monthIndexToParts(index);
@@ -977,7 +1005,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
     const withdrawalIndex = parseMonthYearToIndex(withdrawalStartYear, withdrawalStartMonth);
     if (!withdrawalStartTouched || withdrawalIndex === null) {
-      setWithdrawalFromIndex(minIndex);
+      setWithdrawalFromIndex(withdrawalDefaultIndex);
     } else {
       const clamped = clampNumber(withdrawalIndex, minIndex, withdrawalMaxIndex);
       if (clamped !== withdrawalIndex) {
@@ -995,6 +1023,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     withdrawalStartYear,
     getHorizonConfig,
     contributionEndMaxIndex,
+    enforcedWithdrawalStartIndex,
   ]);
 
   useEffect(() => {

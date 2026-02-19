@@ -440,8 +440,11 @@ export function buildTaxableInvestmentScheduleFromAbleSchedule({
       let federalTaxOnEarnings = 0;
       let stateTaxOnEarnings = 0;
       const safeAvailableBalance = Math.max(0, Number.isFinite(availableBalance) ? availableBalance : 0);
+      const tentativeActualWithdrawal = Math.min(withdrawal, safeAvailableBalance);
+      const depletesThisMonthBeforeTaxReserve =
+        safeAvailableBalance > 0 && tentativeActualWithdrawal >= safeAvailableBalance - 0.005;
       const shouldPostDepletionYearTaxNow =
-        !isDecember && yearEarnings > 0 && withdrawal >= safeAvailableBalance && safeAvailableBalance > 0;
+        !isDecember && yearEarnings > 0 && depletesThisMonthBeforeTaxReserve;
       let reservedForTax = 0;
       if (shouldPostDepletionYearTaxNow) {
         const taxableEarnings = Math.max(0, yearEarnings);
