@@ -162,17 +162,19 @@ export default function AmortizationScheduleTable({
               const isExpanded = expandedYears.has(yearRow.year);
               const yearSummary = (
                 <tr
-                  className="cursor-pointer bg-sky-50 text-sm text-slate-800 transition hover:bg-sky-100"
-                  onClick={() => toggleYear(yearRow.year)}
-                  role="button"
-                  aria-expanded={isExpanded}
+                  className="bg-sky-50 text-sm text-slate-800 transition hover:bg-sky-100"
                 >
                   <th scope="row" className="border-b border-sky-200 px-3 py-3 text-left font-bold whitespace-nowrap">
-                    <div className="flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleYear(yearRow.year)}
+                      aria-expanded={isExpanded}
+                      className="flex w-full items-center justify-between gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]"
+                    >
                       <span className="text-sm font-semibold text-slate-800">
                         {`${yearRow.yearLabel} ${isExpanded ? "–" : "+"}`}
                       </span>
-                    </div>
+                    </button>
                   </th>
                   <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                     {formatCurrencyDisplay(yearRow.contribution)}
@@ -293,17 +295,19 @@ export default function AmortizationScheduleTable({
               const isExpanded = expandedYears.has(yearRow.year);
               const yearSummary = (
                 <tr
-                  className="cursor-pointer bg-sky-50 text-sm text-slate-800 transition hover:bg-sky-100"
-                  onClick={() => toggleYear(yearRow.year)}
-                  role="button"
-                  aria-expanded={isExpanded}
+                  className="bg-sky-50 text-sm text-slate-800 transition hover:bg-sky-100"
                 >
                   <th scope="row" className="border-b border-sky-200 px-3 py-3 text-left font-bold whitespace-nowrap">
-                    <div className="flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleYear(yearRow.year)}
+                      aria-expanded={isExpanded}
+                      className="flex w-full items-center justify-between gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]"
+                    >
                       <span className="text-sm font-semibold text-slate-800">
                         {`${yearRow.year} ${isExpanded ? "–" : "+"}`}
                       </span>
-                    </div>
+                    </button>
                   </th>
                   <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                     {formatCurrencyDisplay(yearRow.contribution)}
