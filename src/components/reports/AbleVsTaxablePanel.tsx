@@ -414,11 +414,16 @@ export default function AbleVsTaxablePanel({
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full border-collapse text-sm">
+              <caption className="sr-only">
+                {language === "es"
+                  ? "Comparación de métricas financieras entre cuentas ABLE y gravable para el periodo seleccionado."
+                  : "Comparison of financial metrics between ABLE and taxable accounts for the selected period."}
+              </caption>
               <thead>
                 <tr className="border-b border-zinc-200 text-left text-xs uppercase tracking-wide text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-                  <th className="px-2 py-2 font-semibold">{labels.metricLabel}</th>
-                  <th className="px-2 py-2 text-right font-semibold">{labels.ableLabel}</th>
-                  <th className="px-2 py-2 text-right font-semibold">{labels.taxableLabel}</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">{labels.metricLabel}</th>
+                  <th scope="col" className="px-2 py-2 text-right font-semibold">{labels.ableLabel}</th>
+                  <th scope="col" className="px-2 py-2 text-right font-semibold">{labels.taxableLabel}</th>
                 </tr>
               </thead>
               <tbody>
@@ -432,7 +437,9 @@ export default function AbleVsTaxablePanel({
                       row.key === "endingAccountBalance" ? "border-b-4 border-double border-zinc-400 dark:border-zinc-500" : "",
                     ].join(" ")}
                   >
-                    <td className="px-2 py-2 text-zinc-700 dark:text-zinc-200">{row.label}</td>
+                    <th scope="row" className="px-2 py-2 text-left font-medium text-zinc-700 dark:text-zinc-200">
+                      {row.label}
+                    </th>
                     <td className="px-2 py-2 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
                       {row.able}
                     </td>

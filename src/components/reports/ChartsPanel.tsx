@@ -27,6 +27,21 @@ type GrowthPoint = {
   stateBenefit: number;
 };
 
+type ChartDataRow = {
+  monthLabel: string;
+  netContributions: number;
+  investmentReturns: number;
+  taxDrag: number;
+  endingBalance: number;
+  additionalEconomicBenefit: number;
+};
+
+type ChartLegendItem = {
+  key: string;
+  label: string;
+  color: string;
+};
+
 const formatCurrencyAxis = (value: number) => `$${Math.round(value / 1000)}k`;
 const formatCurrencyValue = (value: number) =>
   value.toLocaleString("en-US", {
@@ -48,6 +63,7 @@ export default function ChartsPanel({
 }: Props) {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showChartDataTable, setShowChartDataTable] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
@@ -107,7 +123,6 @@ export default function ChartsPanel({
     const chart = echarts.init(chartRef.current);
     const axisColor = isDarkMode ? "#ffffff" : "#52525b";
     const splitLineColor = isDarkMode ? "rgba(161,161,170,0.22)" : "rgba(63,63,70,0.16)";
-    const titleColor = isDarkMode ? "#ffffff" : "#18181b";
     const endingBalanceLineColor = isDarkMode ? "#ffffff" : "#111827";
 
     const labels = displayRows.map((monthRow) =>
@@ -284,18 +299,9 @@ export default function ChartsPanel({
 
     chart.setOption({
       animationDuration: 500,
-      legend: {
-        bottom: 4,
-        icon: "circle",
-        itemWidth: 8,
-        itemHeight: 8,
-        textStyle: {
-          fontSize: 11,
-          color: titleColor,
-        },
-      },
+      legend: { show: false },
       tooltip: { show: false },
-      grid: { left: 24, right: 12, top: 16, bottom: 64, containLabel: true },
+      grid: { left: 24, right: 12, top: 16, bottom: 24, containLabel: true },
       xAxis: {
         type: "category",
         axisLine: { show: false },
@@ -493,6 +499,111 @@ export default function ChartsPanel({
     return rows;
   }, [accountType, displayRows, isDarkMode, language]);
 
+  const chartDataRows = useMemo<ChartDataRow[]>(() => {
+    if (!displayRows.length) return [];
+
+    const firstRow = displayRows[0];
+    const initialNetContribution = firstRow
+      ? firstRow.endingBalance -
+        firstRow.investmentReturn +
+        firstRow.federalTaxOnEarnings +
+        firstRow.stateTaxOnEarnings -
+        firstRow.contribution +
+        firstRow.withdrawal
+      : 0;
+
+    const yearToMonthIndexes = new Map<number, number[]>();
+    const yearToBenefitTotal = new Map<number, number>();
+    const yearToFederalTaxTotal = new Map<number, number>();
+    const yearToStateTaxTotal = new Map<number, number>();
+    for (const row of displayRows) {
+      const year = Math.floor(row.monthIndex / 12);
+      const monthIndexes = yearToMonthIndexes.get(year) ?? [];
+      monthIndexes.push(row.monthIndex);
+      yearToMonthIndexes.set(year, monthIndexes);
+      yearToBenefitTotal.set(year, (yearToBenefitTotal.get(year) ?? 0) + row.saversCredit + row.stateBenefit);
+      yearToFederalTaxTotal.set(year, (yearToFederalTaxTotal.get(year) ?? 0) + row.federalTaxOnEarnings);
+      yearToStateTaxTotal.set(year, (yearToStateTaxTotal.get(year) ?? 0) + row.stateTaxOnEarnings);
+    }
+
+    const smoothedBenefitPerMonth = new Map<number, number>();
+    const smoothedFederalTaxPerMonth = new Map<number, number>();
+    const smoothedStateTaxPerMonth = new Map<number, number>();
+    for (const [year, monthIndexes] of yearToMonthIndexes.entries()) {
+      const count = monthIndexes.length || 1;
+      const benefitPerMonth = (yearToBenefitTotal.get(year) ?? 0) / count;
+      const federalTaxPerMonth = (yearToFederalTaxTotal.get(year) ?? 0) / count;
+      const stateTaxPerMonth = (yearToStateTaxTotal.get(year) ?? 0) / count;
+      for (const monthIndex of monthIndexes) {
+        smoothedBenefitPerMonth.set(monthIndex, benefitPerMonth);
+        smoothedFederalTaxPerMonth.set(monthIndex, federalTaxPerMonth);
+        smoothedStateTaxPerMonth.set(monthIndex, stateTaxPerMonth);
+      }
+    }
+
+    let runningNetContribution = initialNetContribution;
+    let runningGrossReturn = 0;
+    let runningTaxDrag = 0;
+    let runningAdditionalEconomicBenefit = 0;
+
+    return displayRows.map((row) => {
+      runningNetContribution += row.contribution - row.withdrawal;
+      runningGrossReturn += row.investmentReturn;
+      runningTaxDrag +=
+        (smoothedFederalTaxPerMonth.get(row.monthIndex) ?? 0) +
+        (smoothedStateTaxPerMonth.get(row.monthIndex) ?? 0);
+      runningAdditionalEconomicBenefit += smoothedBenefitPerMonth.get(row.monthIndex) ?? 0;
+
+      const endingBalance =
+        accountType === "taxable"
+          ? runningNetContribution + runningGrossReturn - runningTaxDrag
+          : row.endingBalance;
+
+      return {
+        monthLabel: formatMonthYearFromIndex(row.monthIndex, language, { monthStyle: "short" }),
+        netContributions: runningNetContribution,
+        investmentReturns: runningGrossReturn,
+        taxDrag: -runningTaxDrag,
+        endingBalance,
+        additionalEconomicBenefit: runningAdditionalEconomicBenefit,
+      };
+    });
+  }, [accountType, displayRows, language]);
+
+  const hasAdditionalEconomicBenefitInChartData = useMemo(
+    () => chartDataRows.some((row) => Math.abs(row.additionalEconomicBenefit) > 0.005),
+    [chartDataRows],
+  );
+  const chartLegendItems = useMemo<ChartLegendItem[]>(() => {
+    const netContributionsLabel = language === "es" ? "Contribuciones netas" : "Net Contributions";
+    const investmentReturnsLabel = language === "es" ? "Rendimientos de inversión" : "Investment Returns";
+    const taxableTaxDragLabel =
+      language === "es" ? "Impuestos sobre rendimientos (impacto)" : "Taxes on Earnings (Drag)";
+    const taxableEndingLabel = language === "es" ? "Saldo final gravable" : "Taxable Ending Balance";
+    const ableEndingLabel = language === "es" ? "Saldo final ABLE" : "ABLE Ending Balance";
+    const additionalBenefitLabel =
+      language === "es" ? "Beneficio económico adicional*" : "Additional Economic Benefit*";
+
+    return [
+      { key: "net", label: netContributionsLabel, color: "#1f6fd8" },
+      { key: "returns", label: investmentReturnsLabel, color: "#14b8a6" },
+      ...(accountType === "taxable"
+        ? [
+            { key: "tax-drag", label: taxableTaxDragLabel, color: "#ef4444" },
+            { key: "ending-taxable", label: taxableEndingLabel, color: isDarkMode ? "#ffffff" : "#111827" },
+          ]
+        : []),
+      ...(accountType === "able"
+        ? [
+            { key: "ending-able", label: ableEndingLabel, color: isDarkMode ? "#ffffff" : "#111827" },
+            ...(hasAdditionalEconomicBenefitInChartData
+              ? [{ key: "benefit", label: additionalBenefitLabel, color: "#f59e0b" }]
+              : []),
+          ]
+        : []),
+    ];
+  }, [accountType, hasAdditionalEconomicBenefitInChartData, isDarkMode, language]);
+
   const accountStartingBalance = useMemo(() => {
     const firstRow = displayRows[0];
     if (!firstRow) return 0;
@@ -512,6 +623,7 @@ export default function ChartsPanel({
     chartSummaryRows.find((row) => row.key === "benefit")?.value ?? 0;
   const totalEconomicValue = endingBalanceValue + additionalEconomicBenefitValue;
   const srSummaryId = `chart-sr-summary-${accountType}`;
+  const chartDataTableId = `chart-data-table-${accountType}`;
   const srRegionLabel =
     language === "es"
       ? accountType === "able"
@@ -584,12 +696,45 @@ export default function ChartsPanel({
             </div>
           </div>
           {displayRows.length ? (
-            <div ref={chartRef} aria-hidden="true" className="h-[440px] w-full min-w-0" />
+            <div className="h-[440px] w-full min-w-0">
+              <div ref={chartRef} aria-hidden="true" className="h-[440px] w-full min-w-0" />
+            </div>
           ) : (
             <div className="flex h-[440px] items-center justify-center px-4 text-sm text-zinc-500 dark:text-zinc-400">
               {language === "es"
                 ? "No hay datos suficientes para mostrar el gráfico."
                 : "Not enough data to display the chart."}
+            </div>
+          )}
+          {displayRows.length > 0 && (
+            <div className="px-3 pb-3">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-700 dark:text-zinc-300">
+                {chartLegendItems.map((item) => (
+                  <span key={item.key} className="inline-flex items-center gap-1.5">
+                    <span
+                      aria-hidden="true"
+                      className="h-2 w-2 rounded-full border border-zinc-300 dark:border-zinc-600"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span>{item.label}</span>
+                  </span>
+                ))}
+                <button
+                  type="button"
+                  aria-expanded={showChartDataTable}
+                  aria-controls={chartDataTableId}
+                  onClick={() => setShowChartDataTable((current) => !current)}
+                  className="text-xs font-medium text-[var(--brand-primary)] underline underline-offset-2 hover:text-[var(--brand-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)]"
+                >
+                  {showChartDataTable
+                    ? language === "es"
+                      ? "Ocultar datos del gráfico"
+                      : "Hide chart data"
+                    : language === "es"
+                      ? "Mostrar datos del gráfico"
+                      : "Show chart data"}
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -633,6 +778,72 @@ export default function ChartsPanel({
           )}
         </div>
       </div>
+      {showChartDataTable && chartDataRows.length > 0 && (
+        <div
+          id={chartDataTableId}
+          className="mt-3 overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950"
+        >
+          <table className="min-w-full text-xs md:text-sm">
+            <thead className="bg-zinc-50 text-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">
+              <tr>
+                <th scope="col" className="px-3 py-2 text-left font-semibold">
+                  {language === "es" ? "Mes" : "Month"}
+                </th>
+                <th scope="col" className="px-3 py-2 text-right font-semibold">
+                  {language === "es" ? "Contribuciones netas" : "Net Contributions"}
+                </th>
+                <th scope="col" className="px-3 py-2 text-right font-semibold">
+                  {language === "es" ? "Rendimientos de inversión" : "Investment Returns"}
+                </th>
+                {accountType === "taxable" && (
+                  <th scope="col" className="px-3 py-2 text-right font-semibold">
+                    {language === "es"
+                      ? "Impuestos sobre rendimientos (impacto)"
+                      : "Taxes on Earnings (Drag)"}
+                  </th>
+                )}
+                {accountType === "able" && hasAdditionalEconomicBenefitInChartData && (
+                  <th scope="col" className="px-3 py-2 text-right font-semibold">
+                    {language === "es" ? "Beneficio económico adicional*" : "Additional Economic Benefit*"}
+                  </th>
+                )}
+                <th scope="col" className="px-3 py-2 text-right font-semibold">
+                  {language === "es"
+                    ? accountType === "able"
+                      ? "Saldo final ABLE"
+                      : "Saldo final gravable"
+                    : accountType === "able"
+                      ? "ABLE Ending Balance"
+                      : "Taxable Ending Balance"}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {chartDataRows.map((row) => (
+                <tr
+                  key={`${accountType}-${row.monthLabel}`}
+                  className="border-t border-zinc-100 text-zinc-800 dark:border-zinc-800 dark:text-zinc-100"
+                >
+                  <th scope="row" className="px-3 py-2 text-left font-medium">
+                    {row.monthLabel}
+                  </th>
+                  <td className="px-3 py-2 text-right tabular-nums">{formatCurrencyValue(row.netContributions)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{formatCurrencyValue(row.investmentReturns)}</td>
+                  {accountType === "taxable" && (
+                    <td className="px-3 py-2 text-right tabular-nums">{formatSignedCurrencyValue(row.taxDrag)}</td>
+                  )}
+                  {accountType === "able" && hasAdditionalEconomicBenefitInChartData && (
+                    <td className="px-3 py-2 text-right tabular-nums">
+                      {formatCurrencyValue(row.additionalEconomicBenefit)}
+                    </td>
+                  )}
+                  <td className="px-3 py-2 text-right tabular-nums">{formatCurrencyValue(row.endingBalance)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       {accountType === "able" && additionalEconomicBenefitValue > 0.005 && (
         <>
           <p className="mt-2 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">

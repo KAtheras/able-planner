@@ -87,9 +87,9 @@ export default function SummaryView({
       {reportView === "account_growth" ? (
         <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
               {reportTitle}
-            </h1>
+            </h2>
             <div className="ml-auto">
               <ReportWindowToggle label={reportWindowLabel} options={reportWindowOptions} />
             </div>

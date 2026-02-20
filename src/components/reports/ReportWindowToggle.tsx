@@ -13,9 +13,8 @@ type Props = {
 };
 
 export default function ReportWindowToggle({ label, options }: Props) {
-  void label;
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center gap-2" role="group" aria-label={label}>
       <div className="inline-flex flex-nowrap rounded-full border border-zinc-200 bg-white p-0.5 dark:border-zinc-700 dark:bg-zinc-900">
         {options.map((option) => (
           <button
