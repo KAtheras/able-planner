@@ -27,6 +27,60 @@ type WelcomeSectionProps = {
   welcomeTermsCardRef: RefObject<HTMLElement | null>;
 };
 
+type TermsBlock =
+  | { type: "paragraph"; text: string }
+  | { type: "section"; header: string; body: string };
+
+function buildTermsBlocks(termsOfUseParagraphs: string[]): TermsBlock[] {
+  const text = termsOfUseParagraphs.join("\n\n");
+  const lines = text.split("\n");
+  const blocks: TermsBlock[] = [];
+  const numberedHeaderPattern = /^\d+\.\s+/;
+
+  let paragraphLines: string[] = [];
+  let activeSection: { header: string; bodyLines: string[] } | null = null;
+
+  const flushParagraph = () => {
+    if (!paragraphLines.length) return;
+    const paragraph = paragraphLines.join(" ").replace(/\s+/g, " ").trim();
+    if (paragraph) blocks.push({ type: "paragraph", text: paragraph });
+    paragraphLines = [];
+  };
+
+  const flushSection = () => {
+    if (!activeSection) return;
+    const body = activeSection.bodyLines.join(" ").replace(/\s+/g, " ").trim();
+    blocks.push({ type: "section", header: activeSection.header, body });
+    activeSection = null;
+  };
+
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim();
+
+    if (numberedHeaderPattern.test(trimmed)) {
+      flushParagraph();
+      flushSection();
+      activeSection = { header: trimmed, bodyLines: [] };
+      continue;
+    }
+
+    if (activeSection) {
+      if (trimmed) activeSection.bodyLines.push(trimmed);
+      continue;
+    }
+
+    if (trimmed) {
+      paragraphLines.push(trimmed);
+    } else {
+      flushParagraph();
+    }
+  }
+
+  flushParagraph();
+  flushSection();
+  return blocks;
+}
+
 export default function WelcomeSection({
   appTitle,
   appTagline,
@@ -42,6 +96,8 @@ export default function WelcomeSection({
   termsOfUseParagraphs,
   welcomeTermsCardRef,
 }: WelcomeSectionProps) {
+  const termsBlocks = buildTermsBlocks(termsOfUseParagraphs);
+
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
       <TopNav
@@ -142,23 +198,28 @@ export default function WelcomeSection({
                   {landingCopy.termsOfUseTitle || landingCopy.termsOfUseLinkLabel || "Terms of Use"}
                 </h2>
                 <div className="mt-3 space-y-2 text-sm leading-relaxed text-zinc-700 dark:text-zinc-200">
-                  {termsOfUseParagraphs.map((paragraph, index) => {
-                    const [leadIn, ...restParts] = paragraph.split("\n");
-                    const rest = restParts.join("\n").trim();
-                    if (!restParts.length) {
-                      return (
-                        <p key={`terms-of-use-${index}`} className="whitespace-pre-line">
-                          {paragraph}
-                        </p>
-                      );
-                    }
-                    return (
-                      <p key={`terms-of-use-${index}`} className="whitespace-pre-line">
-                        <strong className="font-semibold text-[var(--brand-primary)]">{leadIn.trim()}</strong>
-                        {rest ? ` ${rest}` : null}
-                      </p>
-                    );
-                  })}
+                  {termsBlocks.map((block, index) =>
+                    block.type === "section" ? (
+                      <div key={`terms-section-${index}`} className="space-y-1">
+                        {(() => {
+                          const match = block.header.match(/^(\d+\.)\s+(.*)$/);
+                          const sectionNumber = match?.[1] ?? "";
+                          const sectionTitle = match?.[2] ?? block.header;
+                          return (
+                            <div className="grid grid-cols-[2.5ch_1fr] gap-x-2">
+                              <strong className="text-right font-semibold tabular-nums text-[var(--brand-primary)]">
+                                {sectionNumber}
+                              </strong>
+                              <strong className="font-semibold text-[var(--brand-primary)]">{sectionTitle}</strong>
+                              {block.body ? <p className="col-start-2">{block.body}</p> : null}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <p key={`terms-paragraph-${index}`}>{block.text}</p>
+                    ),
+                  )}
                 </div>
               </section>
             )}

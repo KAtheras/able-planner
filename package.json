@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "export:copy-csv": "node scripts/export-copy-csv.mjs",
+    "export:copy-csv:clean": "node scripts/export-copy-csv.mjs --clean"
   },
   "dependencies": {
     "echarts": "^6.0.0",

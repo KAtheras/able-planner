@@ -43,15 +43,21 @@ type ChartLegendItem = {
 };
 
 const formatCurrencyAxis = (value: number) => `$${Math.round(value / 1000)}k`;
+const normalizeCurrencyDisplayValue = (value: number) =>
+  Object.is(value, -0) || Math.abs(value) < 0.5 ? 0 : value;
 const formatCurrencyValue = (value: number) =>
-  value.toLocaleString("en-US", {
+  normalizeCurrencyDisplayValue(value).toLocaleString("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
-const formatSignedCurrencyValue = (value: number) =>
-  value < 0 ? `-${formatCurrencyValue(Math.abs(value))}` : formatCurrencyValue(value);
+const formatSignedCurrencyValue = (value: number) => {
+  const normalized = normalizeCurrencyDisplayValue(value);
+  return normalized < 0
+    ? `-${formatCurrencyValue(Math.abs(normalized))}`
+    : formatCurrencyValue(normalized);
+};
 
 export default function ChartsPanel({
   language,
