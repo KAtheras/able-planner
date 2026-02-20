@@ -110,15 +110,20 @@ export default function AmortizationScheduleTable({
       <div className="max-h-[520px] w-full overflow-y-auto">
         {view === "able" ? (
           <table className="min-w-full border-collapse text-left text-[13px]">
+          <caption className="sr-only">
+            {language === "es"
+              ? "Tabla de amortización de cuenta ABLE por año y mes."
+              : "ABLE account amortization schedule by year and month."}
+          </caption>
           <thead className="bg-slate-100 text-[10px] uppercase tracking-widest text-sky-700">
             <tr>
-              <th className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap text-center sticky top-0 bg-slate-100 z-10">{labels?.monthYear ?? "MONTH/YEAR"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.contributions ?? "CONTRIBUTIONS"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.withdrawals ?? "WITHDRAWALS"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.investmentReturns ?? "INVESTMENT RETURNS"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.accountBalance ?? "ACCOUNT BALANCE"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.federalSaversCredit ?? "FEDERAL SAVERS CREDIT"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.stateTaxBenefit ?? "STATE TAX BENEFIT"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap text-center sticky top-0 bg-slate-100 z-10">{labels?.monthYear ?? "MONTH/YEAR"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.contributions ?? "CONTRIBUTIONS"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.withdrawals ?? "WITHDRAWALS"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.investmentReturns ?? "INVESTMENT RETURNS"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.accountBalance ?? "ACCOUNT BALANCE"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.federalSaversCredit ?? "FEDERAL SAVERS CREDIT"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.stateTaxBenefit ?? "STATE TAX BENEFIT"}</th>
             </tr>
           </thead>
           <tbody className="text-[13px] text-slate-700">
@@ -130,9 +135,9 @@ export default function AmortizationScheduleTable({
                     key="account-totals"
                     className="bg-white text-[13px] text-slate-600"
                   >
-                    <td className="border-b border-sky-200 px-3 py-3 font-bold whitespace-nowrap">
+                    <th scope="row" className="border-b border-sky-200 px-3 py-3 text-left font-bold whitespace-nowrap">
                       {labels?.accountTotals ?? ""}
-                    </td>
+                    </th>
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                       {formatCurrencyDisplay(yearRow.contribution)}
                     </td>
@@ -162,13 +167,13 @@ export default function AmortizationScheduleTable({
                   role="button"
                   aria-expanded={isExpanded}
                 >
-                  <td className="border-b border-sky-200 px-3 py-3 font-bold whitespace-nowrap">
+                  <th scope="row" className="border-b border-sky-200 px-3 py-3 text-left font-bold whitespace-nowrap">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-slate-800">
                         {`${yearRow.yearLabel} ${isExpanded ? "–" : "+"}`}
                       </span>
                     </div>
-                  </td>
+                  </th>
                   <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                     {formatCurrencyDisplay(yearRow.contribution)}
                   </td>
@@ -199,12 +204,12 @@ export default function AmortizationScheduleTable({
                           key={`${yearRow.year}-${monthRow.monthIndex}`}
                           className="bg-white text-[13px] text-slate-600"
                         >
-                          <td className="border-b border-sky-100 px-3 py-2 pl-8 whitespace-nowrap">
+                          <th scope="row" className="border-b border-sky-100 px-3 py-2 pl-8 text-left font-normal whitespace-nowrap">
                             {formatMonthYearFromIndex(monthRow.monthIndex, language, {
                               monthStyle: "long",
                               withPrefixDash: true,
                             })}
-                          </td>
+                          </th>
                           <td className="border-b border-sky-100 px-3 py-2 text-right">
                             {formatCurrencyDisplay(monthRow.contribution)}
                           </td>
@@ -237,15 +242,20 @@ export default function AmortizationScheduleTable({
         </table>
       ) : (
         <table className="min-w-full border-collapse text-left text-[13px]">
+          <caption className="sr-only">
+            {language === "es"
+              ? "Tabla de amortización de cuenta gravable por año y mes."
+              : "Taxable account amortization schedule by year and month."}
+          </caption>
           <thead className="bg-slate-100 text-[10px] uppercase tracking-widest text-sky-700">
             <tr>
-              <th className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap text-center sticky top-0 bg-slate-100 z-10">{labels?.monthYear ?? "MONTH/YEAR"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.contributions ?? "CONTRIBUTIONS"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.withdrawals ?? "WITHDRAWALS"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.investmentReturns ?? "INVESTMENT RETURNS"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.federalTaxes ?? "FEDERAL TAXES"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.stateTaxes ?? "STATE TAXES"}</th>
-              <th className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.accountBalance ?? "ACCOUNT BALANCE"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 w-[220px] whitespace-nowrap text-center sticky top-0 bg-slate-100 z-10">{labels?.monthYear ?? "MONTH/YEAR"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.contributions ?? "CONTRIBUTIONS"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.withdrawals ?? "WITHDRAWALS"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.investmentReturns ?? "INVESTMENT RETURNS"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.federalTaxes ?? "FEDERAL TAXES"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.stateTaxes ?? "STATE TAXES"}</th>
+              <th scope="col" className="border-b border-sky-200 px-3 py-3 text-center sticky top-0 bg-slate-100 z-10">{labels?.accountBalance ?? "ACCOUNT BALANCE"}</th>
             </tr>
           </thead>
           <tbody className="text-[13px] text-slate-700">
@@ -256,9 +266,9 @@ export default function AmortizationScheduleTable({
                     key="taxable-account-totals"
                     className="bg-white text-[13px] text-slate-600"
                   >
-                    <td className="border-b border-sky-200 px-3 py-3 font-bold whitespace-nowrap">
+                    <th scope="row" className="border-b border-sky-200 px-3 py-3 text-left font-bold whitespace-nowrap">
                       {labels?.accountTotals ?? ""}
-                    </td>
+                    </th>
                     <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                       {formatCurrencyDisplay(yearRow.contribution)}
                     </td>
@@ -288,13 +298,13 @@ export default function AmortizationScheduleTable({
                   role="button"
                   aria-expanded={isExpanded}
                 >
-                  <td className="border-b border-sky-200 px-3 py-3 font-bold whitespace-nowrap">
+                  <th scope="row" className="border-b border-sky-200 px-3 py-3 text-left font-bold whitespace-nowrap">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-slate-800">
                         {`${yearRow.year} ${isExpanded ? "–" : "+"}`}
                       </span>
                     </div>
-                  </td>
+                  </th>
                   <td className="border-b border-sky-200 px-3 py-3 text-right font-semibold">
                     {formatCurrencyDisplay(yearRow.contribution)}
                   </td>
@@ -325,12 +335,12 @@ export default function AmortizationScheduleTable({
                           key={`taxable-${yearRow.year}-${monthRow.monthIndex}`}
                           className="bg-white text-[13px] text-slate-600"
                         >
-                          <td className="border-b border-sky-100 px-3 py-2 pl-8 whitespace-nowrap">
+                          <th scope="row" className="border-b border-sky-100 px-3 py-2 pl-8 text-left font-normal whitespace-nowrap">
                             {formatMonthYearFromIndex(monthRow.monthIndex, language, {
                               monthStyle: "long",
                               withPrefixDash: true,
                             })}
-                          </td>
+                          </th>
                           <td className="border-b border-sky-100 px-3 py-2 text-right">
                             {formatCurrencyDisplay(monthRow.contribution)}
                           </td>

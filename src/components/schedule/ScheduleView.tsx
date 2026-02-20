@@ -58,9 +58,9 @@ export default function ScheduleView({
     return (
       <div className="space-y-2 md:space-y-3">
         <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-400">
-          <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             {labels?.amortizationTitle ?? ""}
-          </h1>
+          </h2>
           <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
             {labels?.enterTimeHorizonPrompt ?? ""}
           </p>

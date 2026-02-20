@@ -47,9 +47,9 @@ export default function ScheduleHeader({
 }: Props) {
   return (
     <div className="flex flex-col items-center gap-3 md:flex-row md:items-center md:gap-4">
-      <h1 className="order-1 w-full text-center text-lg font-semibold text-zinc-900 dark:text-zinc-50 md:order-2 md:flex-1">
+      <h2 className="order-1 w-full text-center text-lg font-semibold text-zinc-900 dark:text-zinc-50 md:order-2 md:flex-1">
         {title}
-      </h1>
+      </h2>
       <div className="order-2 flex w-full items-center justify-between md:order-1 md:w-auto md:justify-start">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
