@@ -59,12 +59,24 @@
           ],
           "links": [
             {
-              "label": "SSA: SSI Spotlight sobre cuentas ABLE",
+              "label": "SSA SSI Spotlight on ABLE Accounts",
               "url": "https://www.ssa.gov/ssi/spotlights/spot-able.html"
             },
             {
-              "label": "SSA Red Book (referencia de políticas)",
+              "label": "SSA POMS SI 01130.740 (ABLE Accounts)",
+              "url": "https://secure.ssa.gov/apps10/poms.nsf/lnx/0501130740"
+            },
+            {
+              "label": "SSA Red Book (Work and Disability Policy Reference)",
               "url": "https://www.ssa.gov/redbook/"
+            },
+            {
+              "label": "IRS Newsroom: ABLE Accounts Overview",
+              "url": "https://www.irs.gov/newsroom/able-accounts-a-valuable-financial-solution-for-people-with-disabilities"
+            },
+            {
+              "label": "IRS FSLG: ABLE Accounts Tax Benefit",
+              "url": "https://www.irs.gov/government-entities/federal-state-local-governments/able-accounts-tax-benefit-for-people-with-disabilities"
             }
           ]
         },
@@ -76,11 +88,11 @@
           ],
           "links": [
             {
-              "label": "IRS: guía sobre Saver’s Credit",
+              "label": "IRS Saver’s Credit Guidance",
               "url": "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-savings-contributions-savers-credit"
             },
             {
-              "label": "IRS Formulario 8880",
+              "label": "IRS Form 8880 (Credit for Qualified Retirement Savings Contributions)",
               "url": "https://www.irs.gov/forms-pubs/about-form-8880"
             }
           ]
@@ -93,7 +105,7 @@
           ],
           "links": [
             {
-              "label": "IRS Publicación 907",
+              "label": "IRS Publication 907 (Tax Highlights for Persons With Disabilities)",
               "url": "https://www.irs.gov/publications/p907"
             },
             {
@@ -110,11 +122,11 @@
           ],
           "links": [
             {
-              "label": "IRS: resumen de cuentas ABLE",
+              "label": "IRS ABLE Accounts Overview",
               "url": "https://www.irs.gov/publications/p907"
             },
             {
-              "label": "Buscador de programas estatales ABLE NRC",
+              "label": "ABLE NRC State Program Finder",
               "url": "https://www.ablenrc.org/select-a-state-program/"
             }
           ]
@@ -126,7 +138,7 @@
           ],
           "links": [
             {
-              "label": "Guía para inversionistas de programas ABLE de MSRB (PDF)",
+              "label": "MSRB Investors’ Guide for ABLE Programs (PDF)",
               "url": "https://www.msrb.org/sites/default/files/Investors-Guide-for-ABLE-Programs.pdf"
             }
           ]
@@ -145,7 +157,9 @@
   },
   "buttons": {
     "back": "Atrás",
+    "cancel": "Cancelar",
     "changeResidencyProceed": "Cambiar mi residencia y continuar al calculador",
+    "continue": "Continuar",
     "done": "Listo",
     "eligibleRetest": "Elegible — Reintentar",
     "eligibleToEvaluate": "Elegible para evaluar",
@@ -285,6 +299,7 @@
     },
     "disclosures": "Divulgaciones",
     "ui": {
+      "externalLinkWarningTitle": "Aviso de enlace externo",
       "placeholderComingSoon": "El contenido de marcador de posición estará disponible pronto.",
       "shellSuffix": " (Borrador)"
     },
@@ -299,6 +314,7 @@
     "ableDepletionNotice": "Según sus supuestos, el saldo de la cuenta ABLE llega a cero en {{reachMonthYear}}. En consecuencia, los retiros se detienen en este planificador después de {{stopMonthYear}}.",
     "ableDepletionNoticeLimitedWithdrawals": "Según sus supuestos, el saldo de la cuenta ABLE llega a cero en {{reachMonthYear}}. Después de {{reachMonthYear}}, los retiros se limitan cada mes al monto disponible en la cuenta.",
     "accountEndingValueLabel": "VALOR FINAL DE LA CUENTA",
+    "externalLinkWarning": "NOTA: Está a punto de salir de ABLE Planner y ver el contenido de un sitio web externo. No podemos hacernos responsables del contenido de sitios web externos. No respaldamos el sitio externo, sus patrocinadores ni ninguna de sus políticas o servicios ofrecidos en el sitio o por cualquier anunciante en el sitio.",
     "balanceCapWarning": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}. También se inician retiros recurrentes en {{withdrawStart}} para mantener el saldo en {{cap}} retirando las ganancias mensuales proyectadas.",
     "balanceCapWarningExistingWithdrawals": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}. También se revisan los retiros recurrentes en {{withdrawStart}} para mantener el saldo en {{cap}} retirando las ganancias mensuales proyectadas.",
     "balanceCapWarningNoForcedWithdrawals": "Según sus contribuciones, retiros y supuestos de rendimiento, se proyecta que la cuenta supere {{cap}} en {{breach}}.\n\nEsto puede resultar en la suspensión de los beneficios de SSI y tener un impacto financiero adverso.\n\nEn consecuencia, en esta herramienta de planificación, las contribuciones se detienen en {{stop}}.",

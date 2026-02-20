@@ -63,8 +63,20 @@
               "url": "https://www.ssa.gov/ssi/spotlights/spot-able.html"
             },
             {
+              "label": "SSA POMS SI 01130.740 (ABLE Accounts)",
+              "url": "https://secure.ssa.gov/apps10/poms.nsf/lnx/0501130740"
+            },
+            {
               "label": "SSA Red Book (Work and Disability Policy Reference)",
               "url": "https://www.ssa.gov/redbook/"
+            },
+            {
+              "label": "IRS Newsroom: ABLE Accounts Overview",
+              "url": "https://www.irs.gov/newsroom/able-accounts-a-valuable-financial-solution-for-people-with-disabilities"
+            },
+            {
+              "label": "IRS FSLG: ABLE Accounts Tax Benefit",
+              "url": "https://www.irs.gov/government-entities/federal-state-local-governments/able-accounts-tax-benefit-for-people-with-disabilities"
             }
           ]
         },
@@ -145,7 +157,9 @@
   },
   "buttons": {
     "back": "Back",
+    "cancel": "Cancel",
     "changeResidencyProceed": "Change my residency and proceed to the calculator",
+    "continue": "Continue",
     "done": "Done",
     "eligibleRetest": "Eligible — Retest",
     "eligibleToEvaluate": "Eligible to evaluate",
@@ -284,6 +298,7 @@
       "taxLiability": "Do you have federal income tax liability?"
     },
     "ui": {
+      "externalLinkWarningTitle": "External link warning",
       "placeholderComingSoon": "Placeholder content is coming soon.",
       "shellSuffix": " (Shell)"
     },
@@ -298,6 +313,7 @@
     "ableDepletionNotice": "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. Accordingly, withdrawals are stopped in this planner after {{stopMonthYear}}.",
     "ableDepletionNoticeLimitedWithdrawals": "Based on your assumptions, the ABLE account balance reaches zero in {{reachMonthYear}}. After {{reachMonthYear}}, withdrawals are limited each month to the amount available in the account.",
     "accountEndingValueLabel": "ACCOUNT ENDING VALUE",
+    "externalLinkWarning": "NOTE: You are about to leave the ABLE Planner and view the content of an external website. We cannot be held responsible for the content of external websites. We do not endorse the external site, its sponsors, or any of its policies or services offered on the site or by any advertiser on the site.",
     "balanceCapWarning": "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also initiated in {{withdrawStart}} to keep the balance at {{cap}} by withdrawing the projected monthly earnings.",
     "balanceCapWarningExistingWithdrawals": "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}. Recurring withdrawals are also revised in {{withdrawStart}} to keep the balance at {{cap}} by withdrawing the projected monthly earnings.",
     "balanceCapWarningNoForcedWithdrawals": "Based on your planned contributions, withdrawals and earnings assumptions the account is projected to exceed {{cap}} in {{breach}}.\n\nThis may result in suspension of SSI benefits and have an adverse financial impact.\n\nAccordingly, in this planning tool, contributions are stopped in {{stop}}.",

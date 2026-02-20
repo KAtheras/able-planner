@@ -238,6 +238,7 @@ export default function Home() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [welcomeTermsAgreed, setWelcomeTermsAgreed] = useState(false);
   const [showWelcomeTermsOfUse, setShowWelcomeTermsOfUse] = useState(false);
+  const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
   const [amortizationView, setAmortizationView] = useState<"able" | "taxable">("able");
   const [sidebarDesktopTopOffset, setSidebarDesktopTopOffset] = useState(0);
   const fscPassedRef = useRef(false);
@@ -333,9 +334,24 @@ export default function Home() {
       </button>
     </div>
   );
+  const openExternalUrlWithWarning = useCallback((url: string) => {
+    if (!url) return;
+    setPendingExternalUrl(url);
+  }, []);
+  const cancelExternalNavigation = useCallback(() => {
+    setPendingExternalUrl(null);
+  }, []);
+  const confirmExternalNavigation = useCallback(() => {
+    if (!pendingExternalUrl || typeof window === "undefined") {
+      setPendingExternalUrl(null);
+      return;
+    }
+    window.open(pendingExternalUrl, "_blank", "noopener,noreferrer");
+    setPendingExternalUrl(null);
+  }, [pendingExternalUrl]);
   const handleOpenEnrollmentPage = () => {
     if (!enrollmentPageUrl) return;
-    window.open(enrollmentPageUrl, "_blank", "noopener,noreferrer");
+    openExternalUrlWithWarning(enrollmentPageUrl);
   };
   const handlePrintReport = () => {
     // Interim behavior until custom PDF layout/export is implemented.
@@ -2314,6 +2330,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
                               href={link.url}
                               target="_blank"
                               rel="noreferrer"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                openExternalUrlWithWarning(link.url);
+                              }}
                               className="font-medium text-blue-600 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                             >
                               {link.label}
@@ -2614,6 +2634,36 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       <footer className="px-2 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-center text-xs text-zinc-500 dark:text-zinc-400 md:px-4 md:pb-4">
         © 2026 Spectra Professional Services, LLC. All rights reserved.
       </footer>
+      {pendingExternalUrl ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={copy?.labels?.ui?.externalLinkWarningTitle ?? ""}
+        >
+          <div className="w-full max-w-xl rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+            <p className="text-sm leading-relaxed text-zinc-800 dark:text-zinc-100">
+              {copy?.messages?.externalLinkWarning ?? ""}
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelExternalNavigation}
+                className="rounded-full border border-zinc-300 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              >
+                {copy?.buttons?.cancel ?? ""}
+              </button>
+              <button
+                type="button"
+                onClick={confirmExternalNavigation}
+                className="rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
+              >
+                {copy?.buttons?.continue ?? ""}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
