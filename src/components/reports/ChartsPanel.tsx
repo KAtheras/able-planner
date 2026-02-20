@@ -294,88 +294,7 @@ export default function ChartsPanel({
           color: titleColor,
         },
       },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: { type: "line" },
-        formatter: (params: unknown) => {
-          const rows = Array.isArray(params) ? params : [];
-          if (!rows.length) return "";
-
-          const first = rows[0] as { axisValueLabel?: string };
-          const axisLabel = first?.axisValueLabel ?? "";
-          const lineItems: Array<{ label: string; value: string }> = [];
-          let netContributions = 0;
-          let investmentReturns = 0;
-          let additionalEconomicBenefit = 0;
-          let ableEndingBalanceFromSeries: number | null = null;
-          let additionalEconomicBenefitItem: { label: string; value: string } | null = null;
-
-          for (const row of rows as Array<{ seriesName?: string; marker?: string; value?: number }>) {
-            const seriesName = row.seriesName ?? "";
-            const marker = row.marker ?? "";
-            const value = Number.isFinite(row.value) ? Number(row.value) : 0;
-            const item = {
-              label: `${marker}${seriesName}`,
-              value: formatCurrencyValue(value),
-            };
-
-            if (seriesName.includes("Net Contributions") || seriesName.includes("Contribuciones netas")) {
-              netContributions = value;
-              lineItems.push(item);
-            } else if (
-              seriesName.includes("Investment Returns") ||
-              seriesName.includes("Rendimientos de inversión")
-            ) {
-              investmentReturns = value;
-              lineItems.push(item);
-            } else if (
-              seriesName.includes("Additional Economic Benefit") ||
-              seriesName.includes("Beneficio económico adicional")
-            ) {
-              additionalEconomicBenefit = value;
-              additionalEconomicBenefitItem = item;
-            } else if (
-              seriesName.includes("ABLE Ending Balance") ||
-              seriesName.includes("Saldo final ABLE")
-            ) {
-              ableEndingBalanceFromSeries = value;
-            } else {
-              lineItems.push(item);
-            }
-          }
-
-          if (accountType === "able") {
-            const ableBalance =
-              ableEndingBalanceFromSeries ?? (netContributions + investmentReturns);
-            const totalEconomicValue = ableBalance + additionalEconomicBenefit;
-            lineItems.push({
-              label: language === "es" ? "Saldo de cuenta ABLE" : "ABLE Account Balance",
-              value: formatCurrencyValue(ableBalance),
-            });
-            if (additionalEconomicBenefitItem) lineItems.push(additionalEconomicBenefitItem);
-            lineItems.push({
-              label: language === "es" ? "Valor económico total" : "Total Economic Value",
-              value: formatCurrencyValue(totalEconomicValue),
-            });
-          }
-
-          const rowsHtml = lineItems
-            .map(
-              (item) =>
-                `<div style="display:flex;justify-content:space-between;gap:16px;min-width:280px;">` +
-                `<span>${item.label}</span>` +
-                `<span style="text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;">${item.value}</span>` +
-                `</div>`,
-            )
-            .join("");
-
-          return `<div style="display:flex;flex-direction:column;gap:2px;">` +
-            `<div style="font-weight:600;margin-bottom:2px;">${axisLabel}</div>` +
-            rowsHtml +
-            `</div>`;
-        },
-        valueFormatter: (value: number) => formatCurrencyValue(value),
-      },
+      tooltip: { show: false },
       grid: { left: 24, right: 12, top: 16, bottom: 64, containLabel: true },
       xAxis: {
         type: "category",
@@ -592,11 +511,64 @@ export default function ChartsPanel({
   const additionalEconomicBenefitValue =
     chartSummaryRows.find((row) => row.key === "benefit")?.value ?? 0;
   const totalEconomicValue = endingBalanceValue + additionalEconomicBenefitValue;
+  const srSummaryId = `chart-sr-summary-${accountType}`;
+  const srRegionLabel =
+    language === "es"
+      ? accountType === "able"
+        ? "Región del gráfico de crecimiento ABLE"
+        : "Región del gráfico de crecimiento gravable"
+      : accountType === "able"
+        ? "ABLE growth chart region"
+        : "Taxable growth chart region";
+
+  const srChartSummary = useMemo(() => {
+    if (!displayRows.length) {
+      return language === "es"
+        ? "No hay datos suficientes para mostrar el gráfico."
+        : "Not enough data to display the chart.";
+    }
+
+    const startLabel = formatMonthYearFromIndex(displayRows[0].monthIndex, language, { monthStyle: "short" });
+    const endLabel = formatMonthYearFromIndex(displayRows[displayRows.length - 1].monthIndex, language, {
+      monthStyle: "short",
+    });
+    const rangeText =
+      language === "es" ? `Rango: ${startLabel} a ${endLabel}.` : `Range: ${startLabel} to ${endLabel}.`;
+
+    const summaryRowsText = chartSummaryRows
+      .map((row) => `${row.label}: ${formatSignedCurrencyValue(row.value)}.`)
+      .join(" ");
+
+    if (accountType === "able" && Math.abs(additionalEconomicBenefitValue) > 0.005) {
+      const totalEconomicText =
+        language === "es"
+          ? `Valor económico total: ${formatCurrencyValue(totalEconomicValue)}.`
+          : `Total Economic Value: ${formatCurrencyValue(totalEconomicValue)}.`;
+      return `${rangeText} ${summaryRowsText} ${totalEconomicText}`;
+    }
+
+    return `${rangeText} ${summaryRowsText}`;
+  }, [
+    accountType,
+    additionalEconomicBenefitValue,
+    chartSummaryRows,
+    displayRows,
+    language,
+    totalEconomicValue,
+  ]);
 
   return (
     <div className="mt-4">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
-        <div className="min-w-0 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950">
+        <div
+          role="region"
+          aria-label={srRegionLabel}
+          aria-describedby={srSummaryId}
+          className="min-w-0 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950"
+        >
+          <p id={srSummaryId} className="sr-only">
+            {srChartSummary}
+          </p>
           <div className="flex flex-wrap items-center gap-2 px-3 pt-3">
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               {language === "es"
@@ -612,7 +584,7 @@ export default function ChartsPanel({
             </div>
           </div>
           {displayRows.length ? (
-            <div ref={chartRef} className="h-[440px] w-full min-w-0" />
+            <div ref={chartRef} aria-hidden="true" className="h-[440px] w-full min-w-0" />
           ) : (
             <div className="flex h-[440px] items-center justify-center px-4 text-sm text-zinc-500 dark:text-zinc-400">
               {language === "es"
