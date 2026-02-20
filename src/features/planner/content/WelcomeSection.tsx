@@ -32,13 +32,22 @@ type TermsBlock =
   | { type: "section"; header: string; body: string };
 
 function buildTermsBlocks(termsOfUseParagraphs: string[]): TermsBlock[] {
-  const text = termsOfUseParagraphs.join("\n\n");
+  const fullText = termsOfUseParagraphs.join("\n\n");
+  const headingPrefixes = [
+    "Spectra Professional Services, LLC. Terms of Use",
+    "Términos de Uso de Spectra Professional Services, LLC.",
+  ];
+  const matchingPrefix = headingPrefixes.find((prefix) => fullText.startsWith(prefix));
+  const text = matchingPrefix ? fullText.slice(matchingPrefix.length).trimStart() : fullText;
   const lines = text.split("\n");
   const blocks: TermsBlock[] = [];
   const numberedHeaderPattern = /^\d+\.\s+/;
+  const electronicAcceptancePattern = /^(Electronic Acceptance|Aceptación electrónica)\b/i;
 
   let paragraphLines: string[] = [];
   let activeSection: { header: string; bodyLines: string[] } | null = null;
+  let electronicAcceptanceLines: string[] = [];
+  let inElectronicAcceptance = false;
 
   const flushParagraph = () => {
     if (!paragraphLines.length) return;
@@ -54,8 +63,39 @@ function buildTermsBlocks(termsOfUseParagraphs: string[]): TermsBlock[] {
     activeSection = null;
   };
 
+  const flushElectronicAcceptance = () => {
+    if (!electronicAcceptanceLines.length) return;
+    const full = electronicAcceptanceLines.join(" ").replace(/\s+/g, " ").trim();
+    if (full) {
+      const isSpanish = full.startsWith("Aceptación electrónica");
+      const prefix = isSpanish ? "Aceptación electrónica" : "Electronic Acceptance";
+      const body = full.startsWith(prefix) ? full.slice(prefix.length).trim() : full;
+      blocks.push({
+        type: "section",
+        header: isSpanish ? "22. Aceptación electrónica" : "22. Electronic Acceptance",
+        body,
+      });
+    }
+    electronicAcceptanceLines = [];
+  };
+
   for (const rawLine of lines) {
     const trimmed = rawLine.trim();
+
+    if (electronicAcceptancePattern.test(trimmed)) {
+      flushParagraph();
+      flushSection();
+      inElectronicAcceptance = true;
+      electronicAcceptanceLines.push(trimmed);
+      continue;
+    }
+
+    if (inElectronicAcceptance) {
+      if (trimmed) {
+        electronicAcceptanceLines.push(trimmed);
+      }
+      continue;
+    }
 
     if (numberedHeaderPattern.test(trimmed)) {
       flushParagraph();
@@ -78,6 +118,7 @@ function buildTermsBlocks(termsOfUseParagraphs: string[]): TermsBlock[] {
 
   flushParagraph();
   flushSection();
+  flushElectronicAcceptance();
   return blocks;
 }
 
