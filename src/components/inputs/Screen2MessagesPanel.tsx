@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import PlannerNoticeCard from "@/components/inputs/PlannerNoticeCard";
 
 type Props = {
@@ -10,6 +10,8 @@ type Props = {
   withdrawalLimitedText: string;
   planMaxNoticeText: string | null;
   ssiBalanceCapWarningText: string | null;
+  ssiWarningDismissed: boolean;
+  onDismissSsiWarning: () => void;
   screen2Messages: string[];
 };
 
@@ -20,14 +22,12 @@ export default function Screen2MessagesPanel({
   withdrawalLimitedText,
   planMaxNoticeText,
   ssiBalanceCapWarningText,
+  ssiWarningDismissed,
+  onDismissSsiWarning,
   screen2Messages,
 }: Props) {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const ssiWarningCardRef = useRef<HTMLDivElement | null>(null);
-  const [dismissedSsiWarningKey, setDismissedSsiWarningKey] = useState<string | null>(null);
-  const activeSsiWarningKey = ssiBalanceCapWarningText ?? null;
-  const ssiWarningDismissed =
-    Boolean(activeSsiWarningKey) && activeSsiWarningKey === dismissedSsiWarningKey;
   const shouldShowSsiWarning = Boolean(ssiBalanceCapWarningText) && !ssiWarningDismissed;
 
   const getMobileScrollOffset = () => {
@@ -66,7 +66,7 @@ export default function Screen2MessagesPanel({
   }, [shouldShowSsiWarning]);
 
   const handleDismissSsiWarning = () => {
-    if (activeSsiWarningKey) setDismissedSsiWarningKey(activeSsiWarningKey);
+    onDismissSsiWarning();
     if (typeof window === "undefined") return;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     if (!isMobile) return;
