@@ -1229,7 +1229,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       </select>
   );
 
-  const resetInputs = () =>
+  const resetInputs = () => {
     resetPlannerInputs({
       plannerStateCode,
       formatDecimalToPercentString,
@@ -1278,6 +1278,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       setWtaDismissed,
       setReportWindowYears,
     });
+    setActive("inputs");
+  };
   const refreshButton = (
     <button
       type="button"
