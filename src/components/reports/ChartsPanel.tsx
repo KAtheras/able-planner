@@ -43,6 +43,10 @@ type ChartLegendItem = {
 };
 
 const formatCurrencyAxis = (value: number) => `$${Math.round(value / 1000)}k`;
+const formatCurrencyThousands = (value: number) =>
+  `${Math.round(normalizeCurrencyDisplayValue(value) / 1000) < 0 ? "-" : ""}$${Math.abs(
+    Math.round(normalizeCurrencyDisplayValue(value) / 1000),
+  )}k`;
 const normalizeCurrencyDisplayValue = (value: number) =>
   Object.is(value, -0) || Math.abs(value) < 0.5 ? 0 : value;
 const formatCurrencyValue = (value: number) =>
@@ -130,6 +134,8 @@ export default function ChartsPanel({
     const axisColor = isDarkMode ? "#ffffff" : "#52525b";
     const splitLineColor = isDarkMode ? "rgba(161,161,170,0.22)" : "rgba(63,63,70,0.16)";
     const endingBalanceLineColor = isDarkMode ? "#ffffff" : "#111827";
+    const themeColor =
+      getComputedStyle(document.documentElement).getPropertyValue("--brand-primary").trim() || "#1f6fd8";
 
     const labels = displayRows.map((monthRow) =>
       formatMonthYearFromIndex(monthRow.monthIndex, language, { monthStyle: "short" }),
@@ -214,6 +220,31 @@ export default function ChartsPanel({
     const hasAdditionalEconomicBenefitSeries = additionalEconomicBenefitSeries.some(
       (value) => Math.abs(value) > 0.005,
     );
+    const endingBalanceAtWindow = endingBalanceSeries[endingBalanceSeries.length - 1];
+    const endingBalanceMarkLine =
+      Number.isFinite(endingBalanceAtWindow)
+        ? {
+            silent: true,
+            animation: false,
+            symbol: ["none", "none"] as const,
+            lineStyle: {
+              color: themeColor,
+              width: 1,
+              type: "solid" as const,
+            },
+            label: {
+              show: true,
+              position: "insideStartTop" as const,
+              formatter: () => formatCurrencyThousands(endingBalanceAtWindow),
+              color: themeColor,
+              fontWeight: 700,
+              padding: [2, 6, 2, 6],
+              backgroundColor: isDarkMode ? "rgba(9, 9, 11, 0.72)" : "rgba(255, 255, 255, 0.78)",
+              borderRadius: 6,
+            },
+            data: [{ yAxis: endingBalanceAtWindow }],
+          }
+        : undefined;
 
     const netContributionsName = language === "es" ? "Contribuciones netas" : "Net Contributions";
     const investmentReturnsName =
@@ -270,6 +301,7 @@ export default function ChartsPanel({
               data: endingBalanceSeries,
               lineStyle: { width: 2, color: endingBalanceLineColor, type: "solid" },
               itemStyle: { color: endingBalanceLineColor },
+              ...(endingBalanceMarkLine ? { markLine: endingBalanceMarkLine } : {}),
             },
           ]
         : []),
@@ -283,6 +315,7 @@ export default function ChartsPanel({
               data: endingBalanceSeries,
               lineStyle: { width: 2, color: endingBalanceLineColor, type: "solid" },
               itemStyle: { color: endingBalanceLineColor },
+              ...(endingBalanceMarkLine ? { markLine: endingBalanceMarkLine } : {}),
             },
             ...(hasAdditionalEconomicBenefitSeries
               ? [
@@ -808,11 +841,6 @@ export default function ChartsPanel({
                       : "Taxes on Earnings (Drag)"}
                   </th>
                 )}
-                {accountType === "able" && hasAdditionalEconomicBenefitInChartData && (
-                  <th scope="col" className="px-3 py-2 text-right font-semibold">
-                    {language === "es" ? "Beneficio económico adicional*" : "Additional Economic Benefit*"}
-                  </th>
-                )}
                 <th scope="col" className="px-3 py-2 text-right font-semibold">
                   {language === "es"
                     ? accountType === "able"
@@ -822,6 +850,11 @@ export default function ChartsPanel({
                       ? "ABLE Ending Balance"
                       : "Taxable Ending Balance"}
                 </th>
+                {accountType === "able" && hasAdditionalEconomicBenefitInChartData && (
+                  <th scope="col" className="px-3 py-2 text-right font-semibold">
+                    {language === "es" ? "Beneficio económico adicional*" : "Additional Economic Benefit*"}
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -838,12 +871,12 @@ export default function ChartsPanel({
                   {accountType === "taxable" && (
                     <td className="px-3 py-2 text-right tabular-nums">{formatSignedCurrencyValue(row.taxDrag)}</td>
                   )}
+                  <td className="px-3 py-2 text-right tabular-nums">{formatCurrencyValue(row.endingBalance)}</td>
                   {accountType === "able" && hasAdditionalEconomicBenefitInChartData && (
                     <td className="px-3 py-2 text-right tabular-nums">
                       {formatCurrencyValue(row.additionalEconomicBenefit)}
                     </td>
                   )}
-                  <td className="px-3 py-2 text-right tabular-nums">{formatCurrencyValue(row.endingBalance)}</td>
                 </tr>
               ))}
             </tbody>
