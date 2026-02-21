@@ -2655,7 +2655,10 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           <div aria-hidden="true" className="h-20 md:hidden" />
         </>
       ) : null}
-      <div ref={shellRef} className="mx-auto flex w-full max-w-6xl">
+      <div
+        ref={shellRef}
+        className={isEmbedded ? "flex w-full max-w-none" : "mx-auto flex w-full max-w-6xl"}
+      >
         <Sidebar
           active={active}
           onChange={handleSidebarChange}
@@ -2673,7 +2676,15 @@ const parsePercentStringToDecimal = (value: string): number | null => {
             onClick: goToMobileNext,
           }}
         />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-2 pt-1 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:px-4 md:pt-1.5 md:pb-6">{content}</main>
+        <main
+          className={
+            isEmbedded
+              ? "w-full flex-1 px-0 pt-0 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:px-0 md:pt-0 md:pb-6"
+              : "mx-auto w-full max-w-6xl flex-1 px-2 pt-1 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:px-4 md:pt-1.5 md:pb-6"
+          }
+        >
+          {content}
+        </main>
       </div>
       {!isEmbedded ? (
         <footer className="px-2 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-center text-xs text-zinc-500 dark:text-zinc-400 md:px-4 md:pb-4">
