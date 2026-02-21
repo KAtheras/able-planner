@@ -25,7 +25,7 @@
   },
   "features": {
     "reports": {
-      "tabs": ["account_growth", "tax_benefits", "taxable_growth", "able_vs_taxable"]
+      "tabs": ["account_growth", "tax_benefits", "taxable_growth", "able_vs_taxable", "experimental_comparison"]
     }
   }
 }

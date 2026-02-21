@@ -7,6 +7,7 @@ export const ALL_REPORT_VIEWS: ReportView[] = [
   "tax_benefits",
   "taxable_growth",
   "able_vs_taxable",
+  "experimental_comparison",
 ];
 
 type BalancePoint = {

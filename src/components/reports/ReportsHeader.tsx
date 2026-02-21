@@ -2,7 +2,12 @@
 
 import { useState, type ReactNode } from "react";
 
-export type ReportView = "account_growth" | "tax_benefits" | "taxable_growth" | "able_vs_taxable";
+export type ReportView =
+  | "account_growth"
+  | "tax_benefits"
+  | "taxable_growth"
+  | "able_vs_taxable"
+  | "experimental_comparison";
 
 type Props = {
   title: string;
@@ -10,6 +15,7 @@ type Props = {
   ableGrowthTabLabel: string;
   taxableGrowthTabLabel: string;
   ableVsTaxableTabLabel: string;
+  experimentalComparisonTabLabel: string;
   language: "en" | "es";
   reportView: ReportView;
   enabledReportViews: ReportView[];
@@ -24,6 +30,7 @@ export default function ReportsHeader({
   ableGrowthTabLabel,
   taxableGrowthTabLabel,
   ableVsTaxableTabLabel,
+  experimentalComparisonTabLabel,
   language,
   reportView,
   enabledReportViews,
@@ -54,10 +61,17 @@ export default function ReportsHeader({
         desktopLabel: taxableGrowthTabLabel,
       };
     }
+    if (view === "able_vs_taxable") {
+      return {
+        view,
+        mobileLabel: language === "es" ? "Comparación" : "Comparison",
+        desktopLabel: ableVsTaxableTabLabel,
+      };
+    }
     return {
-      view: "able_vs_taxable" as const,
-      mobileLabel: language === "es" ? "Comparación" : "Comparison",
-      desktopLabel: ableVsTaxableTabLabel,
+      view: "experimental_comparison" as const,
+      mobileLabel: experimentalComparisonTabLabel,
+      desktopLabel: experimentalComparisonTabLabel,
     };
   });
   const mobileReportLabel = language === "es" ? "Informes" : "Reports";

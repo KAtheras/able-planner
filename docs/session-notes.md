@@ -12,6 +12,19 @@ Use this file to preserve working context between editor sessions.
 - Deploy target: GitHub + Netlify.
 - Current working branch: `refactor/extract-calc`.
 
+## CRITICAL ALERT (2026-02-20)
+- Intended architecture requires server-side calculations (Netlify/serverless) with client-hosted UI.
+- Current implementation has architecture drift:
+- Core projection/report math is still running client-side in `app/page.tsx` (for example, `buildPlannerSchedule(...)` usage).
+- UI does not currently call `/api/calculate` for core schedule/report outputs.
+- `app/api/calculate/route.ts` exists, but does not yet provide full projection/report payload parity with UI.
+
+### Mandatory Next-Session Priority
+- Stop adding new features that expand client-side math.
+- Migrate projection/report/schedule calculations to server-side API as source of truth.
+- Refactor UI to consume API responses for computed outputs.
+- Preserve behavior parity while migrating (SSI/WTA/report outputs must remain consistent).
+
 ## Recent Decisions
 - Keep icon-based sidebar (SVG/components), not PNG files.
 - Mobile schedule header order updated for narrow mode.

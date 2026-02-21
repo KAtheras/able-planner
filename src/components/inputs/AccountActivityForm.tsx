@@ -52,6 +52,7 @@ type AccountActivityFormProps = {
   onAdvancedClick?: () => void;
   advancedButtonLabel?: string;
   advancedButtonActive?: boolean;
+  onTimeHorizonFocus?: () => void;
   onTimeHorizonBlur?: () => void;
   timeHorizonLabel?: string;
   contributionIncreaseDisabled?: boolean;
@@ -101,6 +102,7 @@ export default function AccountActivityForm({
   onAdvancedClick,
   advancedButtonLabel,
   advancedButtonActive = false,
+  onTimeHorizonFocus,
   onTimeHorizonBlur,
   timeHorizonLabel,
   copy,
@@ -270,6 +272,7 @@ export default function AccountActivityForm({
             pattern="[0-9]*"
             value={timeHorizonYears}
             onChange={(e) => onChange?.({ timeHorizonYears: e.target.value })}
+            onFocus={() => onTimeHorizonFocus?.()}
             onBlur={() => onTimeHorizonBlur?.()}
             className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-base md:text-sm"
           />

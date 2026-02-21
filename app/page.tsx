@@ -174,6 +174,7 @@ export default function Home() {
   const [annualReturnWarningMax, setAnnualReturnWarningMax] = useState<number | null>(null);
   const [timeHorizonYears, setTimeHorizonYears] = useState("");
   const [timeHorizonEdited, setTimeHorizonEdited] = useState(false);
+  const [isTimeHorizonEditing, setIsTimeHorizonEditing] = useState(false);
   const copy = getCopy(language);
   const annualReturnWarningText =
     annualReturnWarningMax === null
@@ -1099,6 +1100,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   ]);
 
   useEffect(() => {
+    if (isTimeHorizonEditing) {
+      return;
+    }
     const { startIndex, horizonEndIndex } = getHorizonConfig();
     const minIndex = startIndex;
     const contributionMaxIndex = Math.max(startIndex, contributionEndMaxIndex);
@@ -1161,6 +1165,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     getHorizonConfig,
     contributionEndMaxIndex,
     effectiveEnforcedWithdrawalStartIndex,
+    isTimeHorizonEditing,
   ]);
 
   useEffect(() => {
@@ -2527,7 +2532,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
               onAdvancedClick={toggleBudgetMode}
               advancedButtonLabel={budgetButtonLabel}
               advancedButtonActive={budgetButtonActive}
-              onTimeHorizonBlur={enforceTimeHorizonLimits}
+              onTimeHorizonFocus={() => setIsTimeHorizonEditing(true)}
+              onTimeHorizonBlur={() => {
+                setIsTimeHorizonEditing(false);
+                enforceTimeHorizonLimits();
+              }}
               timeHorizonLabel={
                 language === "es"
                   ? `Horizonte temporal (MÁX ${horizonLimits.maxYears} AÑOS)`

@@ -58,6 +58,7 @@ type Props = {
   onAdvancedClick: () => void;
   advancedButtonLabel: string;
   advancedButtonActive: boolean;
+  onTimeHorizonFocus: () => void;
   onTimeHorizonBlur: () => void;
   timeHorizonLabel: string;
   accountActivityTitle: string;
@@ -101,6 +102,7 @@ export default function InputsLeftPane({
   onAdvancedClick,
   advancedButtonLabel,
   advancedButtonActive,
+  onTimeHorizonFocus,
   onTimeHorizonBlur,
   timeHorizonLabel,
   accountActivityTitle,
@@ -153,6 +155,7 @@ export default function InputsLeftPane({
       onAdvancedClick={onAdvancedClick}
       advancedButtonLabel={advancedButtonLabel}
       advancedButtonActive={advancedButtonActive}
+      onTimeHorizonFocus={onTimeHorizonFocus}
       onTimeHorizonBlur={onTimeHorizonBlur}
       timeHorizonLabel={timeHorizonLabel}
       copy={{

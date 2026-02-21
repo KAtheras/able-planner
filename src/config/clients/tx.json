@@ -29,7 +29,8 @@
         "account_growth",
         "tax_benefits",
         "taxable_growth",
-        "able_vs_taxable"
+        "able_vs_taxable",
+        "experimental_comparison"
       ]
     }
   },

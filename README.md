@@ -2,6 +2,22 @@
 
 A secure, accessible, bilingual ABLE planning application.
 
+## CRITICAL ARCHITECTURE STATUS (READ FIRST)
+
+The intended architecture is:
+- UI hosted by client site.
+- Calculations hosted server-side (Netlify/serverless API).
+
+Current status (as of 2026-02-20):
+- Core projection/report math is still being calculated client-side in `app/page.tsx`.
+- `/api/calculate` exists (`app/api/calculate/route.ts`) but is not yet the full calculation source of truth for UI outputs.
+- There is currently no UI `fetch("/api/calculate")` path driving reports/schedules.
+
+Non-negotiable direction for next sessions:
+- Move all calculation logic used for projections/reports/schedules to server-side API.
+- Make UI consume API results only.
+- Do not add new feature work that increases client-side math footprint.
+
 ## ACCESSIBILITY REQUIREMENT (MANDATORY)
 
 All new code and all code changes in this repository must be built and reviewed for accessibility compliance by default.
@@ -26,7 +42,7 @@ All new code and all code changes in this repository must be built and reviewed 
 - At session start, ask Codex: `Read README.md first`.
 - When this instruction is used, Codex should also read `docs/session-notes.md` before making changes.
 - At session end, ask Codex: `Update docs/session-notes.md`.
-- Resume reminder: before new feature work, finish `app/page.tsx` slimming by extracting remaining Inputs view orchestration into focused components/hooks.
+- Resume reminder: prioritize server-side calculation migration before additional feature work.
 
 ## Development
 npm install

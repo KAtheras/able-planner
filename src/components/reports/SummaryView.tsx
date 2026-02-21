@@ -5,6 +5,7 @@ import ReportsHeader from "@/components/reports/ReportsHeader";
 import type { ReportView } from "@/components/reports/ReportsHeader";
 import ChartsPanel from "@/components/reports/ChartsPanel";
 import AbleVsTaxablePanel from "@/components/reports/AbleVsTaxablePanel";
+import ExperimentalComparisonPanel from "@/components/reports/ExperimentalComparisonPanel";
 import ReportWindowToggle, { type ReportWindowOptionItem } from "@/components/reports/ReportWindowToggle";
 import type { TaxableYearRow, YearRow } from "@/lib/amortization";
 
@@ -14,6 +15,7 @@ type Props = {
   ableGrowthTabLabel: string;
   taxableGrowthTabLabel: string;
   ableVsTaxableTabLabel: string;
+  experimentalComparisonTabLabel: string;
   ableVsTaxablePanelLabels: {
     title: string;
     metricLabel: string;
@@ -33,6 +35,32 @@ type Props = {
       totalEconomicValue: string;
       totalEconomicBenefit: string;
     };
+  };
+  experimentalComparisonPanelLabels: {
+    title: string;
+    panelTitle: string;
+    ableLine: string;
+    taxableLine: string;
+    withdrawalDifference: string;
+    taxableWithdrawalDifference: string;
+    withdrawalInfoToggleAria: string;
+    withdrawalInfoMessage: string;
+    ableBalanceAdvantage: string;
+    taxableBalanceAdvantage: string;
+    balanceInfoToggleAria: string;
+    balanceInfoMessage: string;
+    additionalEconomicBenefitBoth: string;
+    additionalEconomicBenefitFederalOnly: string;
+    additionalEconomicBenefitStateOnly: string;
+    additionalEconomicBenefitNone: string;
+    additionalEconomicBenefitInfoToggleAria: string;
+    additionalEconomicBenefitInfoMessage: string;
+    investmentReturnDifference: string;
+    taxableInvestmentReturnDifference: string;
+    investmentReturnInfoToggleAria: string;
+    investmentReturnInfoMessageWithState: string;
+    investmentReturnInfoMessageFederalOnly: string;
+    noDifferences: string;
   };
   reportView: ReportView;
   enabledReportViews: ReportView[];
@@ -54,7 +82,9 @@ export default function SummaryView({
   ableGrowthTabLabel,
   taxableGrowthTabLabel,
   ableVsTaxableTabLabel,
+  experimentalComparisonTabLabel,
   ableVsTaxablePanelLabels,
+  experimentalComparisonPanelLabels,
   reportView,
   enabledReportViews,
   onReportViewChange,
@@ -77,6 +107,7 @@ export default function SummaryView({
         ableGrowthTabLabel={ableGrowthTabLabel}
         taxableGrowthTabLabel={taxableGrowthTabLabel}
         ableVsTaxableTabLabel={ableVsTaxableTabLabel}
+        experimentalComparisonTabLabel={experimentalComparisonTabLabel}
         language={language}
         reportView={reportView}
         enabledReportViews={enabledReportViews}
@@ -131,12 +162,54 @@ export default function SummaryView({
           reportWindowLabel={reportWindowLabel}
           reportWindowOptions={reportWindowOptions}
         />
-      ) : (
+      ) : reportView === "able_vs_taxable" ? (
         <AbleVsTaxablePanel
           ableRows={ableRows}
           taxableRows={taxableRows}
           labels={ableVsTaxablePanelLabels}
           language={language}
+          reportWindowLabel={reportWindowLabel}
+          reportWindowOptions={reportWindowOptions}
+        />
+      ) : (
+        <ExperimentalComparisonPanel
+          language={language}
+          title={experimentalComparisonPanelLabels.title}
+          panelTitle={experimentalComparisonPanelLabels.panelTitle}
+          ableLineLabel={experimentalComparisonPanelLabels.ableLine}
+          taxableLineLabel={experimentalComparisonPanelLabels.taxableLine}
+          withdrawalDifferenceLabel={experimentalComparisonPanelLabels.withdrawalDifference}
+          taxableWithdrawalDifferenceLabel={experimentalComparisonPanelLabels.taxableWithdrawalDifference}
+          withdrawalInfoToggleAriaLabel={experimentalComparisonPanelLabels.withdrawalInfoToggleAria}
+          withdrawalInfoMessageLabel={experimentalComparisonPanelLabels.withdrawalInfoMessage}
+          ableBalanceAdvantageLabel={experimentalComparisonPanelLabels.ableBalanceAdvantage}
+          taxableBalanceAdvantageLabel={experimentalComparisonPanelLabels.taxableBalanceAdvantage}
+          balanceInfoToggleAriaLabel={experimentalComparisonPanelLabels.balanceInfoToggleAria}
+          balanceInfoMessageLabel={experimentalComparisonPanelLabels.balanceInfoMessage}
+          additionalEconomicBenefitBothLabel={experimentalComparisonPanelLabels.additionalEconomicBenefitBoth}
+          additionalEconomicBenefitFederalOnlyLabel={experimentalComparisonPanelLabels.additionalEconomicBenefitFederalOnly}
+          additionalEconomicBenefitStateOnlyLabel={experimentalComparisonPanelLabels.additionalEconomicBenefitStateOnly}
+          additionalEconomicBenefitNoneLabel={experimentalComparisonPanelLabels.additionalEconomicBenefitNone}
+          additionalEconomicBenefitInfoToggleAriaLabel={
+            experimentalComparisonPanelLabels.additionalEconomicBenefitInfoToggleAria
+          }
+          additionalEconomicBenefitInfoMessageLabel={
+            experimentalComparisonPanelLabels.additionalEconomicBenefitInfoMessage
+          }
+          investmentReturnDifferenceLabel={experimentalComparisonPanelLabels.investmentReturnDifference}
+          taxableInvestmentReturnDifferenceLabel={experimentalComparisonPanelLabels.taxableInvestmentReturnDifference}
+          investmentReturnInfoToggleAriaLabel={
+            experimentalComparisonPanelLabels.investmentReturnInfoToggleAria
+          }
+          investmentReturnInfoMessageWithStateLabel={
+            experimentalComparisonPanelLabels.investmentReturnInfoMessageWithState
+          }
+          investmentReturnInfoMessageFederalOnlyLabel={
+            experimentalComparisonPanelLabels.investmentReturnInfoMessageFederalOnly
+          }
+          noDifferencesLabel={experimentalComparisonPanelLabels.noDifferences}
+          ableRows={ableRows}
+          taxableRows={taxableRows}
           reportWindowLabel={reportWindowLabel}
           reportWindowOptions={reportWindowOptions}
         />

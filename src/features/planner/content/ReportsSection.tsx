@@ -14,6 +14,7 @@ type ReportsLabels = {
   taxBenefitsTab?: string;
   taxableGrowthTab?: string;
   ableVsTaxableTab?: string;
+  experimentalComparisonTab?: string;
   reportWindowLabel?: string;
   ableVsTaxableTitle?: string;
   ableVsTaxableMetricLabel?: string;
@@ -33,6 +34,30 @@ type ReportsLabels = {
     totalEconomicValue?: string;
     totalEconomicBenefit?: string;
   };
+  experimentalComparisonTitle?: string;
+  experimentalComparisonPanelTitle?: string;
+  experimentalComparisonAbleLine?: string;
+  experimentalComparisonTaxableLine?: string;
+  experimentalComparisonWithdrawalDifference?: string;
+  experimentalComparisonTaxableWithdrawalDifference?: string;
+  experimentalComparisonWithdrawalInfoToggleAria?: string;
+  experimentalComparisonWithdrawalInfoMessage?: string;
+  experimentalComparisonAbleBalanceAdvantage?: string;
+  experimentalComparisonTaxableBalanceAdvantage?: string;
+  experimentalComparisonBalanceInfoToggleAria?: string;
+  experimentalComparisonBalanceInfoMessage?: string;
+  experimentalComparisonAdditionalEconomicBenefitBoth?: string;
+  experimentalComparisonAdditionalEconomicBenefitFederalOnly?: string;
+  experimentalComparisonAdditionalEconomicBenefitStateOnly?: string;
+  experimentalComparisonAdditionalEconomicBenefitNone?: string;
+  experimentalComparisonAdditionalEconomicBenefitInfoToggleAria?: string;
+  experimentalComparisonAdditionalEconomicBenefitInfoMessage?: string;
+  experimentalComparisonInvestmentReturnDifference?: string;
+  experimentalComparisonTaxableInvestmentReturnDifference?: string;
+  experimentalComparisonInvestmentReturnInfoToggleAria?: string;
+  experimentalComparisonInvestmentReturnInfoMessageWithState?: string;
+  experimentalComparisonInvestmentReturnInfoMessageFederalOnly?: string;
+  experimentalComparisonNoDifferences?: string;
 };
 
 type Props = {
@@ -73,6 +98,7 @@ export default function ReportsSection({
   const ableGrowthTabLabel = labels?.taxBenefitsTab ?? "";
   const taxableGrowthTabLabel = labels?.taxableGrowthTab ?? "";
   const ableVsTaxableTabLabel = labels?.ableVsTaxableTab ?? "";
+  const experimentalComparisonTabLabel = labels?.experimentalComparisonTab ?? "";
   const reportWindowLabel = labels?.reportWindowLabel ?? "";
   const ableVsTaxablePanelLabels = {
     title: labels?.ableVsTaxableTitle ?? "",
@@ -93,6 +119,42 @@ export default function ReportsSection({
       totalEconomicValue: labels?.ableVsTaxableRows?.totalEconomicValue ?? "",
       totalEconomicBenefit: labels?.ableVsTaxableRows?.totalEconomicBenefit ?? "",
     },
+  };
+  const experimentalComparisonPanelLabels = {
+    title: labels?.experimentalComparisonTitle ?? "",
+    panelTitle: labels?.experimentalComparisonPanelTitle ?? "",
+    ableLine: labels?.experimentalComparisonAbleLine ?? "",
+    taxableLine: labels?.experimentalComparisonTaxableLine ?? "",
+    withdrawalDifference: labels?.experimentalComparisonWithdrawalDifference ?? "",
+    taxableWithdrawalDifference: labels?.experimentalComparisonTaxableWithdrawalDifference ?? "",
+    withdrawalInfoToggleAria: labels?.experimentalComparisonWithdrawalInfoToggleAria ?? "",
+    withdrawalInfoMessage: labels?.experimentalComparisonWithdrawalInfoMessage ?? "",
+    ableBalanceAdvantage: labels?.experimentalComparisonAbleBalanceAdvantage ?? "",
+    taxableBalanceAdvantage: labels?.experimentalComparisonTaxableBalanceAdvantage ?? "",
+    balanceInfoToggleAria: labels?.experimentalComparisonBalanceInfoToggleAria ?? "",
+    balanceInfoMessage: labels?.experimentalComparisonBalanceInfoMessage ?? "",
+    additionalEconomicBenefitBoth:
+      labels?.experimentalComparisonAdditionalEconomicBenefitBoth ?? "",
+    additionalEconomicBenefitFederalOnly:
+      labels?.experimentalComparisonAdditionalEconomicBenefitFederalOnly ?? "",
+    additionalEconomicBenefitStateOnly:
+      labels?.experimentalComparisonAdditionalEconomicBenefitStateOnly ?? "",
+    additionalEconomicBenefitNone:
+      labels?.experimentalComparisonAdditionalEconomicBenefitNone ?? "",
+    additionalEconomicBenefitInfoToggleAria:
+      labels?.experimentalComparisonAdditionalEconomicBenefitInfoToggleAria ?? "",
+    additionalEconomicBenefitInfoMessage:
+      labels?.experimentalComparisonAdditionalEconomicBenefitInfoMessage ?? "",
+    investmentReturnDifference: labels?.experimentalComparisonInvestmentReturnDifference ?? "",
+    taxableInvestmentReturnDifference:
+      labels?.experimentalComparisonTaxableInvestmentReturnDifference ?? "",
+    investmentReturnInfoToggleAria:
+      labels?.experimentalComparisonInvestmentReturnInfoToggleAria ?? "",
+    investmentReturnInfoMessageWithState:
+      labels?.experimentalComparisonInvestmentReturnInfoMessageWithState ?? "",
+    investmentReturnInfoMessageFederalOnly:
+      labels?.experimentalComparisonInvestmentReturnInfoMessageFederalOnly ?? "",
+    noDifferences: labels?.experimentalComparisonNoDifferences ?? "",
   };
 
   const hasPresetMatchingHorizon = REPORT_WINDOW_OPTIONS.some(
@@ -128,7 +190,9 @@ export default function ReportsSection({
       ableGrowthTabLabel={ableGrowthTabLabel}
       taxableGrowthTabLabel={taxableGrowthTabLabel}
       ableVsTaxableTabLabel={ableVsTaxableTabLabel}
+      experimentalComparisonTabLabel={experimentalComparisonTabLabel}
       ableVsTaxablePanelLabels={ableVsTaxablePanelLabels}
+      experimentalComparisonPanelLabels={experimentalComparisonPanelLabels}
       reportView={reportView}
       enabledReportViews={enabledReportViews}
       onReportViewChange={onReportViewChange}
