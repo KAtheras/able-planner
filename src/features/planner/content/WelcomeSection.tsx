@@ -140,11 +140,6 @@ export default function WelcomeSection({
   welcomeTermsCardRef,
 }: WelcomeSectionProps) {
   const termsBlocks = buildTermsBlocks(termsOfUseParagraphs);
-  const mainClassName = hideTopNav
-    ? "w-full flex-1 px-0 pt-0"
-    : "mx-auto w-full max-w-6xl flex-1 px-4 pt-1.5";
-  const contentInnerClassName = hideTopNav ? "px-3 pb-4 md:px-4" : "";
-  const headingOffsetClassName = hideTopNav ? "mt-2" : "mt-4";
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
@@ -166,11 +161,10 @@ export default function WelcomeSection({
         </>
       ) : null}
 
-      <main className={mainClassName}>
-        <div className={contentInnerClassName}>
-          <div className="flex justify-center">{languageToggle}</div>
-          <div className={headingOffsetClassName} />
-          <div className="text-center">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-1.5">
+        <div className="flex justify-center">{languageToggle}</div>
+        <div className="mt-4" />
+        <div className="text-center">
           <h1 className="text-2xl font-semibold">{landingCopy.heroTitle}</h1>
 
           <p className="mt-4 max-w-6xl mx-auto text-left text-base text-zinc-600 dark:text-zinc-400">
@@ -278,14 +272,11 @@ export default function WelcomeSection({
             )}
           </div>
           <div className="mt-4" />
-          </div>
         </div>
       </main>
-      {!hideTopNav ? (
-        <footer className="px-4 pb-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
-          © 2026 Spectra Professional Services, LLC. All rights reserved.
-        </footer>
-      ) : null}
+      <footer className="px-4 pb-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
+        © 2026 Spectra Professional Services, LLC. All rights reserved.
+      </footer>
     </div>
   );
 }
