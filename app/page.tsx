@@ -1480,6 +1480,12 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     mobileNextDisabledFromModel ||
     (active === "inputs" && inputStep === 2 && hasPendingSsiAcknowledgement);
 
+  const goToPreviousInputStep = () => {
+    if (inputStep === 2) {
+      setInputStep(1);
+    }
+  };
+
   const { goToMobileBack, goToMobileNext } = usePlannerNavigation({
     active,
     inputStep,
