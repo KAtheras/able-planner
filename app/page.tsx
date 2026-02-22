@@ -24,6 +24,7 @@ import DisclosuresSection from "@/features/planner/content/DisclosuresSection";
 import InputsLeftPane from "@/features/planner/content/InputsLeftPane";
 import InputsRightPane from "@/features/planner/content/InputsRightPane";
 import { InputsDesktopHeader, InputsTwoColumnShell } from "@/features/planner/content/InputsSectionLayout";
+import ResourcesSection from "@/features/planner/content/ResourcesSection";
 import ReportsSection from "@/features/planner/content/ReportsSection";
 import ScheduleSection from "@/features/planner/content/ScheduleSection";
 import WelcomeSection from "@/features/planner/content/WelcomeSection";
@@ -2260,104 +2261,14 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         : [];
 
       return (
-        <div className="space-y-2 md:space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <h1 className="text-lg font-semibold uppercase text-zinc-900 dark:text-zinc-50">
-              {resourcesTitle}
-            </h1>
-            <div>{languageToggle}</div>
-          </div>
-          <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-400">
-            <div className="max-h-[calc(100vh-16rem)] space-y-2 overflow-y-auto pr-1 md:max-h-[calc(100vh-13rem)] md:space-y-3">
-              {resourcesIntro ? (
-                <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                  {resourcesIntro}
-                </p>
-              ) : null}
-              {resourcesSections.map((section, index) => {
-                const sectionValue = section as {
-                  title?: unknown;
-                  paragraphs?: unknown;
-                  items?: unknown;
-                  links?: unknown;
-                };
-                const title = typeof sectionValue.title === "string" ? sectionValue.title : "";
-                const paragraphs = Array.isArray(sectionValue.paragraphs)
-                  ? sectionValue.paragraphs.filter(
-                      (item: unknown): item is string => typeof item === "string" && item.trim().length > 0,
-                    )
-                  : [];
-                const items = Array.isArray(sectionValue.items)
-                  ? sectionValue.items.filter(
-                      (item: unknown): item is string => typeof item === "string" && item.trim().length > 0,
-                    )
-                  : [];
-                const links = Array.isArray(sectionValue.links)
-                  ? sectionValue.links.filter(
-                      (link) =>
-                        typeof link?.label === "string" &&
-                        link.label.trim() &&
-                        typeof link?.url === "string" &&
-                        link.url.trim(),
-                    )
-                  : [];
-
-                if (!title && paragraphs.length === 0 && items.length === 0 && links.length === 0) return null;
-
-                return (
-                  <div
-                    key={`${title || "resources-section"}-${index}`}
-                    className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-black/80"
-                  >
-                    {title ? (
-                      <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
-                    ) : null}
-                    {paragraphs.map((paragraph, paragraphIndex) => (
-                      <p
-                        key={`${title || "resources"}-paragraph-${paragraphIndex}`}
-                        className="mb-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 last:mb-0"
-                      >
-                        {paragraph}
-                      </p>
-                    ))}
-                    {items.length > 0 ? (
-                      <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                        {items.map((item: string, itemIndex: number) => (
-                          <li key={`${title || "resources"}-item-${itemIndex}`}>{item}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                    {links.length > 0 ? (
-                      <ul className="mt-4 space-y-1.5 text-sm leading-relaxed">
-                        {links.map((link, linkIndex) => (
-                          <li key={`${title || "resources"}-link-${linkIndex}`}>
-                            <a
-                              href={link.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={(event) => {
-                                event.preventDefault();
-                                openExternalUrlWithWarning(link.url);
-                              }}
-                              className="font-medium text-blue-600 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                            >
-                              {link.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                );
-              })}
-              {resourcesSections.length === 0 ? (
-                <div className="rounded-xl border border-zinc-200 bg-white p-6 text-sm leading-relaxed text-zinc-700 dark:border-zinc-800 dark:bg-black/80 dark:text-zinc-300">
-                  {copy?.labels?.ui?.placeholderComingSoon ?? ""}
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
+        <ResourcesSection
+          resourcesTitle={resourcesTitle}
+          resourcesIntro={resourcesIntro}
+          resourcesSections={resourcesSections}
+          placeholderText={copy?.labels?.ui?.placeholderComingSoon ?? ""}
+          languageToggle={languageToggle}
+          onOpenExternalUrl={openExternalUrlWithWarning}
+        />
       );
     }
 
