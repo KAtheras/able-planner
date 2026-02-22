@@ -342,3 +342,7 @@ Use this file to preserve working context between editor sessions.
 - UX adjustment requested: `Enroll` button now opens configured enrollment URL directly in a new tab without showing external-link warning modal.
 - External-link warning modal remains in place for other external links (e.g., resources).
 - Validation: `npx eslint app/page.tsx`
+- External warning modal extraction:
+- Added `src/features/planner/page/ExternalLinkWarningModal.tsx`.
+- Moved external-link warning modal JSX out of `app/page.tsx` and replaced with component usage.
+- Validation: `npx eslint app/page.tsx src/features/planner/page/ExternalLinkWarningModal.tsx`

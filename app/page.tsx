@@ -38,6 +38,7 @@ import {
 } from "@/features/planner/page/plannerPageHelpers";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import PlannerReportActions from "@/features/planner/page/PlannerReportActions";
+import ExternalLinkWarningModal from "@/features/planner/page/ExternalLinkWarningModal";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
 import { getPlannerProjectionAccessState } from "@/features/planner/page/plannerProjectionAccess";
 import { resolveSidebarNavigation } from "@/features/planner/page/plannerSidebarNavigation";
@@ -1766,36 +1767,15 @@ export default function Home() {
       <footer className="px-2 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-center text-xs text-zinc-500 dark:text-zinc-400 md:px-4 md:pb-4">
         © 2026 Spectra Professional Services, LLC. All rights reserved.
       </footer>
-      {pendingExternalUrl ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label={copy?.labels?.ui?.externalLinkWarningTitle ?? ""}
-        >
-          <div className="w-full max-w-xl rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
-            <p className="text-sm leading-relaxed text-zinc-800 dark:text-zinc-100">
-              {copy?.messages?.externalLinkWarning ?? ""}
-            </p>
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={cancelExternalNavigation}
-                className="rounded-full border border-zinc-300 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
-              >
-                {copy?.buttons?.cancel ?? ""}
-              </button>
-              <button
-                type="button"
-                onClick={confirmExternalNavigation}
-                className="rounded-full bg-[var(--brand-primary)] px-4 py-2 text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
-              >
-                {copy?.buttons?.continue ?? ""}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <ExternalLinkWarningModal
+        isOpen={Boolean(pendingExternalUrl)}
+        title={copy?.labels?.ui?.externalLinkWarningTitle ?? ""}
+        message={copy?.messages?.externalLinkWarning ?? ""}
+        cancelLabel={copy?.buttons?.cancel ?? ""}
+        continueLabel={copy?.buttons?.continue ?? ""}
+        onCancel={cancelExternalNavigation}
+        onContinue={confirmExternalNavigation}
+      />
     </div>
   );
 }
