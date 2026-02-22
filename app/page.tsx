@@ -28,6 +28,7 @@ import {
   buildAccountActivityFormChangeHandler,
   buildDemographicsFormChangeHandler,
 } from "@/features/planner/page/plannerFormHandlers";
+import { usePlannerClientEffects } from "@/features/planner/page/usePlannerClientEffects";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
 import {
@@ -921,56 +922,15 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setWithdrawalStartMonth,
   });
 
-  useEffect(() => {
-    const client = getClientConfig(plannerStateCode);
-    const brand = client.brand;
-    const typography = client.typography;
-    if (!brand && !typography) return;
-
-    const root = document.documentElement.style;
-    if (brand) {
-      root.setProperty("--brand-primary", brand.primary);
-      root.setProperty("--brand-primary-hover", brand.primaryHover);
-      root.setProperty("--brand-on-primary", brand.onPrimary);
-      root.setProperty("--brand-ring", brand.ring);
-    }
-
-    if (typography?.fontFamily) {
-      root.setProperty("--app-font-family", typography.fontFamily);
-    }
-    const baseFontSize = typography?.baseFontSizePx;
-    if (Number.isFinite(baseFontSize ?? NaN)) {
-      root.setProperty("--app-font-size", `${baseFontSize}px`);
-    }
-    const lineHeight = typography?.lineHeight;
-    if (Number.isFinite(lineHeight ?? NaN)) {
-      root.setProperty("--app-line-height", `${lineHeight}`);
-    }
-  }, [plannerStateCode]);
-
-  useEffect(() => {
-    if (!beneficiaryStateOfResidence && plannerStateCode !== "default") {
-      setBeneficiaryStateOfResidence(plannerStateCode);
-    }
-  }, [plannerStateCode, beneficiaryStateOfResidence]);
-
-  useEffect(() => {
-    if (timeHorizonEdited) return;
-    const client = getClientConfig(plannerStateCode);
-    const candidate =
-      client?.defaults?.timeHorizonYears ??
-      null;
-    const fallback = typeof candidate === "number" && Number.isFinite(candidate)
-      ? String(Math.round(candidate))
-      : "40";
-    setTimeHorizonYears(fallback);
-  }, [plannerStateCode, timeHorizonEdited]);
-
-  useEffect(() => {
-    if (!beneficiaryStateOfResidence || beneficiaryStateOfResidence === planState) {
-      setNonResidentProceedAck(false);
-    }
-  }, [beneficiaryStateOfResidence, planState]);
+  usePlannerClientEffects({
+    plannerStateCode,
+    beneficiaryStateOfResidence,
+    planState,
+    timeHorizonEdited,
+    setBeneficiaryStateOfResidence,
+    setTimeHorizonYears,
+    setNonResidentProceedAck,
+  });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
