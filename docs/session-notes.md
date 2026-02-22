@@ -357,6 +357,8 @@ Use this file to preserve working context between editor sessions.
 - Avoid low-value micro extractions unless there is reuse/testing payoff.
 - Keep behavior unchanged while refactoring; always lint before commit.
 - Keep `local` projection source as default until API parity is validated.
+- Consolidate calc-driving client config server-side into one backend config map keyed by `clientId` (with default fallback).
+- Keep UI/presentation client config separate on client side.
 
 - What is complete so far:
 - Significant `app/page.tsx` logic has been extracted into `src/features/planner/page/*`.

@@ -59,6 +59,12 @@ Contract must exist in both code and docs:
    - error model
    - trigger semantics (when UI calls API vs not)
 
+### Client Config Authority (Locked)
+
+1. Consolidate calculation-driving client config into one backend authoritative map keyed by `clientId` (single source of truth with default fallback).
+2. Keep UI/presentation config in client-hosted config (branding, copy blocks, tab visibility/order, enrollment URL).
+3. API resolves calc config from backend map based on incoming `clientId`; UI must not authoritatively control calc-driving defaults/constraints.
+
 ## 5) Target File Structure (Non-Micro)
 
 Add/reshape around these focused modules:
@@ -185,11 +191,12 @@ To reduce complexity drift, we are intentionally avoiding:
 2. Add/finish API-mode projection path behind existing source gate:
    - keep `local` as default,
    - complete `api` branch in projection adapter.
-3. Execute parity checks for key flows:
+3. Consolidate calc-driving client config server-side into a single backend map keyed by `clientId` and wire API lookup with fallback.
+4. Execute parity checks for key flows:
    - demographics/input navigation,
    - WTA/SSI constraint behavior,
    - reports/schedule output consistency.
-4. Only after parity is stable: prepare WordPress/client-hosted UI simulation notes for API-origin setup.
+5. Only after parity is stable: prepare WordPress/client-hosted UI simulation notes for API-origin setup.
 
 ## 6.4) Stop/Resume Rules
 
