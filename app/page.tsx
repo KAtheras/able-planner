@@ -30,6 +30,7 @@ import {
 } from "@/features/planner/page/plannerFormHandlers";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
+import { useProjectionDateSync } from "@/features/planner/page/usePlannerRules";
 import {
   clampNumber,
   getStartMonthIndex,
@@ -1070,61 +1071,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     wtaAutoPromptedForIncrease,
   ]);
 
-  useEffect(() => {
-    if (isTimeHorizonEditing) {
-      return;
-    }
-    const { startIndex, horizonEndIndex } = getHorizonConfig();
-    const minIndex = startIndex;
-    const contributionMaxIndex = Math.max(startIndex, contributionEndMaxIndex);
-    const defaultWithdrawalStartIndex = Math.min(horizonEndIndex, startIndex + 1);
-    const withdrawalEnforcedIndex =
-      effectiveEnforcedWithdrawalStartIndex != null
-        ? clampNumber(effectiveEnforcedWithdrawalStartIndex, startIndex, horizonEndIndex)
-        : null;
-    const withdrawalMaxIndex = withdrawalEnforcedIndex ?? Math.max(startIndex, horizonEndIndex);
-    const withdrawalDefaultIndex = withdrawalEnforcedIndex ?? defaultWithdrawalStartIndex;
-
-    const setContributionFromIndex = (index: number) => {
-      const { year, month } = monthIndexToParts(index);
-      const nextYear = String(year);
-      const nextMonth = String(month).padStart(2, "0");
-      if (contributionEndYear !== nextYear) setContributionEndYear(nextYear);
-      if (contributionEndMonth !== nextMonth) setContributionEndMonth(nextMonth);
-    };
-
-    const setWithdrawalFromIndex = (index: number) => {
-      const { year, month } = monthIndexToParts(index);
-      const nextYear = String(year);
-      const nextMonth = String(month).padStart(2, "0");
-      if (withdrawalStartYear !== nextYear) setWithdrawalStartYear(nextYear);
-      if (withdrawalStartMonth !== nextMonth) setWithdrawalStartMonth(nextMonth);
-    };
-
-    const contributionIndex = parseMonthYearToIndex(contributionEndYear, contributionEndMonth);
-    if (!contributionEndTouched || contributionIndex === null) {
-      setContributionFromIndex(contributionMaxIndex);
-    } else {
-      const clamped = clampNumber(contributionIndex, minIndex, contributionMaxIndex);
-      if (clamped !== contributionIndex) {
-        setContributionFromIndex(clamped);
-      }
-    }
-
-    const withdrawalIndex = parseMonthYearToIndex(withdrawalStartYear, withdrawalStartMonth);
-    if (withdrawalEnforcedIndex !== null) {
-      if (withdrawalIndex !== withdrawalEnforcedIndex) {
-        setWithdrawalFromIndex(withdrawalEnforcedIndex);
-      }
-    } else if (!withdrawalStartTouched || withdrawalIndex === null) {
-      setWithdrawalFromIndex(withdrawalDefaultIndex);
-    } else {
-      const clamped = clampNumber(withdrawalIndex, minIndex, withdrawalMaxIndex);
-      if (clamped !== withdrawalIndex) {
-        setWithdrawalFromIndex(clamped);
-      }
-    }
-  }, [
+  useProjectionDateSync({
     plannerStateCode,
     timeHorizonYears,
     contributionEndTouched,
@@ -1133,11 +1080,18 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     contributionEndYear,
     withdrawalStartMonth,
     withdrawalStartYear,
-    getHorizonConfig,
     contributionEndMaxIndex,
     effectiveEnforcedWithdrawalStartIndex,
     isTimeHorizonEditing,
-  ]);
+    getHorizonConfig,
+    clampNumber,
+    parseMonthYearToIndex,
+    monthIndexToParts,
+    setContributionEndYear,
+    setContributionEndMonth,
+    setWithdrawalStartYear,
+    setWithdrawalStartMonth,
+  });
 
   useEffect(() => {
     const client = getClientConfig(plannerStateCode);
