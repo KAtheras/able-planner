@@ -30,6 +30,14 @@ import {
 } from "@/features/planner/page/plannerFormHandlers";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
+import {
+  clampNumber,
+  getStartMonthIndex,
+  getYearOptions,
+  monthIndexToParts,
+  parseIntegerInput,
+  parseMonthYearToIndex,
+} from "@/features/planner/page/plannerTimeUtils";
 import ResourcesSection from "@/features/planner/content/ResourcesSection";
 import ReportsSection from "@/features/planner/content/ReportsSection";
 import ScheduleSection from "@/features/planner/content/ScheduleSection";
@@ -512,9 +520,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   return String(percent);
 }
 
-  const clampNumber = (value: number, min: number, max: number) =>
-    Math.max(min, Math.min(max, value));
-
   const sanitizeAmountInput = (value: string) => {
     if (value === "") return "";
     const clean = value.replace(".00", "");
@@ -526,49 +531,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     return `${parts[0]}.${parts.slice(1).join("")}`;
   };
 
-  const parseIntegerInput = (value: string): number | null => {
-    const trimmed = value.trim();
-    if (trimmed === "") return null;
-    const num = Number(trimmed);
-    if (!Number.isFinite(num)) return null;
-    return Math.round(num);
-  };
-
-  const getStartMonthIndex = () => {
-    const now = new Date();
-    return now.getFullYear() * 12 + now.getMonth() + 1;
-  };
-
-  const monthIndexToParts = (index: number) => ({
-    year: Math.floor(index / 12),
-    month: (index % 12) + 1,
-  });
-
   const formatMonthYearLabel = (index: number) => {
     return formatMonthYearFromIndex(index, language, { monthStyle: "long" });
-  };
-
-  const parseMonthYearToIndex = (yearStr: string, monthStr: string): number | null => {
-    const year = Number(yearStr);
-    const month = Number(monthStr);
-    if (
-      Number.isNaN(year) ||
-      Number.isNaN(month) ||
-      year <= 0 ||
-      month < 1 ||
-      month > 12
-    ) {
-      return null;
-    }
-    return year * 12 + (month - 1);
-  };
-
-  const getYearOptions = (minIndex: number, maxIndex: number) => {
-    const minYear = Math.floor(minIndex / 12);
-    const maxYear = Math.floor(maxIndex / 12);
-    return Array.from({ length: maxYear - minYear + 1 }, (_, idx) =>
-      String(minYear + idx),
-    );
   };
 
   const getTimeHorizonLimits = useCallback(() => {
