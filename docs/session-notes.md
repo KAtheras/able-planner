@@ -339,3 +339,6 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/PlannerReportActions.tsx`.
 - Moved inline report action buttons (enrollment + print) out of `app/page.tsx` into dedicated component.
 - Validation: `npx eslint app/page.tsx src/features/planner/page/PlannerReportActions.tsx`
+- UX adjustment requested: `Enroll` button now opens configured enrollment URL directly in a new tab without showing external-link warning modal.
+- External-link warning modal remains in place for other external links (e.g., resources).
+- Validation: `npx eslint app/page.tsx`

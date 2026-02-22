@@ -300,7 +300,8 @@ export default function Home() {
   );
   const handleOpenEnrollmentPage = () => {
     if (!enrollmentPageUrl) return;
-    openExternalUrlWithWarning(enrollmentPageUrl);
+    if (typeof window === "undefined") return;
+    window.open(enrollmentPageUrl, "_blank", "noopener,noreferrer");
   };
   const handlePrintReport = () => {
     // Interim behavior until custom PDF layout/export is implemented.
