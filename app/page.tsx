@@ -43,6 +43,7 @@ import { resolveSidebarNavigation } from "@/features/planner/page/plannerSidebar
 import { getPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
 import { usePlannerProjectionSource } from "@/features/planner/page/usePlannerProjectionSource";
 import { usePlannerHorizon } from "@/features/planner/page/usePlannerHorizon";
+import { useExternalLinkWarning } from "@/features/planner/page/useExternalLinkWarning";
 import {
   useContributionIncreaseInputLock,
   useContributionIncreaseRules,
@@ -225,7 +226,6 @@ export default function Home() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [welcomeTermsAgreed, setWelcomeTermsAgreed] = useState(false);
   const [showWelcomeTermsOfUse, setShowWelcomeTermsOfUse] = useState(false);
-  const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
   const [amortizationView, setAmortizationView] = useState<"able" | "taxable">("able");
   const [sidebarDesktopTopOffset, setSidebarDesktopTopOffset] = useState(0);
   const fscPassedRef = useRef(false);
@@ -284,6 +284,12 @@ export default function Home() {
   );
   const [screen1Messages, setScreen1Messages] = useState<string[]>(() => [...screen1DefaultMessages]);
   const [screen2Messages, setScreen2Messages] = useState<string[]>(() => [...screen2DefaultMessages]);
+  const {
+    pendingExternalUrl,
+    openExternalUrlWithWarning,
+    cancelExternalNavigation,
+    confirmExternalNavigation,
+  } = useExternalLinkWarning();
 
   useEffect(() => {
     if (!enabledReportViews.includes(reportView)) {
@@ -321,21 +327,6 @@ export default function Home() {
       </button>
     </div>
   );
-  const openExternalUrlWithWarning = useCallback((url: string) => {
-    if (!url) return;
-    setPendingExternalUrl(url);
-  }, []);
-  const cancelExternalNavigation = useCallback(() => {
-    setPendingExternalUrl(null);
-  }, []);
-  const confirmExternalNavigation = useCallback(() => {
-    if (!pendingExternalUrl || typeof window === "undefined") {
-      setPendingExternalUrl(null);
-      return;
-    }
-    window.open(pendingExternalUrl, "_blank", "noopener,noreferrer");
-    setPendingExternalUrl(null);
-  }, [pendingExternalUrl]);
   const handleOpenEnrollmentPage = () => {
     if (!enrollmentPageUrl) return;
     openExternalUrlWithWarning(enrollmentPageUrl);

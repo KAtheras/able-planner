@@ -315,3 +315,7 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/plannerSidebarNavigation.ts`.
 - Moved projection-view access routing decision out of `app/page.tsx` (`handleSidebarChange` now delegates to helper).
 - Validation: `npx eslint app/page.tsx src/features/planner/page/plannerSidebarNavigation.ts`
+- External-link warning extraction:
+- Added `src/features/planner/page/useExternalLinkWarning.ts`.
+- Moved `pendingExternalUrl` state and open/cancel/confirm handlers out of `app/page.tsx` into dedicated hook.
+- Validation: `npx eslint app/page.tsx src/features/planner/page/useExternalLinkWarning.ts`
