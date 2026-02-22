@@ -379,3 +379,6 @@ Use this file to preserve working context between editor sessions.
 - Next after that:
 - Finish API-backed projection path in adapter (`source: "api"`), keep `local` default.
 - Run parity checks for WTA/SSI and reports/schedule outputs before flipping source in test env.
+- SSI warning copy logic fix (edge case): when SSI is enabled and planned contributions are zero/blank, the warning no longer says contributions are stopped.
+- Added withdrawals-only warning templates in `src/copy/en.json` and `src/copy/es.json` and updated template-selection logic in `app/page.tsx`.
+- Validation: `npx eslint app/page.tsx`

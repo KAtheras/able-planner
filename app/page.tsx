@@ -1120,6 +1120,15 @@ export default function Home() {
           ? clampNumber(userWithdrawalStartRaw, horizonConfig.startIndex, horizonConfig.horizonEndIndex)
           : Math.min(horizonConfig.horizonEndIndex, horizonConfig.startIndex + 1);
       const forcedWithdrawalMonthIndex = forcedMsg?.data?.monthIndex ?? null;
+      const parsedCurrentContribution = Number(sanitizeAmountInput(calcMonthlyContributionInput) || "0");
+      const parsedFutureContribution = Number(
+        sanitizeAmountInput(
+          calcMonthlyContributionFutureInput === "" ? calcMonthlyContributionInput : calcMonthlyContributionFutureInput,
+        ) || "0",
+      );
+      const hasPlannedContributions =
+        (Number.isFinite(parsedCurrentContribution) && parsedCurrentContribution > 0) ||
+        (Number.isFinite(parsedFutureContribution) && parsedFutureContribution > 0);
       const shouldUseRevisedWithdrawalLanguage =
         forcedWithdrawalMonthIndex !== null &&
         hasConfiguredWithdrawals &&
@@ -1129,6 +1138,16 @@ export default function Home() {
           ? (copy?.messages?.balanceCapWarningNoForcedWithdrawals ??
               copy?.messages?.balanceCapWarning ??
               "")
+          : !hasPlannedContributions
+            ? shouldUseRevisedWithdrawalLanguage
+              ? (copy?.messages?.balanceCapWarningWithdrawalsOnlyExisting ??
+                  copy?.messages?.balanceCapWarningWithdrawalsOnly ??
+                  copy?.messages?.balanceCapWarningExistingWithdrawals ??
+                  copy?.messages?.balanceCapWarning ??
+                  "")
+              : (copy?.messages?.balanceCapWarningWithdrawalsOnly ??
+                  copy?.messages?.balanceCapWarning ??
+                  "")
           : shouldUseRevisedWithdrawalLanguage
             ? (copy?.messages?.balanceCapWarningExistingWithdrawals ??
                 copy?.messages?.balanceCapWarning ??
