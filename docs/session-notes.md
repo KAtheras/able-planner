@@ -277,3 +277,18 @@ Use this file to preserve working context between editor sessions.
 - Kept mobile action controls sticky; left top banner behavior aligned with host-site integration model.
 - Completed multiple dark-mode QA fixes (dropdowns, schedule toggles/text, hover readability, focus-ring clipping).
 - Added visible chevron indicators to form dropdowns for clearer affordance.
+
+### 2026-02-22
+- Continued safe `app/page.tsx` refactor on `refactor/extract-calc` with no behavior-change intent.
+- Added projection-source gate for adapter boundary:
+- `src/features/planner/page/usePlannerProjectionSource.ts`
+- `app/page.tsx` now passes `projectionSource` into projection adapter path.
+- Added projection boundary helper:
+- `src/features/planner/page/usePlannerProjectionData.ts`
+- `app/page.tsx` now uses `getPlannerProjectionData(...)` instead of direct adapter call.
+- Validation:
+- `npx eslint app/page.tsx src/features/planner/page/usePlannerProjectionSource.ts src/features/planner/page/usePlannerProjectionData.ts`
+- Commits pushed:
+- `a2d4bb1` refactor: wire projection source hook into planner page
+- Next immediate slice:
+- Convert projection boundary helper to async-ready adapter shape (still local-backed), then isolate debounced trigger orchestration from `app/page.tsx`.

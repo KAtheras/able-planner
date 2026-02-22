@@ -31,7 +31,7 @@ import {
 import { usePlannerClientEffects } from "@/features/planner/page/usePlannerClientEffects";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
-import { buildPlannerProjection } from "@/features/planner/page/plannerProjectionAdapter";
+import { getPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
 import { usePlannerProjectionSource } from "@/features/planner/page/usePlannerProjectionSource";
 import {
   useContributionIncreaseInputLock,
@@ -1561,7 +1561,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       reportAbleRows,
       reportTaxableRows,
       accountGrowthNarrativeParagraphs,
-    } = buildPlannerProjection({
+    } = getPlannerProjectionData({
       timeHorizonYears,
       horizonConfig,
       calcStartingBalanceInput,
@@ -1604,7 +1604,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       formatCurrency,
       formatMonthYearLabel,
       getMonthsRemainingInCurrentCalendarYear,
-    }, { source: projectionSource });
+    }, projectionSource);
     const desktopAccountEndingNode = (
       <div className="hidden md:block">
         <AccountEndingValueCard
