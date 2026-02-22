@@ -33,6 +33,7 @@ import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigati
 import {
   useContributionIncreaseRules,
   useProjectionDateSync,
+  useWtaModeRules,
   useWtaAutoAdjustRules,
 } from "@/features/planner/page/usePlannerRules";
 import {
@@ -846,67 +847,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     [getHorizonConfig, setMonthlyContribution, setMonthlyContributionFuture],
   );
 
-  useEffect(() => {
-    const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
-    const plannedAnnual = Number.isFinite(numeric) ? numeric * 12 : 0;
-    const { startIndex, safeYears } = getHorizonConfig();
-    const totalMonthsInHorizon = safeYears * 12;
-    const monthsRemainingInCurrentCalendarYear = getMonthsRemainingInCurrentCalendarYear(startIndex);
-    const plannedCurrentYear = Number.isFinite(numeric)
-      ? numeric * monthsRemainingInCurrentCalendarYear
-      : 0;
-    const monthsBeyondThisYear = Math.max(0, totalMonthsInHorizon - monthsRemainingInCurrentCalendarYear);
-    const monthsInNextCalendarYearWithinHorizon = Math.min(12, monthsBeyondThisYear);
-    const plannedNextCalendarYear = Number.isFinite(numeric)
-      ? numeric * monthsInNextCalendarYearWithinHorizon
-      : 0;
-    const overBaseLimit =
-      plannedCurrentYear > WTA_BASE_ANNUAL_LIMIT ||
-      plannedNextCalendarYear > WTA_BASE_ANNUAL_LIMIT;
-
-    if (!wtaDismissed && (wtaMode === "noPath" || wtaMode === "combinedLimit")) {
-      return;
-    }
-    if (!wtaDismissed && (wtaMode === "initialPrompt" || wtaMode === "wtaQuestion")) {
-      if (overBaseLimit) {
-        return;
-      }
-      setWtaMode("idle");
-      return;
-    }
-
-    if (wtaStatus === "unknown") {
-      // If the current annualized contribution exceeds the base limit, ALWAYS prompt WTA,
-      // even if we previously auto-prompted due to a future-year projection.
-      if (overBaseLimit) {
-        if (wtaAutoPromptedForIncrease) {
-          setWtaAutoPromptedForIncrease(false);
-        }
-        setWtaMode("initialPrompt");
-        return;
-      }
-
-      if (wtaAutoPromptedForIncrease) {
-        return;
-      }
-
-      setWtaMode("idle");
-      return;
-    }
-
-    if (wtaStatus === "eligible") {
-      setWtaMode(
-        plannedAnnual > wtaCombinedLimit ? "combinedLimit" : "idle",
-      );
-      return;
-    }
-
-    setWtaMode(
-      plannedCurrentYear > WTA_BASE_ANNUAL_LIMIT || plannedAnnual > WTA_BASE_ANNUAL_LIMIT
-        ? "noPath"
-        : "idle",
-    );
-  }, [
+  useWtaModeRules({
     monthlyContribution,
     getHorizonConfig,
     wtaCombinedLimit,
@@ -914,7 +855,11 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     wtaAutoPromptedForIncrease,
     wtaMode,
     wtaDismissed,
-  ]);
+    baseAnnualLimit: WTA_BASE_ANNUAL_LIMIT,
+    getMonthsRemainingInCurrentCalendarYear,
+    setWtaMode,
+    setWtaAutoPromptedForIncrease,
+  });
 
   useWtaAutoAdjustRules({
     monthlyContribution,
