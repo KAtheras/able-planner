@@ -41,6 +41,7 @@ import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigati
 import { getPlannerProjectionAccessState } from "@/features/planner/page/plannerProjectionAccess";
 import { getPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
 import { usePlannerProjectionSource } from "@/features/planner/page/usePlannerProjectionSource";
+import { usePlannerHorizon } from "@/features/planner/page/usePlannerHorizon";
 import {
   useContributionIncreaseInputLock,
   useContributionIncreaseRules,
@@ -50,7 +51,6 @@ import {
 } from "@/features/planner/page/usePlannerRules";
 import {
   clampNumber,
-  getStartMonthIndex,
   getYearOptions,
   monthIndexToParts,
   parseIntegerInput,
@@ -467,32 +467,10 @@ export default function Home() {
   const formatMonthYearLabel = (index: number) => {
     return formatMonthYearFromIndex(index, language, { monthStyle: "long" });
   };
-
-  const getTimeHorizonLimits = useCallback(() => {
-    const client = getClientConfig(plannerStateCode);
-    const maxYears =
-      client?.constraints?.timeHorizonYearsHardMax ??
-      75;
-    return {
-      minYears: client?.constraints?.timeHorizonYearsHardMin ?? 1,
-      maxYears,
-    };
-  }, [plannerStateCode]);
-
-  const getHorizonConfig = useCallback(() => {
-    const limits = getTimeHorizonLimits();
-    const parsed = parseIntegerInput(timeHorizonYears);
-    const safeYears = clampNumber(parsed ?? limits.minYears, limits.minYears, limits.maxYears);
-    const startIndex = getStartMonthIndex();
-    const horizonEndIndex = startIndex + safeYears * 12 - 1;
-    return {
-      minYears: limits.minYears,
-      maxYears: limits.maxYears,
-      safeYears,
-      startIndex,
-      horizonEndIndex: Math.max(startIndex, horizonEndIndex),
-    };
-  }, [getTimeHorizonLimits, timeHorizonYears]);
+  const { getTimeHorizonLimits, getHorizonConfig } = usePlannerHorizon({
+    plannerStateCode,
+    timeHorizonYears,
+  });
 
   const {
     budgetMode,

@@ -307,3 +307,7 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/plannerInputUtils.ts` with `sanitizeAgiInput`, `parsePercentStringToDecimal`, `formatDecimalToPercentString`, and `sanitizeAmountInput`.
 - Removed duplicate inline definitions from `app/page.tsx` and switched to imports.
 - Validation: `npx eslint app/page.tsx src/features/planner/page/plannerInputUtils.ts`
+- Horizon config extraction:
+- Added `src/features/planner/page/usePlannerHorizon.ts`.
+- Moved `getTimeHorizonLimits` and `getHorizonConfig` out of `app/page.tsx` into a dedicated hook (no behavior changes).
+- Validation: `npx eslint app/page.tsx src/features/planner/page/usePlannerHorizon.ts`
