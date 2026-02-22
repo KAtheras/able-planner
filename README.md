@@ -37,10 +37,12 @@ All new code and all code changes in this repository must be built and reviewed 
 ## Docs
 - Architecture & system design: docs/ARCHITECTURE.md
 - Session handoff notes: docs/session-notes.md
+- Refactor execution roadmap: docs/refactor-plan.md
 
 ## Session Workflow
 - At session start, ask Codex: `Read README.md first`.
 - When this instruction is used, Codex should also read `docs/session-notes.md` before making changes.
+- For refactor/migration work, also read `docs/refactor-plan.md` before making changes.
 - At session end, ask Codex: `Update docs/session-notes.md`.
 - Resume reminder: prioritize server-side calculation migration before additional feature work.
 

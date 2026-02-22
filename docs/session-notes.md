@@ -4,6 +4,7 @@ Use this file to preserve working context between editor sessions.
 
 ## How To Use
 - At the start of a new session, ask: `Read docs/session-notes.md first`.
+- For refactor/migration sessions, also read: `docs/refactor-plan.md`.
 - At the end of a session, ask: `Update docs/session-notes.md`.
 
 ## Active Project Context
