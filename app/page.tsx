@@ -43,6 +43,7 @@ import { resolveSidebarNavigation } from "@/features/planner/page/plannerSidebar
 import { getSsiIncomeWarningState } from "@/features/planner/page/plannerSsiIncomeWarning";
 import { resolvePlannerLandingCopy } from "@/features/planner/page/plannerLandingCopy";
 import { resolvePlannerPlanState } from "@/features/planner/page/plannerPlanState";
+import { resolvePlannerClientViewConfig } from "@/features/planner/page/plannerClientViewConfig";
 import { getPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
 import { usePlannerProjectionSource } from "@/features/planner/page/usePlannerProjectionSource";
 import { usePlannerHorizon } from "@/features/planner/page/usePlannerHorizon";
@@ -91,7 +92,7 @@ import {
 } from "@/features/planner/inputs/wtaFlow";
 import { useSsiEnforcement } from "@/features/planner/inputs/useSsiEnforcement";
 import { buildMobileNavModel } from "@/features/planner/navigation/mobileNavModel";
-import { getEnabledReportViews, type ReportWindowOption } from "@/features/planner/report/reportViewModel";
+import { type ReportWindowOption } from "@/features/planner/report/reportViewModel";
 import federalSaversContributionLimits from "@/config/rules/federalSaversContributionLimits.json";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 import ssiIncomeWarningThresholds from "@/config/rules/ssiIncomeWarningThresholds.json";
@@ -102,27 +103,6 @@ import {
 } from "@/lib/report/exportScheduleCsv";
 import { shouldShowStandaloneWithdrawalLimitedMessage } from "@/lib/planner/messages";
 import { useQualifiedWithdrawalBudget } from "@/lib/inputs/useQualifiedWithdrawalBudget";
-
-type ClientBlocks = Partial<
-  Record<
-    "landingWelcome" | "disclosuresAssumptions" | "rightCardPrimary" | "rightCardSecondary",
-    Partial<Record<SupportedLanguage, string>>
-  >
->;
-type ClientLandingContent = Partial<{
-  heroTitle: string;
-  heroBody: string;
-  heroBullets: string[];
-  disclosuresTitle: string;
-  disclosuresIntro: string;
-  disclosuresBody: string;
-  agreeToTermsPrefix: string;
-  agreeAndContinueLabel: string;
-  termsOfUseLinkLabel: string;
-  termsOfUseTitle: string;
-  termsOfUseBody: string;
-}>;
-type ClientLandingOverrides = Partial<Record<SupportedLanguage, ClientLandingContent>>;
 
 import { buildPlannerSchedule } from "@/lib/calc/usePlannerSchedule";
 
@@ -240,17 +220,8 @@ export default function Home() {
   const lastMobileConsoleModeRef = useRef<"annual" | "residency" | "fsc" | "ssi" | null>(null);
   const lastMobileScreen2PanelRef = useRef<string | null>(null);
   const currentClientConfig = getClientConfig(plannerStateCode);
-  const enrollmentPageUrlRaw = (currentClientConfig as { enrollmentPageUrl?: string } | undefined)
-    ?.enrollmentPageUrl;
-  const enrollmentPageUrl =
-    typeof enrollmentPageUrlRaw === "string" && enrollmentPageUrlRaw.trim()
-      ? enrollmentPageUrlRaw.trim()
-      : "";
-  const configuredReportTabs =
-    (currentClientConfig as { features?: { reports?: { tabs?: string[] } } })?.features?.reports?.tabs ??
-    [];
-  const enabledReportViews = getEnabledReportViews(configuredReportTabs);
-  const defaultReportView = enabledReportViews[0] ?? "account_growth";
+  const { enrollmentPageUrl, enabledReportViews, defaultReportView, landingOverride, blocks } =
+    resolvePlannerClientViewConfig(currentClientConfig, language);
   const planInfoMap = planLevelInfo as unknown as Record<
     string,
     { name?: string; residencyRequired?: boolean; maxAccountBalance?: number }
@@ -269,13 +240,8 @@ export default function Home() {
     nonResidentProceedAck,
     planInfoMap,
   });
-  const getClientBlock = (slot: "landingWelcome" | "disclosuresAssumptions" | "rightCardPrimary" | "rightCardSecondary") => {
-    const raw = (currentClientConfig as { clientBlocks?: ClientBlocks } | undefined)?.clientBlocks?.[slot]?.[language];
-    return typeof raw === "string" && raw.trim() ? raw : "";
-  };
-  const landingOverride = (currentClientConfig as { landing?: ClientLandingOverrides } | undefined)?.landing?.[language];
-  const rightCardPrimaryOverride = getClientBlock("rightCardPrimary");
-  const rightCardSecondaryOverride = getClientBlock("rightCardSecondary");
+  const rightCardPrimaryOverride = blocks.rightCardPrimary;
+  const rightCardSecondaryOverride = blocks.rightCardSecondary;
   const screen1DefaultMessages = resolveDefaultMessages(
     rightCardPrimaryOverride,
     copy.flows?.screen1?.defaultMessages,
@@ -424,7 +390,7 @@ export default function Home() {
     }
   }, [showSsiIncomeEligibilityWarning]);
 
-  const landingWelcomeOverride = getClientBlock("landingWelcome");
+  const landingWelcomeOverride = blocks.landingWelcome;
   const { useLegacyLandingWelcomeOverride, landingCopy, termsOfUseParagraphs } = resolvePlannerLandingCopy({
     landingOverride,
     landingWelcomeOverride,
@@ -1570,7 +1536,7 @@ export default function Home() {
     const assumptionItems = Array.isArray(copy?.ui?.assumptions?.items)
       ? copy.ui!.assumptions!.items
       : [];
-    const disclosuresAssumptionsOverride = getClientBlock("disclosuresAssumptions");
+    const disclosuresAssumptionsOverride = blocks.disclosuresAssumptions;
     const disclosuresContent = (
       <DisclosuresSection
         assumptionTitle={assumptionTitle}
