@@ -27,6 +27,168 @@ type UseProjectionDateSyncParams = {
   setWithdrawalStartMonth: (next: string) => void;
 };
 
+type UseContributionIncreaseRulesParams = {
+  annualContributionLimit: number;
+  contributionIncreaseBreachHelperText?: string;
+  contributionIncreaseDisabledHelperText?: string;
+  contributionIncreasePct: string;
+  monthlyContributionNum: number;
+  timeHorizonYears: string;
+  wtaStatus: "unknown" | "ineligible" | "eligible";
+  wtaAutoPromptedForIncrease: boolean;
+  baseAnnualLimit: number;
+  setContributionBreachYear: (next: number | null) => void;
+  setContributionIncreaseHelperText: (next: string | undefined) => void;
+  setStopContributionIncreasesAfterYear: (next: number | null) => void;
+  setWtaAutoPromptedForIncrease: (next: boolean) => void;
+  setWtaMode: (next: "idle" | "initialPrompt" | "wtaQuestion" | "combinedLimit" | "noPath") => void;
+  setWtaHasEarnedIncome: (next: boolean | null) => void;
+  setWtaEarnedIncome: (next: string) => void;
+  setWtaRetirementPlan: (next: boolean | null) => void;
+  setContributionIncreasePct: (next: string) => void;
+};
+
+export function useContributionIncreaseRules({
+  annualContributionLimit,
+  contributionIncreaseBreachHelperText,
+  contributionIncreaseDisabledHelperText,
+  contributionIncreasePct,
+  monthlyContributionNum,
+  timeHorizonYears,
+  wtaStatus,
+  wtaAutoPromptedForIncrease,
+  baseAnnualLimit,
+  setContributionBreachYear,
+  setContributionIncreaseHelperText,
+  setStopContributionIncreasesAfterYear,
+  setWtaAutoPromptedForIncrease,
+  setWtaMode,
+  setWtaHasEarnedIncome,
+  setWtaEarnedIncome,
+  setWtaRetirementPlan,
+  setContributionIncreasePct,
+}: UseContributionIncreaseRulesParams) {
+  useEffect(() => {
+    const pctRaw = Number(contributionIncreasePct);
+    if (monthlyContributionNum <= 0 || !Number.isFinite(pctRaw) || pctRaw <= 0) {
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+
+    const baseAnnual = monthlyContributionNum * 12;
+    const pctDecimal = pctRaw / 100;
+    const horizonInput = Number(timeHorizonYears);
+    if (!Number.isFinite(horizonInput) || horizonInput <= 0) {
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+    const maxYearsToCheck = Math.floor(horizonInput);
+
+    const computeBreachYear = (limit: number): number | null => {
+      if (baseAnnual >= limit) {
+        return 0;
+      }
+      for (let year = 1; year <= maxYearsToCheck; year += 1) {
+        const projectedAnnual = baseAnnual * Math.pow(1 + pctDecimal, year - 1);
+        if (projectedAnnual > limit) {
+          return year;
+        }
+      }
+      return null;
+    };
+
+    const baseBreachYear = computeBreachYear(baseAnnualLimit);
+    const projectionBreachesBaseLimit = baseBreachYear !== null && baseBreachYear > 0;
+
+    if (wtaStatus === "unknown" && !projectionBreachesBaseLimit && wtaAutoPromptedForIncrease) {
+      setWtaAutoPromptedForIncrease(false);
+    }
+
+    const shouldPromptWtaFromIncrease =
+      wtaStatus === "unknown" &&
+      projectionBreachesBaseLimit &&
+      !wtaAutoPromptedForIncrease;
+
+    if (shouldPromptWtaFromIncrease) {
+      setWtaAutoPromptedForIncrease(true);
+      setWtaMode("initialPrompt");
+      setWtaHasEarnedIncome(null);
+      setWtaEarnedIncome("");
+      setWtaRetirementPlan(null);
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+
+    if (wtaStatus === "unknown") {
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+
+    if (annualContributionLimit <= 0) {
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+
+    const limitBreachYear = computeBreachYear(annualContributionLimit);
+    if (limitBreachYear === null) {
+      setContributionBreachYear(null);
+      setContributionIncreaseHelperText(undefined);
+      setStopContributionIncreasesAfterYear(null);
+      return;
+    }
+
+    setContributionBreachYear(limitBreachYear);
+    setStopContributionIncreasesAfterYear(limitBreachYear > 0 ? limitBreachYear - 1 : null);
+
+    if (limitBreachYear === 0) {
+      setContributionIncreasePct("0");
+      setStopContributionIncreasesAfterYear(null);
+      setContributionIncreaseHelperText(
+        contributionIncreaseDisabledHelperText ??
+          "Base contributions already meet the annual limit; increases are disabled.",
+      );
+      return;
+    }
+
+    setContributionIncreaseHelperText(
+      (contributionIncreaseBreachHelperText ??
+        "At {{pct}}%, contributions exceed the annual limit in year {{breachYear}}. Contribution increases will stop after year {{stopYear}}.")
+        .replace("{{pct}}", contributionIncreasePct)
+        .replace("{{breachYear}}", String(limitBreachYear))
+        .replace("{{stopYear}}", String(limitBreachYear - 1)),
+    );
+  }, [
+    annualContributionLimit,
+    contributionIncreaseBreachHelperText,
+    contributionIncreaseDisabledHelperText,
+    contributionIncreasePct,
+    monthlyContributionNum,
+    timeHorizonYears,
+    wtaStatus,
+    wtaAutoPromptedForIncrease,
+    baseAnnualLimit,
+    setContributionBreachYear,
+    setContributionIncreaseHelperText,
+    setStopContributionIncreasesAfterYear,
+    setWtaAutoPromptedForIncrease,
+    setWtaMode,
+    setWtaHasEarnedIncome,
+    setWtaEarnedIncome,
+    setWtaRetirementPlan,
+    setContributionIncreasePct,
+  ]);
+}
+
 export function useProjectionDateSync({
   plannerStateCode,
   timeHorizonYears,

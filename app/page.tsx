@@ -30,7 +30,7 @@ import {
 } from "@/features/planner/page/plannerFormHandlers";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
-import { useProjectionDateSync } from "@/features/planner/page/usePlannerRules";
+import { useContributionIncreaseRules, useProjectionDateSync } from "@/features/planner/page/usePlannerRules";
 import {
   clampNumber,
   getStartMonthIndex,
@@ -960,116 +960,26 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setWtaAutoApplied,
   ]);
 
-  useEffect(() => {
-    const pctRaw = Number(contributionIncreasePct);
-    if (monthlyContributionNum <= 0 || !Number.isFinite(pctRaw) || pctRaw <= 0) {
-      setContributionBreachYear(null);
-      setContributionIncreaseHelperText(undefined);
-      setStopContributionIncreasesAfterYear(null);
-      return;
-    }
-
-    const baseAnnual = monthlyContributionNum * 12;
-    const pctDecimal = pctRaw / 100;
-    const horizonInput = Number(timeHorizonYears);
-    if (!Number.isFinite(horizonInput) || horizonInput <= 0) {
-      setContributionBreachYear(null);
-      setContributionIncreaseHelperText(undefined);
-      setStopContributionIncreasesAfterYear(null);
-      return;
-    }
-    const maxYearsToCheck = Math.floor(horizonInput);
-
-    const computeBreachYear = (limit: number): number | null => {
-      if (baseAnnual >= limit) {
-        return 0;
-      }
-      for (let year = 1; year <= maxYearsToCheck; year += 1) {
-        const projectedAnnual = baseAnnual * Math.pow(1 + pctDecimal, year - 1);
-        if (projectedAnnual > limit) {
-          return year;
-        }
-      }
-      return null;
-    };
-
-    const baseBreachYear = computeBreachYear(WTA_BASE_ANNUAL_LIMIT);
-    const projectionBreachesBaseLimit = baseBreachYear !== null && baseBreachYear > 0;
-
-    // If inputs change and we no longer breach the base limit, allow auto-prompting again later.
-    if (wtaStatus === "unknown" && !projectionBreachesBaseLimit && wtaAutoPromptedForIncrease) {
-      setWtaAutoPromptedForIncrease(false);
-    }
-
-    const shouldPromptWtaFromIncrease =
-      wtaStatus === "unknown" &&
-      projectionBreachesBaseLimit &&
-      !wtaAutoPromptedForIncrease;
-
-    if (shouldPromptWtaFromIncrease) {
-      setWtaAutoPromptedForIncrease(true);
-      setWtaMode("initialPrompt");
-      setWtaHasEarnedIncome(null);
-      setWtaEarnedIncome("");
-      setWtaRetirementPlan(null);
-      setContributionBreachYear(null);
-      setContributionIncreaseHelperText(undefined);
-      setStopContributionIncreasesAfterYear(null);
-      return;
-    }
-
-    if (wtaStatus === "unknown") {
-      setContributionBreachYear(null);
-      setContributionIncreaseHelperText(undefined);
-      setStopContributionIncreasesAfterYear(null);
-      return;
-    }
-
-    if (annualContributionLimit <= 0) {
-      setContributionBreachYear(null);
-      setContributionIncreaseHelperText(undefined);
-      setStopContributionIncreasesAfterYear(null);
-      return;
-    }
-
-    const limitBreachYear = computeBreachYear(annualContributionLimit);
-    if (limitBreachYear === null) {
-      setContributionBreachYear(null);
-      setContributionIncreaseHelperText(undefined);
-      setStopContributionIncreasesAfterYear(null);
-      return;
-    }
-
-    setContributionBreachYear(limitBreachYear);
-    setStopContributionIncreasesAfterYear(limitBreachYear > 0 ? limitBreachYear - 1 : null);
-
-    if (limitBreachYear === 0) {
-      setContributionIncreasePct("0");
-      setStopContributionIncreasesAfterYear(null);
-      setContributionIncreaseHelperText(
-        copy?.labels?.inputs?.contributionIncreaseDisabledHelper ??
-          "Base contributions already meet the annual limit; increases are disabled.",
-      );
-      return;
-    }
-
-    setContributionIncreaseHelperText(
-      (copy?.labels?.inputs?.contributionIncreaseBreachHelper ??
-        "At {{pct}}%, contributions exceed the annual limit in year {{breachYear}}. Contribution increases will stop after year {{stopYear}}.")
-        .replace("{{pct}}", contributionIncreasePct)
-        .replace("{{breachYear}}", String(limitBreachYear))
-        .replace("{{stopYear}}", String(limitBreachYear - 1)),
-    );
-  }, [
+  useContributionIncreaseRules({
     annualContributionLimit,
-    copy?.labels?.inputs?.contributionIncreaseBreachHelper,
-    copy?.labels?.inputs?.contributionIncreaseDisabledHelper,
+    contributionIncreaseBreachHelperText: copy?.labels?.inputs?.contributionIncreaseBreachHelper,
+    contributionIncreaseDisabledHelperText: copy?.labels?.inputs?.contributionIncreaseDisabledHelper,
     contributionIncreasePct,
     monthlyContributionNum,
     timeHorizonYears,
     wtaStatus,
     wtaAutoPromptedForIncrease,
-  ]);
+    baseAnnualLimit: WTA_BASE_ANNUAL_LIMIT,
+    setContributionBreachYear,
+    setContributionIncreaseHelperText,
+    setStopContributionIncreasesAfterYear,
+    setWtaAutoPromptedForIncrease,
+    setWtaMode,
+    setWtaHasEarnedIncome,
+    setWtaEarnedIncome,
+    setWtaRetirementPlan,
+    setContributionIncreasePct,
+  });
 
   useProjectionDateSync({
     plannerStateCode,
