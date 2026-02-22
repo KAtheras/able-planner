@@ -2665,7 +2665,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           language={language}
           labels={copy.ui?.sidebar}
           desktopTopOffsetPx={sidebarDesktopTopOffset}
-          pinDesktopLeft={isEmbedded}
           mobileBackAction={{
             label: copy?.buttons?.back ?? "Back",
             disabled: mobileBackDisabled,
@@ -2680,7 +2679,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         <main
           className={
             isEmbedded
-              ? "w-full flex-1 px-2 pt-1 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:px-4 md:pt-1.5 md:pb-6"
+              ? "w-full flex-1 px-0 pt-0 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:px-0 md:pt-0 md:pb-6"
               : "mx-auto w-full max-w-6xl flex-1 px-2 pt-1 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:px-4 md:pt-1.5 md:pb-6"
           }
         >
