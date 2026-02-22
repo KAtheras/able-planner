@@ -28,6 +28,7 @@ import {
   buildAccountActivityFormChangeHandler,
   buildDemographicsFormChangeHandler,
 } from "@/features/planner/page/plannerFormHandlers";
+import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
 import ResourcesSection from "@/features/planner/content/ResourcesSection";
 import ReportsSection from "@/features/planner/content/ReportsSection";
 import ScheduleSection from "@/features/planner/content/ScheduleSection";
@@ -1479,97 +1480,25 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     mobileNextDisabledFromModel ||
     (active === "inputs" && inputStep === 2 && hasPendingSsiAcknowledgement);
 
-  const goToPreviousInputStep = () => {
-    if (inputStep === 2) {
-      setInputStep(1);
-    }
-  };
-
-  const goToMobileBack = () => {
-    if (active === "inputs") {
-      goToPreviousInputStep();
-      return;
-    }
-
-    if (active === "reports") {
-      if (reportViewIndexForInputNav <= 0) {
-        setActive("inputs");
-        setInputStep(2);
-        return;
-      }
-      setReportView(enabledReportViews[reportViewIndexForInputNav - 1]);
-      return;
-    }
-
-    if (active === "schedule") {
-      if (amortizationView === "taxable") {
-        setAmortizationView("able");
-        return;
-      }
-      setActive("reports");
-      setReportView(defaultLastReportViewForInputNav);
-      return;
-    }
-
-    if (active === "resources") {
-      setActive("schedule");
-      return;
-    }
-
-    if (active === "disclosures") {
-      setActive("resources");
-    }
-  };
-
-  const goToMobileNext = () => {
-    if (active === "inputs") {
-      if (isInputNextDisabledForInputNav || (inputStep === 2 && hasPendingSsiAcknowledgement)) {
-        return;
-      }
-      if (inputStep === 1) {
-        setInputStep(2);
-        return;
-      }
-      const { minYears, maxYears } = getTimeHorizonLimits();
-      if (timeHorizonYears !== "") {
-        const parsed = parseIntegerInput(timeHorizonYears);
-        if (parsed !== null) {
-          let next = parsed;
-          if (next < minYears) next = minYears;
-          if (next > maxYears) next = maxYears;
-          if (String(next) !== timeHorizonYears) {
-            setTimeHorizonYears(String(next));
-          }
-        }
-      }
-      setActive("reports");
-      setReportView(defaultReportView);
-      return;
-    }
-
-    if (active === "reports") {
-      if (reportViewIndexForInputNav < enabledReportViews.length - 1) {
-        setReportView(enabledReportViews[reportViewIndexForInputNav + 1]);
-        return;
-      }
-      setActive("schedule");
-      setAmortizationView("able");
-      return;
-    }
-
-    if (active === "schedule") {
-      if (amortizationView === "able") {
-        setAmortizationView("taxable");
-        return;
-      }
-      setActive("resources");
-      return;
-    }
-
-    if (active === "resources") {
-      setActive("disclosures");
-    }
-  };
+  const { goToMobileBack, goToMobileNext } = usePlannerNavigation({
+    active,
+    inputStep,
+    reportViewIndex: reportViewIndexForInputNav,
+    defaultLastReportView: defaultLastReportViewForInputNav,
+    defaultReportView,
+    enabledReportViews,
+    amortizationView,
+    hasPendingSsiAcknowledgement,
+    isInputNextDisabled: isInputNextDisabledForInputNav,
+    timeHorizonYears,
+    parseIntegerInput,
+    getTimeHorizonLimits,
+    setActive,
+    setInputStep,
+    setReportView,
+    setAmortizationView,
+    setTimeHorizonYears,
+  });
 
   const content = (() => {
     const agiValue = Number(plannerAgi);
