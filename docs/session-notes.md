@@ -382,3 +382,6 @@ Use this file to preserve working context between editor sessions.
 - SSI warning copy logic fix (edge case): when SSI is enabled and planned contributions are zero/blank, the warning no longer says contributions are stopped.
 - Added withdrawals-only warning templates in `src/copy/en.json` and `src/copy/es.json` and updated template-selection logic in `app/page.tsx`.
 - Validation: `npx eslint app/page.tsx`
+- Plan max-balance warning suppression fix: if planned contributions are zero/blank, the "contributions stop" plan-max warning is now suppressed.
+- Implemented in `app/page.tsx` by reusing planned-contribution detection in screen-2 warning logic.
+- Validation: `npx eslint app/page.tsx`

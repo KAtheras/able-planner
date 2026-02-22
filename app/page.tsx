@@ -1093,6 +1093,15 @@ export default function Home() {
       const ssiContributionStopIndex =
         contributionStopMsg?.data?.monthIndex ??
         (isSsiEligible ? contributionEndIndexValue : null);
+      const parsedCurrentContribution = Number(sanitizeAmountInput(calcMonthlyContributionInput) || "0");
+      const parsedFutureContribution = Number(
+        sanitizeAmountInput(
+          calcMonthlyContributionFutureInput === "" ? calcMonthlyContributionInput : calcMonthlyContributionFutureInput,
+        ) || "0",
+      );
+      const hasPlannedContributions =
+        (Number.isFinite(parsedCurrentContribution) && parsedCurrentContribution > 0) ||
+        (Number.isFinite(parsedFutureContribution) && parsedFutureContribution > 0);
       const showStandaloneWithdrawalLimitedMessage =
         shouldShowStandaloneWithdrawalLimitedMessage({
           hasConfiguredWithdrawals,
@@ -1103,7 +1112,7 @@ export default function Home() {
         (message) => message.data.monthIndex <= contributionEndIndexValue,
       );
       const planMaxNoticeText =
-        firstPlanStopMessage
+        firstPlanStopMessage && hasPlannedContributions
           ? (copy?.messages?.planMaxReached ?? "")
               .replace(
                 "{{month}}",
@@ -1120,15 +1129,6 @@ export default function Home() {
           ? clampNumber(userWithdrawalStartRaw, horizonConfig.startIndex, horizonConfig.horizonEndIndex)
           : Math.min(horizonConfig.horizonEndIndex, horizonConfig.startIndex + 1);
       const forcedWithdrawalMonthIndex = forcedMsg?.data?.monthIndex ?? null;
-      const parsedCurrentContribution = Number(sanitizeAmountInput(calcMonthlyContributionInput) || "0");
-      const parsedFutureContribution = Number(
-        sanitizeAmountInput(
-          calcMonthlyContributionFutureInput === "" ? calcMonthlyContributionInput : calcMonthlyContributionFutureInput,
-        ) || "0",
-      );
-      const hasPlannedContributions =
-        (Number.isFinite(parsedCurrentContribution) && parsedCurrentContribution > 0) ||
-        (Number.isFinite(parsedFutureContribution) && parsedFutureContribution > 0);
       const shouldUseRevisedWithdrawalLanguage =
         forcedWithdrawalMonthIndex !== null &&
         hasConfiguredWithdrawals &&
