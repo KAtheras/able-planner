@@ -32,6 +32,7 @@ import { usePlannerClientEffects } from "@/features/planner/page/usePlannerClien
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
 import { buildPlannerProjection } from "@/features/planner/page/plannerProjectionAdapter";
+import { usePlannerProjectionSource } from "@/features/planner/page/usePlannerProjectionSource";
 import {
   useContributionIncreaseInputLock,
   useContributionIncreaseRules,
@@ -161,6 +162,7 @@ function getFederalSaverCreditPercent(status: FilingStatusOption, agi: number) {
 }
 
 export default function Home() {
+  const { projectionSource } = usePlannerProjectionSource();
   const [language, setLanguage] = useState<SupportedLanguage>("en");
   const [active, setActive] = useState<NavKey>("inputs");
   const [reportView, setReportView] = useState<ReportView>("account_growth");
@@ -1602,7 +1604,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       formatCurrency,
       formatMonthYearLabel,
       getMonthsRemainingInCurrentCalendarYear,
-    }, { source: "local" });
+    }, { source: projectionSource });
     const desktopAccountEndingNode = (
       <div className="hidden md:block">
         <AccountEndingValueCard
