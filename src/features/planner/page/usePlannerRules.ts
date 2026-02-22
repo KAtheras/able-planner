@@ -44,6 +44,97 @@ type UseWtaAutoAdjustRulesParams = {
   setWtaMode: (next: "idle" | "initialPrompt" | "wtaQuestion" | "combinedLimit" | "noPath") => void;
 };
 
+type UseContributionIncreaseInputLockParams = {
+  monthlyContribution: string;
+  wtaStatus: "unknown" | "ineligible" | "eligible";
+  wtaCombinedLimit: number;
+  contributionBreachYear: number | null;
+  contributionIncreaseDisabledHelperText?: string;
+  baseAnnualLimit: number;
+  getHorizonConfig: () => HorizonConfig;
+  getMonthsRemainingInCurrentCalendarYear: (startIndex: number) => number;
+  setContributionIncreasePct: (next: string) => void;
+  setStopContributionIncreasesAfterYear: (next: number | null) => void;
+  setContributionIncreaseHelperText: (next: string | undefined) => void;
+};
+
+export function useContributionIncreaseInputLock({
+  monthlyContribution,
+  wtaStatus,
+  wtaCombinedLimit,
+  contributionBreachYear,
+  contributionIncreaseDisabledHelperText,
+  baseAnnualLimit,
+  getHorizonConfig,
+  getMonthsRemainingInCurrentCalendarYear,
+  setContributionIncreasePct,
+  setStopContributionIncreasesAfterYear,
+  setContributionIncreaseHelperText,
+}: UseContributionIncreaseInputLockParams) {
+  useEffect(() => {
+    const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
+    if (!Number.isFinite(numeric) || numeric <= 0) {
+      const input = document.getElementById("activity-contribution-increase");
+      if (input) {
+        input.removeAttribute("readOnly");
+        input.removeAttribute("aria-disabled");
+        input.setAttribute("tabindex", "0");
+        input.classList.remove("pointer-events-none");
+      }
+      return;
+    }
+    const { startIndex } = getHorizonConfig();
+    const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(startIndex);
+    const limit = wtaStatus === "eligible" ? wtaCombinedLimit : baseAnnualLimit;
+    if (!Number.isFinite(limit) || limit <= 0) {
+      const input = document.getElementById("activity-contribution-increase");
+      if (input) {
+        input.removeAttribute("readOnly");
+        input.removeAttribute("aria-disabled");
+        input.setAttribute("tabindex", "0");
+        input.classList.remove("pointer-events-none");
+      }
+      return;
+    }
+    const currentSliceTotal = numeric * monthsRemaining;
+    const futureYearTotal = numeric * 12;
+    const meetsLimit = currentSliceTotal >= limit || futureYearTotal >= limit;
+    const input = document.getElementById("activity-contribution-increase");
+    if (meetsLimit) {
+      setContributionIncreasePct("0");
+      setStopContributionIncreasesAfterYear(null);
+      setContributionIncreaseHelperText(
+        contributionIncreaseDisabledHelperText ??
+          "Base contributions already meet the annual limit; increases are disabled.",
+      );
+      if (input) {
+        input.setAttribute("readOnly", "true");
+        input.setAttribute("aria-disabled", "true");
+        input.setAttribute("tabindex", "-1");
+        input.classList.add("pointer-events-none");
+      }
+    } else if (input) {
+      input.removeAttribute("readOnly");
+      input.removeAttribute("aria-disabled");
+      input.setAttribute("tabindex", "0");
+      input.classList.remove("pointer-events-none");
+    }
+    void contributionBreachYear;
+  }, [
+    contributionBreachYear,
+    contributionIncreaseDisabledHelperText,
+    getHorizonConfig,
+    monthlyContribution,
+    wtaCombinedLimit,
+    wtaStatus,
+    baseAnnualLimit,
+    getMonthsRemainingInCurrentCalendarYear,
+    setContributionIncreasePct,
+    setStopContributionIncreasesAfterYear,
+    setContributionIncreaseHelperText,
+  ]);
+}
+
 type UseWtaModeRulesParams = {
   monthlyContribution: string;
   wtaCombinedLimit: number;

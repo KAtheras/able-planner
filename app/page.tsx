@@ -32,6 +32,7 @@ import { usePlannerClientEffects } from "@/features/planner/page/usePlannerClien
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
 import {
+  useContributionIncreaseInputLock,
   useContributionIncreaseRules,
   useProjectionDateSync,
   useWtaModeRules,
@@ -1088,63 +1089,19 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       {refreshButton}
     </>
   );
-  useEffect(() => {
-    const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
-    if (!Number.isFinite(numeric) || numeric <= 0) {
-      const input = document.getElementById("activity-contribution-increase");
-      if (input) {
-        input.removeAttribute("readOnly");
-        input.removeAttribute("aria-disabled");
-        input.setAttribute("tabindex", "0");
-        input.classList.remove("pointer-events-none");
-      }
-      return;
-    }
-    const { startIndex } = getHorizonConfig();
-    const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(startIndex);
-    const limit = wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
-    if (!Number.isFinite(limit) || limit <= 0) {
-      const input = document.getElementById("activity-contribution-increase");
-      if (input) {
-        input.removeAttribute("readOnly");
-        input.removeAttribute("aria-disabled");
-        input.setAttribute("tabindex", "0");
-        input.classList.remove("pointer-events-none");
-      }
-      return;
-    }
-    const currentSliceTotal = numeric * monthsRemaining;
-    const futureYearTotal = numeric * 12;
-    const meetsLimit = currentSliceTotal >= limit || futureYearTotal >= limit;
-    const input = document.getElementById("activity-contribution-increase");
-    if (meetsLimit) {
-      setContributionIncreasePct("0");
-      setStopContributionIncreasesAfterYear(null);
-      setContributionIncreaseHelperText(
-        copy?.labels?.inputs?.contributionIncreaseDisabledHelper ??
-          "Base contributions already meet the annual limit; increases are disabled.",
-      );
-      if (input) {
-        input.setAttribute("readOnly", "true");
-        input.setAttribute("aria-disabled", "true");
-        input.setAttribute("tabindex", "-1");
-        input.classList.add("pointer-events-none");
-      }
-    } else if (input) {
-      input.removeAttribute("readOnly");
-      input.removeAttribute("aria-disabled");
-      input.setAttribute("tabindex", "0");
-      input.classList.remove("pointer-events-none");
-    }
-    void contributionBreachYear;
-  }, [
-    contributionBreachYear,
-    copy?.labels?.inputs?.contributionIncreaseDisabledHelper,
-    getHorizonConfig,
+  useContributionIncreaseInputLock({
     monthlyContribution,
-    wtaCombinedLimit,
     wtaStatus,
-  ]);
+    wtaCombinedLimit,
+    contributionBreachYear,
+    contributionIncreaseDisabledHelperText: copy?.labels?.inputs?.contributionIncreaseDisabledHelper,
+    baseAnnualLimit: WTA_BASE_ANNUAL_LIMIT,
+    getHorizonConfig,
+    getMonthsRemainingInCurrentCalendarYear,
+    setContributionIncreasePct,
+    setStopContributionIncreasesAfterYear,
+    setContributionIncreaseHelperText,
+  });
 
   const horizonConfigForInputNav = getHorizonConfig();
   const {
