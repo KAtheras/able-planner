@@ -40,6 +40,7 @@ import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
 import { getPlannerProjectionAccessState } from "@/features/planner/page/plannerProjectionAccess";
 import { resolveSidebarNavigation } from "@/features/planner/page/plannerSidebarNavigation";
+import { getSsiIncomeWarningState } from "@/features/planner/page/plannerSsiIncomeWarning";
 import { getPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
 import { usePlannerProjectionSource } from "@/features/planner/page/usePlannerProjectionSource";
 import { usePlannerHorizon } from "@/features/planner/page/usePlannerHorizon";
@@ -413,16 +414,16 @@ export default function Home() {
     setActive(decision.nextActive);
   };
   const ssiWarningThreshold = ssiIncomeThresholdMap?.[plannerFilingStatus];
-  const showSsiIncomeEligibilityWarning =
-    isSsiEligible &&
-    agiValidForSsiWarning &&
-    Number.isFinite(ssiWarningThreshold ?? NaN) &&
-    agiValueForSsiWarning > Number(ssiWarningThreshold);
+  const { showSsiIncomeEligibilityWarning, showSsiSelectionPlannerMessage } = getSsiIncomeWarningState({
+    isSsiEligible,
+    agiValidForSsiWarning,
+    agiValueForSsiWarning,
+    ssiWarningThreshold,
+  });
   const ssiIncomeEligibilityWarningText = showSsiIncomeEligibilityWarning
     ? (copy?.messages?.ssiIncomeEligibilityWarning ??
       "Based on your taxable income and filing status, you may not be eligible for SSI benefits. However, the ABLE planner will assume the beneficiary is eligible for SSI benefits based on your selection. Accordingly, the ABLE planner will implement logic that will keep the account balances below the SSI limit by stopping contributions and enforcing required distributions, where necessary.")
     : "";
-  const showSsiSelectionPlannerMessage = isSsiEligible && !showSsiIncomeEligibilityWarning;
   const ssiSelectionPlannerMessageText = showSsiSelectionPlannerMessage
     ? (copy?.messages?.ssiSelectionPlannerMessage ??
       "Checking this box will instruct the planner to stop contributions and implement withdrawals where necessary to keep your projected account balance under $100,000.")

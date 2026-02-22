@@ -319,3 +319,7 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/useExternalLinkWarning.ts`.
 - Moved `pendingExternalUrl` state and open/cancel/confirm handlers out of `app/page.tsx` into dedicated hook.
 - Validation: `npx eslint app/page.tsx src/features/planner/page/useExternalLinkWarning.ts`
+- SSI income warning extraction:
+- Added `src/features/planner/page/plannerSsiIncomeWarning.ts`.
+- Moved SSI warning gating derivation out of `app/page.tsx` (`showSsiIncomeEligibilityWarning`, `showSsiSelectionPlannerMessage`).
+- Validation: `npx eslint app/page.tsx src/features/planner/page/plannerSsiIncomeWarning.ts`
