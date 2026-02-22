@@ -28,6 +28,7 @@ import {
   buildAccountActivityFormChangeHandler,
   buildDemographicsFormChangeHandler,
 } from "@/features/planner/page/plannerFormHandlers";
+import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
 import ResourcesSection from "@/features/planner/content/ResourcesSection";
 import ReportsSection from "@/features/planner/content/ReportsSection";
@@ -873,7 +874,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       setMonthlyContribution(String(currentYearMaxMonthly));
       setMonthlyContributionFuture(String(futureYearMaxMonthly));
     },
-    [getHorizonConfig],
+    [getHorizonConfig, setMonthlyContribution, setMonthlyContributionFuture],
   );
 
   useEffect(() => {
@@ -2129,87 +2130,78 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       exportTaxableScheduleCsv(taxableRows, copy?.labels?.schedule, language);
     };
 
-    if (active === "reports") {
-      return (
-        <ReportsSection
-          labels={copy?.labels?.reports}
-          placeholderText={copy?.labels?.ui?.placeholderComingSoon ?? ""}
-          reportView={reportView}
-          enabledReportViews={enabledReportViews}
-          onReportViewChange={(nextView) => {
-            if (enabledReportViews.includes(nextView)) {
-              setReportView(nextView);
-            }
-          }}
-          reportWindowYearsValue={reportWindowYearsValue}
-          reportWindowMaxYears={reportWindowMaxYears}
-          onReportWindowYearsChange={setReportWindowYears}
-          reportActions={reportHeaderActions}
-          language={language}
-          languageToggle={languageToggle}
-          accountGrowthNarrativeParagraphs={accountGrowthNarrativeParagraphs}
-          ableRows={reportAbleRows}
-          taxableRows={reportTaxableRows}
-        />
-      );
-    }
+    const reportsContent = (
+      <ReportsSection
+        labels={copy?.labels?.reports}
+        placeholderText={copy?.labels?.ui?.placeholderComingSoon ?? ""}
+        reportView={reportView}
+        enabledReportViews={enabledReportViews}
+        onReportViewChange={(nextView) => {
+          if (enabledReportViews.includes(nextView)) {
+            setReportView(nextView);
+          }
+        }}
+        reportWindowYearsValue={reportWindowYearsValue}
+        reportWindowMaxYears={reportWindowMaxYears}
+        onReportWindowYearsChange={setReportWindowYears}
+        reportActions={reportHeaderActions}
+        language={language}
+        languageToggle={languageToggle}
+        accountGrowthNarrativeParagraphs={accountGrowthNarrativeParagraphs}
+        ableRows={reportAbleRows}
+        taxableRows={reportTaxableRows}
+      />
+    );
 
-    if (active === "schedule") {
-      return (
-        <ScheduleSection
-          hasTimeHorizon={hasTimeHorizon}
-          language={language}
-          labels={copy?.labels?.schedule}
-          view={amortizationView}
-          onViewChange={setAmortizationView}
-          onDownloadAble={downloadAbleScheduleCsv}
-          onDownloadTaxable={downloadTaxableScheduleCsv}
-          refreshButton={refreshButton}
-          languageToggle={languageToggle}
-          rows={scheduleRowsWithBenefits}
-          taxableRows={taxableRows}
-        />
-      );
-    }
+    const scheduleContent = (
+      <ScheduleSection
+        hasTimeHorizon={hasTimeHorizon}
+        language={language}
+        labels={copy?.labels?.schedule}
+        view={amortizationView}
+        onViewChange={setAmortizationView}
+        onDownloadAble={downloadAbleScheduleCsv}
+        onDownloadTaxable={downloadTaxableScheduleCsv}
+        refreshButton={refreshButton}
+        languageToggle={languageToggle}
+        rows={scheduleRowsWithBenefits}
+        taxableRows={taxableRows}
+      />
+    );
 
-    if (active === "disclosures") {
-      const assumptionTitle =
-        copy?.ui?.assumptions?.title ?? (copy?.ui?.sidebar?.disclosures ?? "");
-      const assumptionItems = Array.isArray(copy?.ui?.assumptions?.items)
-        ? copy.ui!.assumptions!.items
-        : [];
-      const disclosuresAssumptionsOverride = getClientBlock("disclosuresAssumptions");
-      return (
-        <DisclosuresSection
-          assumptionTitle={assumptionTitle}
-          assumptionItems={assumptionItems}
-          disclosuresAssumptionsOverride={disclosuresAssumptionsOverride}
-          languageToggle={languageToggle}
-        />
-      );
-    }
+    const assumptionTitle =
+      copy?.ui?.assumptions?.title ?? (copy?.ui?.sidebar?.disclosures ?? "");
+    const assumptionItems = Array.isArray(copy?.ui?.assumptions?.items)
+      ? copy.ui!.assumptions!.items
+      : [];
+    const disclosuresAssumptionsOverride = getClientBlock("disclosuresAssumptions");
+    const disclosuresContent = (
+      <DisclosuresSection
+        assumptionTitle={assumptionTitle}
+        assumptionItems={assumptionItems}
+        disclosuresAssumptionsOverride={disclosuresAssumptionsOverride}
+        languageToggle={languageToggle}
+      />
+    );
 
-    if (active === "resources") {
-      const resourcesTitle =
-        copy?.ui?.resources?.title ??
-        copy?.ui?.sidebar?.resources ??
-        (language === "es" ? "Recursos" : "Resources");
-      const resourcesIntro = copy?.ui?.resources?.intro ?? "";
-      const resourcesSections = Array.isArray(copy?.ui?.resources?.sections)
-        ? copy.ui.resources.sections
-        : [];
-
-      return (
-        <ResourcesSection
-          resourcesTitle={resourcesTitle}
-          resourcesIntro={resourcesIntro}
-          resourcesSections={resourcesSections}
-          placeholderText={copy?.labels?.ui?.placeholderComingSoon ?? ""}
-          languageToggle={languageToggle}
-          onOpenExternalUrl={openExternalUrlWithWarning}
-        />
-      );
-    }
+    const resourcesTitle =
+      copy?.ui?.resources?.title ??
+      copy?.ui?.sidebar?.resources ??
+      (language === "es" ? "Recursos" : "Resources");
+    const resourcesIntro = copy?.ui?.resources?.intro ?? "";
+    const resourcesSections = Array.isArray(copy?.ui?.resources?.sections)
+      ? copy.ui.resources.sections
+      : [];
+    const resourcesContent = (
+      <ResourcesSection
+        resourcesTitle={resourcesTitle}
+        resourcesIntro={resourcesIntro}
+        resourcesSections={resourcesSections}
+        placeholderText={copy?.labels?.ui?.placeholderComingSoon ?? ""}
+        languageToggle={languageToggle}
+        onOpenExternalUrl={openExternalUrlWithWarning}
+      />
+    );
 
     const handleDemographicsFormChange = buildDemographicsFormChangeHandler({
       plannerStateCode,
@@ -2249,7 +2241,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       setWithdrawalIncreasePct,
     });
 
-    return (
+    const inputsContent = (
       <div className="space-y-3">
         <InputsDesktopHeader
           title={desktopInputPageTitle}
@@ -2363,6 +2355,17 @@ const parsePercentStringToDecimal = (value: string): number | null => {
           value={endingValueInfo.endingLabel}
         />
       </div>
+    );
+
+    return (
+      <PlannerContentRouter
+        active={active}
+        reportsContent={reportsContent}
+        scheduleContent={scheduleContent}
+        disclosuresContent={disclosuresContent}
+        resourcesContent={resourcesContent}
+        inputsContent={inputsContent}
+      />
     );
   })();
 
