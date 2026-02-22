@@ -327,3 +327,7 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/plannerLandingCopy.ts`.
 - Moved landing override merge logic (`hasLandingOverride`, legacy welcome fallback, terms paragraphs split) out of `app/page.tsx`.
 - Validation: `npx eslint app/page.tsx src/features/planner/page/plannerLandingCopy.ts`
+- Plan/residency derivation extraction:
+- Added `src/features/planner/page/plannerPlanState.ts`.
+- Moved plan-state resolution and residency blocking derivation out of `app/page.tsx`.
+- Validation: `npx eslint app/page.tsx src/features/planner/page/plannerPlanState.ts`

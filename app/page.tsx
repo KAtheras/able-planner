@@ -42,6 +42,7 @@ import { getPlannerProjectionAccessState } from "@/features/planner/page/planner
 import { resolveSidebarNavigation } from "@/features/planner/page/plannerSidebarNavigation";
 import { getSsiIncomeWarningState } from "@/features/planner/page/plannerSsiIncomeWarning";
 import { resolvePlannerLandingCopy } from "@/features/planner/page/plannerLandingCopy";
+import { resolvePlannerPlanState } from "@/features/planner/page/plannerPlanState";
 import { getPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
 import { usePlannerProjectionSource } from "@/features/planner/page/usePlannerProjectionSource";
 import { usePlannerHorizon } from "@/features/planner/page/usePlannerHorizon";
@@ -250,9 +251,24 @@ export default function Home() {
     [];
   const enabledReportViews = getEnabledReportViews(configuredReportTabs);
   const defaultReportView = enabledReportViews[0] ?? "account_growth";
-  const planStateOverride = currentClientConfig.planStateCode?.toUpperCase();
-  const planStateFallback = /^[A-Z]{2}$/.test(plannerStateCode) ? plannerStateCode.toUpperCase() : undefined;
-  const planState = planStateOverride ?? planStateFallback ?? "";
+  const planInfoMap = planLevelInfo as unknown as Record<
+    string,
+    { name?: string; residencyRequired?: boolean; maxAccountBalance?: number }
+  >;
+  const {
+    planState,
+    planName,
+    planLabel,
+    planResidencyRequired,
+    planMaxBalance,
+    residencyBlocking,
+  } = resolvePlannerPlanState({
+    planStateCodeFromClient: currentClientConfig.planStateCode,
+    plannerStateCode,
+    beneficiaryStateOfResidence,
+    nonResidentProceedAck,
+    planInfoMap,
+  });
   const getClientBlock = (slot: "landingWelcome" | "disclosuresAssumptions" | "rightCardPrimary" | "rightCardSecondary") => {
     const raw = (currentClientConfig as { clientBlocks?: ClientBlocks } | undefined)?.clientBlocks?.[slot]?.[language];
     return typeof raw === "string" && raw.trim() ? raw : "";
@@ -353,23 +369,9 @@ export default function Home() {
       </button>
     </>
   );
-  const planInfoMap = planLevelInfo as unknown as Record<
-    string,
-    { name?: string; residencyRequired?: boolean; maxAccountBalance?: number }
-  >;
   const ssiIncomeThresholdMap = (
     ssiIncomeWarningThresholds as { thresholds?: Partial<Record<FilingStatusOption, number>> }
   ).thresholds;
-  const planInfoEntry = planInfoMap[planState];
-  const planName = planInfoEntry?.name ?? planState;
-  const planLabel = `${planName} Able`;
-  const planResidencyRequired = Boolean(planInfoEntry?.residencyRequired);
-  const planMaxBalance = planInfoMap[planState]?.maxAccountBalance ?? planInfoMap.default?.maxAccountBalance ?? null;
-  const residencyMismatch =
-    Boolean(beneficiaryStateOfResidence) &&
-    Boolean(planState) &&
-    beneficiaryStateOfResidence.toUpperCase() !== planState;
-  const residencyBlocking = residencyMismatch && (planResidencyRequired || !nonResidentProceedAck);
   const showFscQuestionnaire = messagesMode === "fsc" && agiGateEligible === true;
   const {
     monthlyContributionNum,
