@@ -323,3 +323,7 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/plannerSsiIncomeWarning.ts`.
 - Moved SSI warning gating derivation out of `app/page.tsx` (`showSsiIncomeEligibilityWarning`, `showSsiSelectionPlannerMessage`).
 - Validation: `npx eslint app/page.tsx src/features/planner/page/plannerSsiIncomeWarning.ts`
+- Landing copy resolution extraction:
+- Added `src/features/planner/page/plannerLandingCopy.ts`.
+- Moved landing override merge logic (`hasLandingOverride`, legacy welcome fallback, terms paragraphs split) out of `app/page.tsx`.
+- Validation: `npx eslint app/page.tsx src/features/planner/page/plannerLandingCopy.ts`

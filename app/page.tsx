@@ -41,6 +41,7 @@ import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigati
 import { getPlannerProjectionAccessState } from "@/features/planner/page/plannerProjectionAccess";
 import { resolveSidebarNavigation } from "@/features/planner/page/plannerSidebarNavigation";
 import { getSsiIncomeWarningState } from "@/features/planner/page/plannerSsiIncomeWarning";
+import { resolvePlannerLandingCopy } from "@/features/planner/page/plannerLandingCopy";
 import { getPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
 import { usePlannerProjectionSource } from "@/features/planner/page/usePlannerProjectionSource";
 import { usePlannerHorizon } from "@/features/planner/page/usePlannerHorizon";
@@ -257,20 +258,6 @@ export default function Home() {
     return typeof raw === "string" && raw.trim() ? raw : "";
   };
   const landingOverride = (currentClientConfig as { landing?: ClientLandingOverrides } | undefined)?.landing?.[language];
-  const hasLandingOverride = Boolean(
-    landingOverride &&
-      (landingOverride.heroTitle?.trim() ||
-        landingOverride.heroBody?.trim() ||
-        landingOverride.disclosuresTitle?.trim() ||
-        landingOverride.disclosuresIntro?.trim() ||
-        landingOverride.disclosuresBody?.trim() ||
-        landingOverride.agreeToTermsPrefix?.trim() ||
-        landingOverride.agreeAndContinueLabel?.trim() ||
-        landingOverride.termsOfUseLinkLabel?.trim() ||
-        landingOverride.termsOfUseTitle?.trim() ||
-        landingOverride.termsOfUseBody?.trim() ||
-        (Array.isArray(landingOverride.heroBullets) && landingOverride.heroBullets.length > 0)),
-  );
   const rightCardPrimaryOverride = getClientBlock("rightCardPrimary");
   const rightCardSecondaryOverride = getClientBlock("rightCardSecondary");
   const screen1DefaultMessages = resolveDefaultMessages(
@@ -436,29 +423,11 @@ export default function Home() {
   }, [showSsiIncomeEligibilityWarning]);
 
   const landingWelcomeOverride = getClientBlock("landingWelcome");
-  const useLegacyLandingWelcomeOverride = Boolean(landingWelcomeOverride) && !hasLandingOverride;
-  const landingCopy = {
-    heroTitle: landingOverride?.heroTitle?.trim() || copy.landing?.heroTitle || "",
-    heroBody:
-      landingOverride?.heroBody?.trim() ||
-      (useLegacyLandingWelcomeOverride ? landingWelcomeOverride : "") ||
-      copy.landing?.heroBody ||
-      "",
-    heroBullets:
-      Array.isArray(landingOverride?.heroBullets) && landingOverride.heroBullets.length > 0
-        ? landingOverride.heroBullets
-        : (copy.landing?.heroBullets ?? []),
-    disclosuresTitle: landingOverride?.disclosuresTitle?.trim() || copy.landing?.disclosuresTitle || "",
-    disclosuresIntro: landingOverride?.disclosuresIntro?.trim() || copy.landing?.disclosuresIntro || "",
-    disclosuresBody: landingOverride?.disclosuresBody?.trim() || copy.landing?.disclosuresBody || "",
-    agreeToTermsPrefix: landingOverride?.agreeToTermsPrefix?.trim() || copy.landing?.agreeToTermsPrefix || "",
-    agreeAndContinueLabel: landingOverride?.agreeAndContinueLabel?.trim() || copy.landing?.agreeAndContinueLabel || "",
-    termsOfUseLinkLabel: landingOverride?.termsOfUseLinkLabel?.trim() || copy.landing?.termsOfUseLinkLabel || "",
-    termsOfUseTitle: landingOverride?.termsOfUseTitle?.trim() || copy.landing?.termsOfUseTitle || "",
-    termsOfUseBody: landingOverride?.termsOfUseBody?.trim() || copy.landing?.termsOfUseBody || "",
-  };
-
-  const termsOfUseParagraphs = (landingCopy.termsOfUseBody || "").split("\n\n").filter(Boolean);
+  const { useLegacyLandingWelcomeOverride, landingCopy, termsOfUseParagraphs } = resolvePlannerLandingCopy({
+    landingOverride,
+    landingWelcomeOverride,
+    fallbackLanding: copy.landing,
+  });
 
   const formatMonthYearLabel = (index: number) => {
     return formatMonthYearFromIndex(index, language, { monthStyle: "long" });
