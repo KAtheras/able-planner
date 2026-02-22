@@ -281,6 +281,46 @@ export default function Home() {
     setPlannerStateCode((prev) => (prev === nextPlannerStateCode ? prev : nextPlannerStateCode));
     setIsClientLockedByUrl(true);
   }, []);
+
+  useEffect(() => {
+    if (!isEmbedded || typeof window === "undefined" || !document.body) return;
+
+    let rafId: number | null = null;
+    const postEmbedHeight = () => {
+      const height = Math.max(
+        document.documentElement?.scrollHeight ?? 0,
+        document.documentElement?.offsetHeight ?? 0,
+        document.body?.scrollHeight ?? 0,
+        document.body?.offsetHeight ?? 0,
+      );
+      if (height > 0) {
+        window.parent.postMessage({ type: "able:resize", height }, "*");
+      }
+    };
+    const schedulePostHeight = () => {
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(postEmbedHeight);
+    };
+
+    schedulePostHeight();
+    window.addEventListener("load", schedulePostHeight);
+    window.addEventListener("resize", schedulePostHeight);
+
+    const observer = new MutationObserver(schedulePostHeight);
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      characterData: true,
+    });
+
+    return () => {
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+      window.removeEventListener("load", schedulePostHeight);
+      window.removeEventListener("resize", schedulePostHeight);
+      observer.disconnect();
+    };
+  }, [isEmbedded, showWelcome, showWelcomeTermsOfUse, active, inputStep, language]);
   const enrollmentPageUrlRaw = (currentClientConfig as { enrollmentPageUrl?: string } | undefined)
     ?.enrollmentPageUrl;
   const enrollmentPageUrl =
