@@ -29,6 +29,12 @@ import {
   buildDemographicsFormChangeHandler,
 } from "@/features/planner/page/plannerFormHandlers";
 import { usePlannerClientEffects } from "@/features/planner/page/usePlannerClientEffects";
+import {
+  formatCurrency,
+  getFederalSaverCreditPercent,
+  resolveDefaultMessages,
+  type FilingStatusOption,
+} from "@/features/planner/page/plannerPageHelpers";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
 import { getPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
@@ -73,7 +79,6 @@ import {
 import { useSsiEnforcement } from "@/features/planner/inputs/useSsiEnforcement";
 import { buildMobileNavModel } from "@/features/planner/navigation/mobileNavModel";
 import { getEnabledReportViews, type ReportWindowOption } from "@/features/planner/report/reportViewModel";
-import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrackets.json";
 import federalSaversContributionLimits from "@/config/rules/federalSaversContributionLimits.json";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 import ssiIncomeWarningThresholds from "@/config/rules/ssiIncomeWarningThresholds.json";
@@ -107,59 +112,16 @@ type ClientLandingContent = Partial<{
 }>;
 type ClientLandingOverrides = Partial<Record<SupportedLanguage, ClientLandingContent>>;
 
-function resolveDefaultMessages(
-  override: string,
-  fallback: string[] | undefined,
-  defaultMessages: string[],
-): string[] {
-  if (override) {
-    return override
-      .split(/\n\s*\n/)
-      .map((part) => part.trim())
-      .filter(Boolean);
-  }
-  return [...(fallback ?? defaultMessages)];
-}
-
 import { buildPlannerSchedule } from "@/lib/calc/usePlannerSchedule";
 
 const WELCOME_KEY = "ablePlannerWelcomeAcknowledged";
 const INPUT_DEBOUNCE_MS = 900;
 
-type FilingStatusOption = "single" | "married_joint" | "married_separate" | "head_of_household";
 type PlannerState = string;
 
 const INITIAL_MESSAGES: string[] = ["", "", "", ""];
 
 const SCREEN2_DEFAULT_MESSAGES: string[] = ["", "", "", "", ""];
-
-
-const formatCurrency = (value: number) =>
-  value.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
-type FederalSaverBracketEntry = (typeof federalSaversCreditBrackets)[number];
-
-function getFederalSaverCreditPercent(status: FilingStatusOption, agi: number) {
-  for (const bracket of federalSaversCreditBrackets as FederalSaverBracketEntry[]) {
-    const info = bracket.brackets[status];
-    if (!info) continue;
-    if (info.type === "max" && agi <= info.value!) {
-      return bracket.creditRate;
-    }
-    if (info.type === "range" && agi >= info.min! && agi <= info.max!) {
-      return bracket.creditRate;
-    }
-    if (info.type === "min" && agi > info.value!) {
-      return bracket.creditRate;
-    }
-  }
-  return 0;
-}
 
 export default function Home() {
   const { projectionSource } = usePlannerProjectionSource();

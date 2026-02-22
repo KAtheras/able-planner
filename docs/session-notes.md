@@ -292,3 +292,6 @@ Use this file to preserve working context between editor sessions.
 - `a2d4bb1` refactor: wire projection source hook into planner page
 - Next immediate slice:
 - Convert projection boundary helper to async-ready adapter shape (still local-backed), then isolate debounced trigger orchestration from `app/page.tsx`.
+- Additional extraction slice completed:
+- Added `src/features/planner/page/plannerPageHelpers.ts` for `formatCurrency`, `resolveDefaultMessages`, and `getFederalSaverCreditPercent` (+ shared `FilingStatusOption` type).
+- Removed those pure helper definitions from `app/page.tsx` and switched to imported helper usage.
