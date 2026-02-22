@@ -46,6 +46,12 @@ All new code and all code changes in this repository must be built and reviewed 
 - At session end, ask Codex: `Update docs/session-notes.md`.
 - Resume reminder: prioritize server-side calculation migration before additional feature work.
 
+## Current Refactor Checkpoint (2026-02-22)
+- Working branch: `refactor/extract-calc`
+- Latest strategy checkpoint: `docs/refactor-plan.md` (sections 6.1-6.4)
+- Latest execution checkpoint: `docs/session-notes.md` -> `2026-02-22 (Reconnect Checkpoint)`
+- Next planned implementation step: extract `app/page.tsx` `content` orchestration block into one boundary module, then continue API-source migration behind existing projection adapter gate.
+
 ## Development
 npm install
 npm run dev

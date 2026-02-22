@@ -350,3 +350,30 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/plannerContributionEnforcement.ts` with `getPlannerContributionEnforcement(...)`.
 - `app/page.tsx` now delegates enforced stop/withdrawal index derivation to this module.
 - Validation: `npx eslint app/page.tsx src/features/planner/page/plannerContributionEnforcement.ts`
+
+### 2026-02-22 (Reconnect Checkpoint)
+- Strategic stance (locked):
+- Prioritize high-value boundaries only (business logic, orchestration boundaries, API path readiness).
+- Avoid low-value micro extractions unless there is reuse/testing payoff.
+- Keep behavior unchanged while refactoring; always lint before commit.
+- Keep `local` projection source as default until API parity is validated.
+
+- What is complete so far:
+- Significant `app/page.tsx` logic has been extracted into `src/features/planner/page/*`.
+- Projection source boundary, shared API contracts, and adapter/client scaffolding exist.
+- Enrollment action now opens directly without external-link warning modal; warning remains for other external links.
+- Latest high-value extraction completed:
+- `src/features/planner/page/plannerContributionEnforcement.ts`
+- Commit: `ff32d48`
+
+- Current stop point quality:
+- Branch: `refactor/extract-calc`
+- Remote is up to date through latest refactor commits.
+- Lint passing on touched files for each slice.
+
+- Next immediate step (first task next session):
+- Extract the large `content` IIFE in `app/page.tsx` into one orchestration boundary module (single module, non-micro).
+
+- Next after that:
+- Finish API-backed projection path in adapter (`source: "api"`), keep `local` default.
+- Run parity checks for WTA/SSI and reports/schedule outputs before flipping source in test env.

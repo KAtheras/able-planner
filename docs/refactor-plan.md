@@ -154,6 +154,54 @@ Done when:
 2. Migration is documented and repeatable.
 3. Simulated client deployment checklist is complete.
 
+## 6.1) Current Progress Snapshot (February 22, 2026)
+
+Overall progress (ballpark): 40-50% complete.
+
+1. Phase 0 (safety baseline): partially complete
+   - Lint checks are consistently run on touched files.
+   - Manual parity discipline is in place, but full scenario baseline pack is still needed.
+2. Phase 1-2 (structural/client orchestration refactor): mostly complete
+   - Large sections of `app/page.tsx` have been extracted into planner page modules.
+   - Core orchestration remains in `app/page.tsx` (notably the large `content` builder), which is the next major boundary move.
+3. Phase 3 (API contract + adapter boundary): partially complete
+   - Shared contracts and API client wrapper are present.
+   - Projection source boundary is wired (`local` default; `api` path not fully active yet).
+4. Phase 4-5 (server authoritative calculations + UI API consumption): pending
+   - `/api/calculate` is not yet the full source of truth for planner UI outputs.
+5. Phase 6 (cleanup + deployment readiness): pending
+
+## 6.2) What Was Intentionally Avoided
+
+To reduce complexity drift, we are intentionally avoiding:
+
+1. Micro-component extraction of trivial UI fragments with low reuse value.
+2. New feature additions that increase client-side calculation footprint.
+3. Premature caching layers before API migration/parity is complete.
+
+## 6.3) Next Session Runbook (Priority Ordered)
+
+1. Extract the large `content` IIFE from `app/page.tsx` into one orchestration boundary module (single module, not many micro files).
+2. Add/finish API-mode projection path behind existing source gate:
+   - keep `local` as default,
+   - complete `api` branch in projection adapter.
+3. Execute parity checks for key flows:
+   - demographics/input navigation,
+   - WTA/SSI constraint behavior,
+   - reports/schedule output consistency.
+4. Only after parity is stable: prepare WordPress/client-hosted UI simulation notes for API-origin setup.
+
+## 6.4) Stop/Resume Rules
+
+When pausing work:
+
+1. End only at a lint-clean commit boundary.
+2. Update `docs/session-notes.md` with:
+   - what changed,
+   - exact commit hash,
+   - explicit next immediate step.
+3. Do not start new feature work until server-authoritative calculation migration advances.
+
 ## 7) Session Estimate
 
 Expected:
