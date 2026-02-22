@@ -7,40 +7,7 @@ import planLevelInfo from "@/config/rules/planLevelInfo.json";
 import stateTaxDeductions from "@/config/rules/stateTaxDeductions.json";
 import stateTaxRates from "@/config/rules/stateTaxRates.json";
 import { getClientConfig, normalizeClientId } from "@/config/clients";
-
-type FscCriteria = {
-  hasTaxLiability?: boolean;
-  isOver18?: boolean;
-  isStudent?: boolean;
-  isDependent?: boolean;
-};
-
-type ProjectionWindow = {
-  year?: number;
-  month?: number;
-};
-
-type ProjectionInput = {
-  startingBalance?: number;
-  monthlyContribution?: number;
-  contributionEnd?: ProjectionWindow;
-  monthlyWithdrawal?: number;
-  withdrawalStart?: ProjectionWindow;
-};
-
-type CalculateRequest = {
-  stateCode?: string;
-  planStateCode?: string;
-  beneficiaryStateCode?: string;
-  filingStatus?: string;
-  agi?: number;
-  clientId?: string;
-  annualReturnOverride?: number;
-  timeHorizonYearsOverride?: number;
-  isSsiBeneficiary?: boolean;
-  fscCriteria?: FscCriteria;
-  projection?: ProjectionInput;
-};
+import type { CalculateRequest, ProjectionWindow } from "@/features/planner/api/contracts";
 
 type StateInfo = {
   name?: string | null;
