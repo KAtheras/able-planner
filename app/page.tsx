@@ -2679,12 +2679,8 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     );
   }
 
-  const appShellClassName = isEmbedded
-    ? "flex min-h-0 flex-col bg-zinc-50 dark:bg-black"
-    : "flex min-h-screen flex-col bg-zinc-50 dark:bg-black";
-
   return (
-    <div className={appShellClassName}>
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
       {!isEmbedded ? (
         <>
           <TopNav
