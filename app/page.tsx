@@ -24,6 +24,10 @@ import DisclosuresSection from "@/features/planner/content/DisclosuresSection";
 import InputsLeftPane from "@/features/planner/content/InputsLeftPane";
 import InputsRightPane from "@/features/planner/content/InputsRightPane";
 import { InputsDesktopHeader, InputsTwoColumnShell } from "@/features/planner/content/InputsSectionLayout";
+import {
+  buildAccountActivityFormChangeHandler,
+  buildDemographicsFormChangeHandler,
+} from "@/features/planner/page/plannerFormHandlers";
 import ResourcesSection from "@/features/planner/content/ResourcesSection";
 import ReportsSection from "@/features/planner/content/ReportsSection";
 import ScheduleSection from "@/features/planner/content/ScheduleSection";
@@ -2272,115 +2276,43 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       );
     }
 
-    const handleDemographicsFormChange = (updates: {
-      beneficiaryName?: string;
-      stateOfResidence?: string;
-      filingStatus?: string;
-      agi?: string;
-      annualReturn?: string;
-      isSsiEligible?: boolean;
-    }) => {
-      if ("beneficiaryName" in updates) setBeneficiaryName(updates.beneficiaryName ?? "");
-      if ("stateOfResidence" in updates)
-        setBeneficiaryStateOfResidence(updates.stateOfResidence ?? "");
-      if ("filingStatus" in updates)
-        setPlannerFilingStatus((updates.filingStatus ?? "single") as FilingStatusOption);
-      if ("agi" in updates) setPlannerAgi(sanitizeAgiInput(updates.agi ?? ""));
-      if ("annualReturn" in updates) {
-        setAnnualReturnEdited(true);
+    const handleDemographicsFormChange = buildDemographicsFormChangeHandler({
+      plannerStateCode,
+      sanitizeAgiInput,
+      parsePercentStringToDecimal,
+      formatDecimalToPercentString,
+      setBeneficiaryName,
+      setBeneficiaryStateOfResidence,
+      setPlannerFilingStatus: (value) => setPlannerFilingStatus(value as FilingStatusOption),
+      setPlannerAgi,
+      setAnnualReturnEdited,
+      setAnnualReturn,
+      setAnnualReturnWarningMax,
+      setIsSsiEligible,
+    });
 
-        const raw = (updates.annualReturn ?? "").toString();
-        const dec = parsePercentStringToDecimal(raw);
-
-        if (dec === null) {
-          setAnnualReturn("");
-          setAnnualReturnWarningMax(null);
-        } else {
-          const client = getClientConfig(plannerStateCode);
-          const warningMax = client?.constraints?.annualReturnWarningMax;
-          const hardMax = client?.constraints?.annualReturnHardMax;
-
-          let nextDec = Math.max(0, dec);
-
-          if (typeof hardMax === "number" && Number.isFinite(hardMax)) {
-            if (nextDec > hardMax) nextDec = hardMax;
-          }
-
-          setAnnualReturn(formatDecimalToPercentString(nextDec));
-
-          if (typeof warningMax === "number" && Number.isFinite(warningMax)) {
-            if (nextDec > warningMax) {
-              setAnnualReturnWarningMax(warningMax);
-            } else {
-              setAnnualReturnWarningMax(null);
-            }
-          } else {
-            setAnnualReturnWarningMax(null);
-          }
-        }
-      }
-      if ("isSsiEligible" in updates) setIsSsiEligible(Boolean(updates.isSsiEligible));
-    };
-
-    const handleAccountActivityFormChange = (updates: {
-      timeHorizonYears?: string;
-      startingBalance?: string;
-      monthlyContribution?: string;
-      contributionEndYear?: string;
-      contributionEndMonth?: string;
-      monthlyWithdrawal?: string;
-      withdrawalStartYear?: string;
-      withdrawalStartMonth?: string;
-      contributionIncreasePct?: string;
-      withdrawalIncreasePct?: string;
-    }) => {
-      if ("timeHorizonYears" in updates) {
-        const raw = (updates.timeHorizonYears ?? "").replace(".00", "");
-        setTimeHorizonYears(raw);
-        setTimeHorizonEdited(true);
-      }
-      if ("startingBalance" in updates)
-        setStartingBalance(sanitizeAmountInput(updates.startingBalance ?? ""));
-      if ("monthlyContribution" in updates) {
-        const sanitized = sanitizeAmountInput(updates.monthlyContribution ?? "");
-        setMonthlyContribution(sanitized);
-        setMonthlyContributionFuture("");
-      }
-      if ("contributionEndYear" in updates) {
-        setContributionEndTouched(true);
-        setManualContributionEndYear(updates.contributionEndYear ?? "");
-        setContributionEndYear(updates.contributionEndYear ?? "");
-      }
-      if ("contributionEndMonth" in updates) {
-        setContributionEndTouched(true);
-        setManualContributionEndMonth(updates.contributionEndMonth ?? "");
-        setContributionEndMonth(updates.contributionEndMonth ?? "");
-      }
-      if ("monthlyWithdrawal" in updates) {
-        handleManualWithdrawalOverride(updates.monthlyWithdrawal ?? "");
-      }
-      if ("withdrawalStartYear" in updates) {
-        setWithdrawalStartTouched(true);
-        setManualWithdrawalStartYear(updates.withdrawalStartYear ?? "");
-        setWithdrawalStartYear(updates.withdrawalStartYear ?? "");
-      }
-      if ("withdrawalStartMonth" in updates) {
-        setWithdrawalStartTouched(true);
-        setManualWithdrawalStartMonth(updates.withdrawalStartMonth ?? "");
-        setWithdrawalStartMonth(updates.withdrawalStartMonth ?? "");
-      }
-      if ("contributionIncreasePct" in updates) {
-        const nextValue = updates.contributionIncreasePct ?? "";
-        setContributionIncreasePct(nextValue);
-        const nextNumeric = Number(nextValue);
-        setHasUserEnteredContributionIncrease(
-          Number.isFinite(nextNumeric) && nextNumeric > 0,
-        );
-      }
-      if ("withdrawalIncreasePct" in updates) {
-        setWithdrawalIncreasePct(updates.withdrawalIncreasePct ?? "");
-      }
-    };
+    const handleAccountActivityFormChange = buildAccountActivityFormChangeHandler({
+      sanitizeAmountInput,
+      handleManualWithdrawalOverride,
+      setTimeHorizonYears,
+      setTimeHorizonEdited,
+      setStartingBalance,
+      setMonthlyContribution,
+      setMonthlyContributionFuture,
+      setContributionEndTouched,
+      setManualContributionEndYear,
+      setContributionEndYear,
+      setManualContributionEndMonth,
+      setContributionEndMonth,
+      setWithdrawalStartTouched,
+      setManualWithdrawalStartYear,
+      setWithdrawalStartYear,
+      setManualWithdrawalStartMonth,
+      setWithdrawalStartMonth,
+      setContributionIncreasePct,
+      setHasUserEnteredContributionIncrease,
+      setWithdrawalIncreasePct,
+    });
 
     return (
       <div className="space-y-3">
