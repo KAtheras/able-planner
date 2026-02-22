@@ -303,3 +303,7 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/plannerProjectionAccess.ts`.
 - Moved projection gating/driver derivation (debounced balance+contribution parsing, AGI validity, projection-view access flag) out of `app/page.tsx`.
 - Validation: `npx eslint app/page.tsx src/features/planner/page/plannerProjectionAccess.ts`
+- Input parser/sanitizer extraction:
+- Added `src/features/planner/page/plannerInputUtils.ts` with `sanitizeAgiInput`, `parsePercentStringToDecimal`, `formatDecimalToPercentString`, and `sanitizeAmountInput`.
+- Removed duplicate inline definitions from `app/page.tsx` and switched to imports.
+- Validation: `npx eslint app/page.tsx src/features/planner/page/plannerInputUtils.ts`
