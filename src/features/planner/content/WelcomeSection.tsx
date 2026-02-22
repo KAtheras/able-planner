@@ -145,9 +145,12 @@ export default function WelcomeSection({
     : "mx-auto w-full max-w-6xl flex-1 px-4 pt-1.5";
   const contentInnerClassName = hideTopNav ? "px-3 pb-4 md:px-4" : "";
   const headingOffsetClassName = hideTopNav ? "mt-2" : "mt-4";
+  const wrapperClassName = hideTopNav
+    ? "flex min-h-0 flex-col bg-zinc-50 dark:bg-black"
+    : "flex min-h-screen flex-col bg-zinc-50 dark:bg-black";
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
+    <div className={wrapperClassName}>
       {!hideTopNav ? (
         <>
           <TopNav
