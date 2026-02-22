@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Sidebar, { type NavKey } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { getCopy, type SupportedLanguage } from "@/copy";
-import { getClientConfig, normalizeClientId } from "@/config/clients";
+import { getClientConfig } from "@/config/clients";
 import AccountEndingValueCard from "@/components/inputs/AccountEndingValueCard";
 import ResidencyWarningCard from "@/components/inputs/ResidencyWarningCard";
 import Screen2MessagesPanel from "@/components/inputs/Screen2MessagesPanel";
@@ -130,13 +130,6 @@ const INITIAL_MESSAGES: string[] = ["", "", "", ""];
 
 const SCREEN2_DEFAULT_MESSAGES: string[] = ["", "", "", "", ""];
 
-const isTruthyUrlFlag = (value: string | null | undefined) => {
-  const normalized = (value ?? "").trim().toLowerCase();
-  return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
-};
-
-const toPlannerStateCode = (clientId: string) => (clientId === "default" ? "default" : clientId.toUpperCase());
-
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", {
@@ -170,8 +163,6 @@ export default function Home() {
   const [active, setActive] = useState<NavKey>("inputs");
   const [reportView, setReportView] = useState<ReportView>("account_growth");
   const [reportWindowYears, setReportWindowYears] = useState<ReportWindowOption>("max");
-  const [isEmbedded, setIsEmbedded] = useState(false);
-  const [isClientLockedByUrl, setIsClientLockedByUrl] = useState(false);
   const [plannerStateCode, setPlannerStateCode] = useState<PlannerState>("default");
   const [inputStep, setInputStep] = useState<1 | 2>(1);
   const [plannerAgi, setPlannerAgi] = useState("");
@@ -260,27 +251,6 @@ export default function Home() {
   const lastMobileConsoleModeRef = useRef<"annual" | "residency" | "fsc" | "ssi" | null>(null);
   const lastMobileScreen2PanelRef = useRef<string | null>(null);
   const currentClientConfig = getClientConfig(plannerStateCode);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const embedMode = isTruthyUrlFlag(params.get("embed")) || isTruthyUrlFlag(params.get("iframe"));
-    if (embedMode) {
-      setIsEmbedded(true);
-    }
-
-    const rawClient =
-      params.get("client") ??
-      params.get("clientId") ??
-      params.get("state") ??
-      params.get("plan");
-    if (!rawClient) return;
-
-    const normalizedClientId = normalizeClientId(rawClient);
-    const nextPlannerStateCode = toPlannerStateCode(normalizedClientId);
-    setPlannerStateCode((prev) => (prev === nextPlannerStateCode ? prev : nextPlannerStateCode));
-    setIsClientLockedByUrl(true);
-  }, []);
   const enrollmentPageUrlRaw = (currentClientConfig as { enrollmentPageUrl?: string } | undefined)
     ?.enrollmentPageUrl;
   const enrollmentPageUrl =
@@ -1315,7 +1285,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     setActive("inputs");
   };
 
-  const planSelector = isClientLockedByUrl ? null : (
+  const planSelector = (
     <select
       value={plannerStateCode}
       onChange={(event) => {
@@ -2624,7 +2594,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         appTitle={copy.app?.title ?? ""}
         appTagline={copy.app?.tagline}
         planSelector={planSelector}
-        hideTopNav={isEmbedded}
         languageToggle={languageToggle}
         landingCopy={landingCopy}
         useLegacyLandingWelcomeOverride={useLegacyLandingWelcomeOverride}
@@ -2641,20 +2610,16 @@ const parsePercentStringToDecimal = (value: string): number | null => {
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
-      {!isEmbedded ? (
-        <>
-          <TopNav
-            title={copy.app?.title ?? ""}
-            tagline={copy.app?.tagline}
-            rightSlot={
-              <div className="flex items-center gap-2">
-                {planSelector}
-              </div>
-            }
-          />
-          <div aria-hidden="true" className="h-20 md:hidden" />
-        </>
-      ) : null}
+      <TopNav
+        title={copy.app?.title ?? ""}
+        tagline={copy.app?.tagline}
+        rightSlot={
+          <div className="flex items-center gap-2">
+            {planSelector}
+          </div>
+        }
+      />
+      <div aria-hidden="true" className="h-20 md:hidden" />
       <div ref={shellRef} className="mx-auto flex w-full max-w-6xl">
         <Sidebar
           active={active}
@@ -2675,11 +2640,9 @@ const parsePercentStringToDecimal = (value: string): number | null => {
         />
         <main className="mx-auto w-full max-w-6xl flex-1 px-2 pt-1 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:px-4 md:pt-1.5 md:pb-6">{content}</main>
       </div>
-      {!isEmbedded ? (
-        <footer className="px-2 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-center text-xs text-zinc-500 dark:text-zinc-400 md:px-4 md:pb-4">
-          © 2026 Spectra Professional Services, LLC. All rights reserved.
-        </footer>
-      ) : null}
+      <footer className="px-2 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-center text-xs text-zinc-500 dark:text-zinc-400 md:px-4 md:pb-4">
+        © 2026 Spectra Professional Services, LLC. All rights reserved.
+      </footer>
       {pendingExternalUrl ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"

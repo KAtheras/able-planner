@@ -15,7 +15,6 @@ type WelcomeSectionProps = {
   appTitle: string;
   appTagline?: string;
   planSelector: ReactNode;
-  hideTopNav?: boolean;
   languageToggle: ReactNode;
   landingCopy: LandingCopy;
   useLegacyLandingWelcomeOverride: boolean;
@@ -127,7 +126,6 @@ export default function WelcomeSection({
   appTitle,
   appTagline,
   planSelector,
-  hideTopNav = false,
   languageToggle,
   landingCopy,
   useLegacyLandingWelcomeOverride,
@@ -143,23 +141,19 @@ export default function WelcomeSection({
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
-      {!hideTopNav ? (
-        <>
-          <TopNav
-            title={appTitle}
-            tagline={appTagline}
-            rightSlot={
-              <div className="flex items-center gap-2">
-                {planSelector}
-                <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-800 dark:border-zinc-800 dark:bg-black dark:text-zinc-200">
-                  WELCOME
-                </span>
-              </div>
-            }
-          />
-          <div aria-hidden="true" className="h-20 md:hidden" />
-        </>
-      ) : null}
+      <TopNav
+        title={appTitle}
+        tagline={appTagline}
+        rightSlot={
+          <div className="flex items-center gap-2">
+            {planSelector}
+            <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-800 dark:border-zinc-800 dark:bg-black dark:text-zinc-200">
+              WELCOME
+            </span>
+          </div>
+        }
+      />
+      <div aria-hidden="true" className="h-20 md:hidden" />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-1.5">
         <div className="flex justify-center">{languageToggle}</div>
