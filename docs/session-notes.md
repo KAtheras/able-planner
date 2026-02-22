@@ -311,3 +311,7 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/usePlannerHorizon.ts`.
 - Moved `getTimeHorizonLimits` and `getHorizonConfig` out of `app/page.tsx` into a dedicated hook (no behavior changes).
 - Validation: `npx eslint app/page.tsx src/features/planner/page/usePlannerHorizon.ts`
+- Sidebar navigation guard extraction:
+- Added `src/features/planner/page/plannerSidebarNavigation.ts`.
+- Moved projection-view access routing decision out of `app/page.tsx` (`handleSidebarChange` now delegates to helper).
+- Validation: `npx eslint app/page.tsx src/features/planner/page/plannerSidebarNavigation.ts`

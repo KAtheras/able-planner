@@ -39,6 +39,7 @@ import {
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
 import { getPlannerProjectionAccessState } from "@/features/planner/page/plannerProjectionAccess";
+import { resolveSidebarNavigation } from "@/features/planner/page/plannerSidebarNavigation";
 import { getPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
 import { usePlannerProjectionSource } from "@/features/planner/page/usePlannerProjectionSource";
 import { usePlannerHorizon } from "@/features/planner/page/usePlannerHorizon";
@@ -405,17 +406,20 @@ export default function Home() {
   const annualContributionLimit =
     wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
   const handleSidebarChange = (next: NavKey) => {
-    if ((next === "reports" || next === "schedule") && !canAccessProjectionViews) {
-      setActive("inputs");
+    const decision = resolveSidebarNavigation({
+      next,
+      canAccessProjectionViews,
+      agiValidForSsiWarning,
+      residencyBlocking,
+    });
+
+    if (decision.shouldResetMessagesMode) {
       setMessagesMode("intro");
-      if (!agiValidForSsiWarning || residencyBlocking) {
-        setInputStep(1);
-      } else {
-        setInputStep(2);
-      }
-      return;
     }
-    setActive(next);
+    if (decision.nextInputStep !== null) {
+      setInputStep(decision.nextInputStep);
+    }
+    setActive(decision.nextActive);
   };
   const ssiWarningThreshold = ssiIncomeThresholdMap?.[plannerFilingStatus];
   const showSsiIncomeEligibilityWarning =
