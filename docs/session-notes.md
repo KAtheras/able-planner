@@ -299,3 +299,7 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/usePlannerDebouncedInputs.ts`.
 - Moved all debounced calc input wiring out of `app/page.tsx` into the new hook (no behavior changes).
 - Validation: `npx eslint app/page.tsx src/features/planner/page/usePlannerDebouncedInputs.ts`
+- Projection-access extraction:
+- Added `src/features/planner/page/plannerProjectionAccess.ts`.
+- Moved projection gating/driver derivation (debounced balance+contribution parsing, AGI validity, projection-view access flag) out of `app/page.tsx`.
+- Validation: `npx eslint app/page.tsx src/features/planner/page/plannerProjectionAccess.ts`

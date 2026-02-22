@@ -38,6 +38,7 @@ import {
 } from "@/features/planner/page/plannerPageHelpers";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
+import { getPlannerProjectionAccessState } from "@/features/planner/page/plannerProjectionAccess";
 import { getPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
 import { usePlannerProjectionSource } from "@/features/planner/page/usePlannerProjectionSource";
 import {
@@ -384,22 +385,19 @@ export default function Home() {
     beneficiaryStateOfResidence.toUpperCase() !== planState;
   const residencyBlocking = residencyMismatch && (planResidencyRequired || !nonResidentProceedAck);
   const showFscQuestionnaire = messagesMode === "fsc" && agiGateEligible === true;
-  const startingBalanceNum =
-    Number((calcStartingBalanceInput ?? "").replace(".00", "")) || 0;
-  const monthlyContributionNum =
-    Number((calcMonthlyContributionInput ?? "").replace(".00","")) || 0;
-  const hasProjectionDriver = startingBalanceNum > 0 || monthlyContributionNum > 0;
+  const {
+    monthlyContributionNum,
+    agiValueForSsiWarning,
+    agiValidForSsiWarning,
+    canAccessProjectionViews,
+  } = getPlannerProjectionAccessState({
+    calcStartingBalanceInput,
+    calcMonthlyContributionInput,
+    calcPlannerAgiInput,
+    residencyBlocking,
+  });
   const annualContributionLimit =
     wtaStatus === "eligible" ? wtaCombinedLimit : WTA_BASE_ANNUAL_LIMIT;
-  const agiValueForSsiWarning = Number(calcPlannerAgiInput);
-  const agiValidForSsiWarning =
-    calcPlannerAgiInput !== "" &&
-    !Number.isNaN(agiValueForSsiWarning) &&
-    (agiValueForSsiWarning > 0 || agiValueForSsiWarning === 0);
-  const canAccessProjectionViews =
-    agiValidForSsiWarning &&
-    !residencyBlocking &&
-    hasProjectionDriver;
   const handleSidebarChange = (next: NavKey) => {
     if ((next === "reports" || next === "schedule") && !canAccessProjectionViews) {
       setActive("inputs");
