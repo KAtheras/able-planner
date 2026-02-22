@@ -385,3 +385,11 @@ Use this file to preserve working context between editor sessions.
 - Plan max-balance warning suppression fix: if planned contributions are zero/blank, the "contributions stop" plan-max warning is now suppressed.
 - Implemented in `app/page.tsx` by reusing planned-contribution detection in screen-2 warning logic.
 - Validation: `npx eslint app/page.tsx`
+- Netlify production build fix: resolved TypeScript mismatch for `planMaxBalance` in projection data path (`number | null` authority retained end-to-end).
+- SSI top-level messaging fix: when contributions are zero/blank, SSI eligibility/selection messages now use no-contribution variants (no "contributions will be stopped" wording).
+- Added copy keys in EN/ES:
+- `ssiIncomeEligibilityWarningNoContributions`
+- `ssiSelectionPlannerMessageNoContributions`
+- Validation:
+- `npx tsc --noEmit`
+- `npx eslint app/page.tsx`

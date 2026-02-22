@@ -40,7 +40,7 @@ export type PlannerProjectionDataParams = {
   plannerFilingStatus: FilingStatusOption;
   beneficiaryStateOfResidence: string;
   planState: string;
-  planMaxBalance: number | undefined;
+  planMaxBalance: number | null;
   reportView: ReportView;
   reportWindowYears: ReportWindowOption;
   language: "en" | "es";

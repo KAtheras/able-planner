@@ -355,13 +355,26 @@ export default function Home() {
     agiValueForSsiWarning,
     ssiWarningThreshold,
   });
+  const ssiCurrentContributionValue = Number(sanitizeAmountInput(monthlyContribution) || "0");
+  const ssiFutureContributionValue = Number(
+    sanitizeAmountInput(monthlyContributionFuture === "" ? monthlyContribution : monthlyContributionFuture) || "0",
+  );
+  const hasPlannedContributionsForSsiMessaging =
+    (Number.isFinite(ssiCurrentContributionValue) && ssiCurrentContributionValue > 0) ||
+    (Number.isFinite(ssiFutureContributionValue) && ssiFutureContributionValue > 0);
   const ssiIncomeEligibilityWarningText = showSsiIncomeEligibilityWarning
-    ? (copy?.messages?.ssiIncomeEligibilityWarning ??
-      "Based on your taxable income and filing status, you may not be eligible for SSI benefits. However, the ABLE planner will assume the beneficiary is eligible for SSI benefits based on your selection. Accordingly, the ABLE planner will implement logic that will keep the account balances below the SSI limit by stopping contributions and enforcing required distributions, where necessary.")
+    ? hasPlannedContributionsForSsiMessaging
+      ? (copy?.messages?.ssiIncomeEligibilityWarning ??
+        "Based on your taxable income and filing status, you may not be eligible for SSI benefits. However, the ABLE planner will assume the beneficiary is eligible for SSI benefits based on your selection. Accordingly, the ABLE planner will implement logic that will keep the account balances below the SSI limit by stopping contributions and enforcing required distributions, where necessary.")
+      : (copy?.messages?.ssiIncomeEligibilityWarningNoContributions ??
+        "Based on your taxable income and filing status, you may not be eligible for SSI benefits. However, the ABLE planner will assume the beneficiary is eligible for SSI benefits based on your selection. Accordingly, the ABLE planner will implement logic that will keep the account balances below the SSI limit by enforcing required distributions, where necessary.")
     : "";
   const ssiSelectionPlannerMessageText = showSsiSelectionPlannerMessage
-    ? (copy?.messages?.ssiSelectionPlannerMessage ??
-      "Checking this box will instruct the planner to stop contributions and implement withdrawals where necessary to keep your projected account balance under $100,000.")
+    ? hasPlannedContributionsForSsiMessaging
+      ? (copy?.messages?.ssiSelectionPlannerMessage ??
+        "Checking this box will instruct the planner to stop contributions and implement withdrawals where necessary to keep your projected account balance under $100,000.")
+      : (copy?.messages?.ssiSelectionPlannerMessageNoContributions ??
+        "Checking this box will instruct the planner to implement withdrawals where necessary to keep your projected account balance under $100,000.")
     : "";
 
   useEffect(() => {
