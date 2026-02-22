@@ -31,6 +31,7 @@ import {
 import { usePlannerClientEffects } from "@/features/planner/page/usePlannerClientEffects";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
+import { buildPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
 import {
   useContributionIncreaseInputLock,
   useContributionIncreaseRules,
@@ -64,45 +65,23 @@ import {
   getBaseLimitBreaches,
   getMonthsRemainingInCurrentCalendarYear,
   getWtaEligibilityOutcome,
-  isWtaResolutionPendingForEndingValue as computeWtaResolutionPendingForEndingValue,
   WTA_BASE_ANNUAL_LIMIT,
   type WtaMode,
   type WtaStatus,
 } from "@/features/planner/inputs/wtaFlow";
 import { useSsiEnforcement } from "@/features/planner/inputs/useSsiEnforcement";
 import { buildMobileNavModel } from "@/features/planner/navigation/mobileNavModel";
-import {
-  buildReportWindowModel,
-  getEnabledReportViews,
-  type ReportWindowOption,
-} from "@/features/planner/report/reportViewModel";
-import {
-  buildReportAbleRows,
-  buildReportTaxableRows,
-  getAbleMonthlyForDisplay,
-  getTaxableMonthlyForDisplay,
-} from "@/features/planner/report/reportRows";
-import { enrichScheduleRowsWithBenefits } from "@/features/planner/report/scheduleModel";
-import {
-  computeStateBenefitCapped,
-  getFederalIncomeTaxLiability,
-  getStateTaxBenefitConfig,
-} from "@/features/planner/tax/taxMath";
+import { getEnabledReportViews, type ReportWindowOption } from "@/features/planner/report/reportViewModel";
 import federalSaversCreditBrackets from "@/config/rules/federalSaversCreditBrackets.json";
 import federalSaversContributionLimits from "@/config/rules/federalSaversContributionLimits.json";
 import planLevelInfo from "@/config/rules/planLevelInfo.json";
 import ssiIncomeWarningThresholds from "@/config/rules/ssiIncomeWarningThresholds.json";
-import { buildAccountGrowthNarrative } from "@/lib/report/buildAccountGrowthNarrative";
 import { formatMonthYearFromIndex } from "@/lib/date/formatMonthYear";
 import {
   downloadAbleScheduleCsv as exportAbleScheduleCsv,
   downloadTaxableScheduleCsv as exportTaxableScheduleCsv,
 } from "@/lib/report/exportScheduleCsv";
-import {
-  buildEndingValueInfo,
-  hasWithdrawalLimitedPlanCode,
-  shouldShowStandaloneWithdrawalLimitedMessage,
-} from "@/lib/planner/messages";
+import { shouldShowStandaloneWithdrawalLimitedMessage } from "@/lib/planner/messages";
 import { useQualifiedWithdrawalBudget } from "@/lib/inputs/useQualifiedWithdrawalBudget";
 import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 
@@ -1558,140 +1537,71 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       );
     };
 
-    const parsedTimeHorizon = parseIntegerInput(timeHorizonYears);
-    const hasTimeHorizon = timeHorizonYears.trim() !== "" && parsedTimeHorizon !== null;
-
-    const startIndex = horizonConfig.startIndex;
-    const horizonEndIndex = horizonConfig.horizonEndIndex;
-    const totalMonths = horizonConfig.safeYears * 12;
-    const parseAmount = (value: string) => {
-      const cleaned = sanitizeAmountInput(value);
-      const numeric = Number(cleaned || "0");
-      if (!Number.isFinite(numeric)) return 0;
-      return Math.max(0, numeric);
-    };
-    const startingBalanceValue = parseAmount(calcStartingBalanceInput);
-    const monthlyContributionValue = parseAmount(calcMonthlyContributionInput);
-    const monthlyContributionFutureValue =
-      calcMonthlyContributionFutureInput !== ""
-        ? parseAmount(calcMonthlyContributionFutureInput)
-        : monthlyContributionValue;
-    const monthlyWithdrawalValue = parseAmount(calcMonthlyWithdrawalInput);
-    const hasConfiguredWithdrawals = monthlyWithdrawalValue > 0;
-    const contributionEndRaw = parseMonthYearToIndex(
+    const fscCreditPercent = getFederalSaverCreditPercent(
+      plannerFilingStatus,
+      agiValid ? agiValue : 0,
+    );
+    const fscContributionLimit =
+      (federalSaversContributionLimits as Record<string, number>)[plannerFilingStatus] ?? 0;
+    const {
+      hasTimeHorizon,
+      contributionEndIndexValue,
+      ssiMessages,
+      planMessages,
+      taxableRows,
+      hasConfiguredWithdrawals,
+      hasWithdrawalLimitedMessage,
+      endingValueInfo,
+      isWtaResolutionPendingForEndingValue,
+      scheduleRowsWithBenefits,
+      reportWindowMaxYears,
+      reportWindowYearsValue,
+      reportAbleRows,
+      reportTaxableRows,
+      accountGrowthNarrativeParagraphs,
+    } = buildPlannerProjectionData({
+      timeHorizonYears,
+      horizonConfig,
+      calcStartingBalanceInput,
+      calcMonthlyContributionInput,
+      calcMonthlyContributionFutureInput,
+      calcMonthlyWithdrawalInput,
+      calcContributionIncreasePctInput,
+      calcWithdrawalIncreasePctInput,
+      calcAnnualReturnInput,
       contributionEndYear,
       contributionEndMonth,
-    );
-    const contributionEndIndexValue =
-      contributionEndRaw !== null
-        ? clampNumber(contributionEndRaw, startIndex, horizonEndIndex)
-        : horizonEndIndex;
-    const withdrawalStartRaw = parseMonthYearToIndex(
       withdrawalStartYear,
       withdrawalStartMonth,
-    );
-    const defaultWithdrawalStartIndex = Math.min(horizonEndIndex, startIndex + 1);
-    const enforcedWithdrawalStartIndexValue =
-      effectiveEnforcedWithdrawalStartIndex != null
-        ? clampNumber(effectiveEnforcedWithdrawalStartIndex, startIndex, horizonEndIndex)
-        : null;
-    const withdrawalStartIndexValue =
-      enforcedWithdrawalStartIndexValue !== null
-        ? enforcedWithdrawalStartIndexValue
-        : withdrawalStartRaw !== null
-        ? clampNumber(withdrawalStartRaw, startIndex, horizonEndIndex)
-        : defaultWithdrawalStartIndex;
-    const contributionIncreaseValue = Number(calcContributionIncreasePctInput);
-    const withdrawalIncreaseValue = Number(calcWithdrawalIncreasePctInput);
-    
-
-    // Compute stop year synchronously so the schedule matches the helper message (no useEffect timing lag).
-    const computedStopContributionIncreasesAfterYear = (() => {
-      const pctRaw = Number(calcContributionIncreasePctInput);
-      if (monthlyContributionNum <= 0 || !Number.isFinite(pctRaw) || pctRaw <= 0) return null;
-
-      const horizonInput = Number(timeHorizonYears);
-      if (!Number.isFinite(horizonInput) || horizonInput <= 0) return null;
-
-      // Only enforce once WTA status is known (matches helper gating logic).
-      const limit = annualContributionLimit;
-      if (!Number.isFinite(limit) || limit <= 0) return null;
-
-      const baseAnnual = monthlyContributionNum * 12;
-      if (baseAnnual >= limit) return 0;
-
-      const pctDecimal = pctRaw / 100;
-      const maxYearsToCheck = Math.floor(horizonInput);
-
-      for (let year = 1; year <= maxYearsToCheck; year += 1) {
-        const projectedAnnual = baseAnnual * Math.pow(1 + pctDecimal, year - 1);
-        if (projectedAnnual > limit) {
-          return year - 1; // stop increases after the prior year
-        }
-      }
-      return null;
-    })();
-
-    const monthsRemainingForWtaResolution = getMonthsRemainingInCurrentCalendarYear(startIndex);
-    const annualMonthlyBasisForWtaResolution = Number.isFinite(monthlyContributionFutureValue)
-      ? monthlyContributionFutureValue
-      : monthlyContributionValue;
-    const plannedCurrentYearContributionForWtaResolution =
-      monthlyContributionValue * monthsRemainingForWtaResolution;
-    const plannedAnnualContributionForWtaResolution =
-      annualMonthlyBasisForWtaResolution * 12;
-    const isWtaResolutionPendingForEndingValue = computeWtaResolutionPendingForEndingValue({
+      effectiveEnforcedWithdrawalStartIndex,
+      monthlyContributionNum,
+      annualContributionLimit,
       wtaDismissed,
       wtaMode,
-      plannedCurrentYearContribution: plannedCurrentYearContributionForWtaResolution,
-      plannedAnnualContribution: plannedAnnualContributionForWtaResolution,
-    });
-
-    // While WTA is unresolved, clamp projection contributions to base-limit monthly caps
-    // so reports/schedules do not reflect over-limit contributions prematurely.
-    const projectionMonthlyContributionCurrent = isWtaResolutionPendingForEndingValue
-      ? Math.min(
-          monthlyContributionValue,
-          Math.floor(WTA_BASE_ANNUAL_LIMIT / monthsRemainingForWtaResolution),
-        )
-      : monthlyContributionValue;
-    const projectionMonthlyContributionFuture = isWtaResolutionPendingForEndingValue
-      ? Math.min(monthlyContributionFutureValue, Math.floor(WTA_BASE_ANNUAL_LIMIT / 12))
-      : monthlyContributionFutureValue;
-
-    const { scheduleRows, ssiMessages, planMessages, taxableRows } = buildPlannerSchedule({
-        startMonthIndex: startIndex,
-        totalMonths,
-        horizonEndIndex,
-        startingBalance: startingBalanceValue,
-      monthlyContribution: projectionMonthlyContributionCurrent,
-      monthlyContributionCurrentYear: projectionMonthlyContributionCurrent,
-      monthlyContributionFutureYears: projectionMonthlyContributionFuture,
-        monthlyWithdrawal: monthlyWithdrawalValue,
-        contributionIncreasePct: Number.isFinite(contributionIncreaseValue)
-          ? Math.max(0, contributionIncreaseValue)
-          : 0,
-        stopContributionIncreasesAfterYear: computedStopContributionIncreasesAfterYear,
-        withdrawalIncreasePct: Number.isFinite(withdrawalIncreaseValue)
-          ? Math.max(0, withdrawalIncreaseValue)
-          : 0,
-        contributionEndIndex: contributionEndIndexValue,
-        withdrawalStartIndex: withdrawalStartIndexValue,
-        annualReturnDecimal: parsePercentStringToDecimal(calcAnnualReturnInput) ?? 0,
-        isSsiEligible,
-        agi: calcAgiValid ? calcAgiValue : null,
-        filingStatus: plannerFilingStatus,
-        stateOfResidence: beneficiaryStateOfResidence || null,
-        enabled: hasTimeHorizon,
+      baseAnnualLimit: WTA_BASE_ANNUAL_LIMIT,
+      isSsiEligible,
+      calcAgiValid,
+      calcAgiValue,
+      plannerFilingStatus,
+      beneficiaryStateOfResidence,
+      planState,
       planMaxBalance,
-      });
-    const hasWithdrawalLimitedMessage = hasWithdrawalLimitedPlanCode(scheduleRows);
-    const endingValueInfo = buildEndingValueInfo({
-      scheduleRows,
-      hasConfiguredWithdrawals,
-      horizonEndIndex,
+      reportView,
+      reportWindowYears,
+      language,
+      fscStatus,
+      agiGateEligible,
+      agiValid,
+      agiValue,
+      fscCreditPercent,
+      fscContributionLimit,
+      clampNumber,
+      sanitizeAmountInput,
+      parseMonthYearToIndex,
+      parsePercentStringToDecimal,
       formatCurrency,
       formatMonthYearLabel,
+      getMonthsRemainingInCurrentCalendarYear,
     });
     const desktopAccountEndingNode = (
       <div className="hidden md:block">
@@ -1718,62 +1628,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
       );
     };
 
-    const fscCreditPercent = getFederalSaverCreditPercent(
-      plannerFilingStatus,
-      agiValid ? agiValue : 0,
-    );
-    const fscContributionLimit =
-      (federalSaversContributionLimits as Record<string, number>)[plannerFilingStatus] ?? 0;
-    const showFederalSaverCredit =
-      fscStatus === "eligible" &&
-      agiGateEligible === true &&
-      Number.isFinite(fscCreditPercent) &&
-      fscCreditPercent > 0 &&
-      fscContributionLimit > 0;
-    const benefitStateCode = (beneficiaryStateOfResidence || planState || "").toUpperCase();
-    const stateBenefitConfig = getStateTaxBenefitConfig(benefitStateCode, plannerFilingStatus);
-    const scheduleRowsWithBenefits = enrichScheduleRowsWithBenefits({
-      rows: scheduleRows,
-      showFederalSaverCredit,
-      fscContributionLimit,
-      fscCreditPercent,
-      getFederalTaxLiability: () =>
-        getFederalIncomeTaxLiability(plannerFilingStatus, agiValid ? agiValue : 0),
-      getStateBenefitForYear: (contributionsForYear) =>
-        computeStateBenefitCapped(
-          stateBenefitConfig,
-          contributionsForYear,
-          agiValid ? agiValue : 0,
-          plannerFilingStatus,
-          benefitStateCode,
-        ),
-    });
-    const ableMonthlyForDisplay = getAbleMonthlyForDisplay(scheduleRowsWithBenefits);
-    const taxableMonthlyForDisplay = getTaxableMonthlyForDisplay(taxableRows);
-    const { reportWindowMaxYears, reportWindowYearsValue, reportWindowEndIndex } =
-      buildReportWindowModel({
-        reportView,
-        reportWindowYears,
-        startIndex,
-        horizonEndIndex: horizonConfig.horizonEndIndex,
-        horizonSafeYears: horizonConfig.safeYears,
-        ableMonthly: ableMonthlyForDisplay,
-        taxableMonthly: taxableMonthlyForDisplay,
-      });
-    const reportAbleRows = buildReportAbleRows(
-      scheduleRowsWithBenefits,
-      reportWindowEndIndex,
-    );
-    const reportTaxableRows = buildReportTaxableRows(taxableRows, reportWindowEndIndex);
-    const accountGrowthNarrative = buildAccountGrowthNarrative({
-      language,
-      ableRows: reportAbleRows,
-      taxableRows: reportTaxableRows,
-    });
-    const accountGrowthNarrativeParagraphs = accountGrowthNarrative
-      .split("\n\n")
-      .map((paragraph) => paragraph.trim())
-      .filter(Boolean);
     const downloadAbleScheduleCsv = () => {
       exportAbleScheduleCsv(scheduleRowsWithBenefits, copy?.labels?.schedule, language);
     };
