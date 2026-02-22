@@ -286,8 +286,6 @@ export default function Home() {
     if (!isEmbedded || typeof window === "undefined" || !document.body) return;
 
     let rafId: number | null = null;
-    let burstIntervalId: number | null = null;
-    let burstStopTimeoutId: number | null = null;
     const postEmbedHeight = () => {
       const height = Math.max(
         document.documentElement?.scrollHeight ?? 0,
@@ -307,14 +305,6 @@ export default function Home() {
     schedulePostHeight();
     window.addEventListener("load", schedulePostHeight);
     window.addEventListener("resize", schedulePostHeight);
-    window.addEventListener("pageshow", schedulePostHeight);
-
-    // Parent listeners in CMS embeds can attach late; burst updates reduce stale fallback heights.
-    burstIntervalId = window.setInterval(schedulePostHeight, 300);
-    burstStopTimeoutId = window.setTimeout(() => {
-      if (burstIntervalId !== null) window.clearInterval(burstIntervalId);
-      burstIntervalId = null;
-    }, 6000);
 
     const observer = new MutationObserver(schedulePostHeight);
     observer.observe(document.body, {
@@ -326,11 +316,8 @@ export default function Home() {
 
     return () => {
       if (rafId !== null) window.cancelAnimationFrame(rafId);
-      if (burstIntervalId !== null) window.clearInterval(burstIntervalId);
-      if (burstStopTimeoutId !== null) window.clearTimeout(burstStopTimeoutId);
       window.removeEventListener("load", schedulePostHeight);
       window.removeEventListener("resize", schedulePostHeight);
-      window.removeEventListener("pageshow", schedulePostHeight);
       observer.disconnect();
     };
   }, [isEmbedded, showWelcome, showWelcomeTermsOfUse, active, inputStep, language]);
