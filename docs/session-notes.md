@@ -67,6 +67,11 @@ Use this file to preserve working context between editor sessions.
 ## Deploy Notes
 - Netlify branch currently used: `refactor/extract-calc`.
 - If Netlify errors with publish/base conflict, verify publish directory setting in Netlify UI.
+- Current integration direction (post-iframe rollback):
+- Prefer client-hosted UI as a standalone app URL (no WordPress iframe embedding) to avoid host-page CSS/height conflicts.
+- If UI origin and Netlify API origin differ, `/api/calculate` must enforce CORS with an explicit allowed-origin list.
+- CORS validation is per browser origin; client-specific calculation behavior remains driven by `clientId` in request payload.
+- If UI and API are deployed on the same origin, CORS complexity is largely avoided.
 - Latest known push included:
 - Mobile console auto-scroll + return-to-input behavior (`app/page.tsx`) commit `d8647d7`.
 - FSC unblocked vs annual return warning priority + mobile input zoom fix commit `ec8c52a`.
