@@ -37,6 +37,7 @@ import {
   type FilingStatusOption,
 } from "@/features/planner/page/plannerPageHelpers";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
+import PlannerReportActions from "@/features/planner/page/PlannerReportActions";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
 import { getPlannerProjectionAccessState } from "@/features/planner/page/plannerProjectionAccess";
 import { resolveSidebarNavigation } from "@/features/planner/page/plannerSidebarNavigation";
@@ -306,34 +307,12 @@ export default function Home() {
     window.print();
   };
   const reportActions = (
-    <>
-      <button
-        type="button"
-        onClick={handleOpenEnrollmentPage}
-        disabled={!enrollmentPageUrl}
-        className={[
-          "inline-flex h-8 items-center justify-center rounded-full border px-2.5 text-[11px] font-semibold md:px-3 md:text-xs",
-          enrollmentPageUrl
-            ? "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-            : "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-500",
-        ].join(" ")}
-        title={enrollmentPageUrl ? (language === "es" ? "Abrir inscripción" : "Open enrollment") : (language === "es" ? "URL de inscripción no configurada" : "Enrollment URL not configured")}
-        aria-label={language === "es" ? "Inscribirse" : "Enroll"}
-      >
-        <span>{language === "es" ? "Inscribirse" : "Enroll"}</span>
-      </button>
-      <button
-        type="button"
-        onClick={handlePrintReport}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-        title={language === "es" ? "Imprimir / PDF" : "Print / PDF"}
-        aria-label={language === "es" ? "Imprimir / PDF" : "Print / PDF"}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-current">
-          <path d="M7 3a1 1 0 0 0-1 1v3h2V5h8v2h2V4a1 1 0 0 0-1-1H7Zm-2 6a3 3 0 0 0-3 3v5h4v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3h4v-5a3 3 0 0 0-3-3H5Zm3 8h8v2H8v-2Zm-2-2v-4h12v4H6Zm12-2h2v2h-2v-2Z" />
-        </svg>
-      </button>
-    </>
+    <PlannerReportActions
+      language={language}
+      enrollmentPageUrl={enrollmentPageUrl}
+      onOpenEnrollmentPage={handleOpenEnrollmentPage}
+      onPrintReport={handlePrintReport}
+    />
   );
   const ssiIncomeThresholdMap = (
     ssiIncomeWarningThresholds as { thresholds?: Partial<Record<FilingStatusOption, number>> }

@@ -335,3 +335,7 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/plannerClientViewConfig.ts`.
 - Moved client config derivation out of `app/page.tsx` (enrollment URL, enabled/default report views, landing override, and client block overrides).
 - Validation: `npx eslint app/page.tsx src/features/planner/page/plannerClientViewConfig.ts`
+- Report actions UI extraction:
+- Added `src/features/planner/page/PlannerReportActions.tsx`.
+- Moved inline report action buttons (enrollment + print) out of `app/page.tsx` into dedicated component.
+- Validation: `npx eslint app/page.tsx src/features/planner/page/PlannerReportActions.tsx`
