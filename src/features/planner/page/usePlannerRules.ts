@@ -27,6 +27,90 @@ type UseProjectionDateSyncParams = {
   setWithdrawalStartMonth: (next: string) => void;
 };
 
+type UseWtaAutoAdjustRulesParams = {
+  monthlyContribution: string;
+  monthlyContributionFuture: string;
+  timeHorizonYears: string;
+  contributionIncreasePct: string;
+  wtaStatus: "unknown" | "ineligible" | "eligible";
+  wtaCombinedLimit: number;
+  wtaDismissed: boolean;
+  wtaAutoApplied: boolean;
+  baseAnnualLimit: number;
+  getHorizonConfig: () => HorizonConfig;
+  getMonthsRemainingInCurrentCalendarYear: (startIndex: number) => number;
+  applySetToMax: (limit: number) => void;
+  setWtaAutoApplied: (next: boolean) => void;
+  setWtaMode: (next: "idle" | "initialPrompt" | "wtaQuestion" | "combinedLimit" | "noPath") => void;
+};
+
+export function useWtaAutoAdjustRules({
+  monthlyContribution,
+  monthlyContributionFuture,
+  timeHorizonYears,
+  contributionIncreasePct,
+  wtaStatus,
+  wtaCombinedLimit,
+  wtaDismissed,
+  wtaAutoApplied,
+  baseAnnualLimit,
+  getHorizonConfig,
+  getMonthsRemainingInCurrentCalendarYear,
+  applySetToMax,
+  setWtaAutoApplied,
+  setWtaMode,
+}: UseWtaAutoAdjustRulesParams) {
+  useEffect(() => {
+    if (wtaDismissed || wtaAutoApplied) {
+      return;
+    }
+    const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
+    const futureNumeric =
+      typeof monthlyContributionFuture === "string" && monthlyContributionFuture !== ""
+        ? Number(monthlyContributionFuture)
+        : NaN;
+    const { startIndex } = getHorizonConfig();
+    const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(startIndex);
+    const plannedCurrentYear = Number.isFinite(numeric) ? numeric * monthsRemaining : 0;
+    const annualBasis =
+      Number.isFinite(futureNumeric) && futureNumeric >= 0 ? futureNumeric : numeric;
+    const plannedAnnual = Number.isFinite(annualBasis) ? annualBasis * 12 : 0;
+    const breachNow = plannedCurrentYear > baseAnnualLimit;
+    const breachFuture = plannedAnnual > baseAnnualLimit;
+    const ineligibleBreach = wtaStatus === "ineligible" && (breachNow || breachFuture);
+    const eligibleCombinedBreach =
+      wtaStatus === "eligible" && plannedAnnual > wtaCombinedLimit;
+
+    if (ineligibleBreach) {
+      applySetToMax(baseAnnualLimit);
+      setWtaAutoApplied(true);
+      setWtaMode("noPath");
+      return;
+    }
+
+    if (eligibleCombinedBreach) {
+      applySetToMax(wtaCombinedLimit);
+      setWtaAutoApplied(true);
+      setWtaMode("combinedLimit");
+    }
+  }, [
+    monthlyContribution,
+    monthlyContributionFuture,
+    timeHorizonYears,
+    contributionIncreasePct,
+    wtaStatus,
+    wtaCombinedLimit,
+    wtaDismissed,
+    wtaAutoApplied,
+    baseAnnualLimit,
+    getHorizonConfig,
+    getMonthsRemainingInCurrentCalendarYear,
+    applySetToMax,
+    setWtaMode,
+    setWtaAutoApplied,
+  ]);
+}
+
 type UseContributionIncreaseRulesParams = {
   annualContributionLimit: number;
   contributionIncreaseBreachHelperText?: string;

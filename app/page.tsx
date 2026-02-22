@@ -30,7 +30,11 @@ import {
 } from "@/features/planner/page/plannerFormHandlers";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
-import { useContributionIncreaseRules, useProjectionDateSync } from "@/features/planner/page/usePlannerRules";
+import {
+  useContributionIncreaseRules,
+  useProjectionDateSync,
+  useWtaAutoAdjustRules,
+} from "@/features/planner/page/usePlannerRules";
 import {
   clampNumber,
   getStartMonthIndex,
@@ -912,40 +916,7 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     wtaDismissed,
   ]);
 
-  useEffect(() => {
-    if (wtaDismissed || wtaAutoApplied) {
-      return;
-    }
-    const numeric = monthlyContribution === "" ? 0 : Number(monthlyContribution);
-    const futureNumeric =
-      typeof monthlyContributionFuture === "string" && monthlyContributionFuture !== ""
-        ? Number(monthlyContributionFuture)
-        : NaN;
-    const { startIndex } = getHorizonConfig();
-    const monthsRemaining = getMonthsRemainingInCurrentCalendarYear(startIndex);
-    const plannedCurrentYear = Number.isFinite(numeric) ? numeric * monthsRemaining : 0;
-    const annualBasis =
-      Number.isFinite(futureNumeric) && futureNumeric >= 0 ? futureNumeric : numeric;
-    const plannedAnnual = Number.isFinite(annualBasis) ? annualBasis * 12 : 0;
-    const breachNow = plannedCurrentYear > WTA_BASE_ANNUAL_LIMIT;
-    const breachFuture = plannedAnnual > WTA_BASE_ANNUAL_LIMIT;
-    const ineligibleBreach = wtaStatus === "ineligible" && (breachNow || breachFuture);
-    const eligibleCombinedBreach =
-      wtaStatus === "eligible" && plannedAnnual > wtaCombinedLimit;
-
-    if (ineligibleBreach) {
-      applySetToMax(WTA_BASE_ANNUAL_LIMIT);
-      setWtaAutoApplied(true);
-      setWtaMode("noPath");
-      return;
-    }
-
-    if (eligibleCombinedBreach) {
-      applySetToMax(wtaCombinedLimit);
-      setWtaAutoApplied(true);
-      setWtaMode("combinedLimit");
-    }
-  }, [
+  useWtaAutoAdjustRules({
     monthlyContribution,
     monthlyContributionFuture,
     timeHorizonYears,
@@ -954,11 +925,13 @@ const parsePercentStringToDecimal = (value: string): number | null => {
     wtaCombinedLimit,
     wtaDismissed,
     wtaAutoApplied,
+    baseAnnualLimit: WTA_BASE_ANNUAL_LIMIT,
     getHorizonConfig,
+    getMonthsRemainingInCurrentCalendarYear,
     applySetToMax,
-    setWtaMode,
     setWtaAutoApplied,
-  ]);
+    setWtaMode,
+  });
 
   useContributionIncreaseRules({
     annualContributionLimit,
