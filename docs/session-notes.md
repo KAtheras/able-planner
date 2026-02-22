@@ -346,3 +346,7 @@ Use this file to preserve working context between editor sessions.
 - Added `src/features/planner/page/ExternalLinkWarningModal.tsx`.
 - Moved external-link warning modal JSX out of `app/page.tsx` and replaced with component usage.
 - Validation: `npx eslint app/page.tsx src/features/planner/page/ExternalLinkWarningModal.tsx`
+- High-value extraction: contribution/SSI enforcement calculation block moved out of `app/page.tsx`.
+- Added `src/features/planner/page/plannerContributionEnforcement.ts` with `getPlannerContributionEnforcement(...)`.
+- `app/page.tsx` now delegates enforced stop/withdrawal index derivation to this module.
+- Validation: `npx eslint app/page.tsx src/features/planner/page/plannerContributionEnforcement.ts`
