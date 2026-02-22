@@ -31,7 +31,7 @@ import {
 import { usePlannerClientEffects } from "@/features/planner/page/usePlannerClientEffects";
 import PlannerContentRouter from "@/features/planner/page/PlannerContentRouter";
 import { usePlannerNavigation } from "@/features/planner/page/usePlannerNavigation";
-import { buildPlannerProjectionData } from "@/features/planner/page/usePlannerProjectionData";
+import { buildPlannerProjectionData } from "@/features/planner/page/plannerProjectionData";
 import {
   useContributionIncreaseInputLock,
   useContributionIncreaseRules,
