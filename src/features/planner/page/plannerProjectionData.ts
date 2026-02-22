@@ -14,7 +14,7 @@ type HorizonConfig = {
   safeYears: number;
 };
 
-type Params = {
+export type PlannerProjectionDataParams = {
   timeHorizonYears: string;
   horizonConfig: HorizonConfig;
   calcStartingBalanceInput: string;
@@ -102,7 +102,7 @@ export function buildPlannerProjectionData({
   formatCurrency,
   formatMonthYearLabel,
   getMonthsRemainingInCurrentCalendarYear,
-}: Params) {
+}: PlannerProjectionDataParams) {
   const parsedTimeHorizon = Number(timeHorizonYears.trim());
   const hasTimeHorizon = timeHorizonYears.trim() !== "" && Number.isFinite(parsedTimeHorizon);
 
@@ -291,3 +291,5 @@ export function buildPlannerProjectionData({
     accountGrowthNarrativeParagraphs,
   };
 }
+
+export type PlannerProjectionDataResult = ReturnType<typeof buildPlannerProjectionData>;
