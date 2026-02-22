@@ -967,18 +967,6 @@ const parsePercentStringToDecimal = (value: string): number | null => {
   }, [plannerStateCode, timeHorizonEdited]);
 
   useEffect(() => {
-  }, [
-    timeHorizonYears,
-    contributionIncreasePct,
-    monthlyWithdrawal,
-    withdrawalIncreasePct,
-    contributionEndMonth,
-    contributionEndYear,
-    withdrawalStartMonth,
-    withdrawalStartYear,
-  ]);
-
-  useEffect(() => {
     if (!beneficiaryStateOfResidence || beneficiaryStateOfResidence === planState) {
       setNonResidentProceedAck(false);
     }
