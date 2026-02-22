@@ -295,3 +295,7 @@ Use this file to preserve working context between editor sessions.
 - Additional extraction slice completed:
 - Added `src/features/planner/page/plannerPageHelpers.ts` for `formatCurrency`, `resolveDefaultMessages`, and `getFederalSaverCreditPercent` (+ shared `FilingStatusOption` type).
 - Removed those pure helper definitions from `app/page.tsx` and switched to imported helper usage.
+- Debounce orchestration extraction:
+- Added `src/features/planner/page/usePlannerDebouncedInputs.ts`.
+- Moved all debounced calc input wiring out of `app/page.tsx` into the new hook (no behavior changes).
+- Validation: `npx eslint app/page.tsx src/features/planner/page/usePlannerDebouncedInputs.ts`

@@ -29,6 +29,7 @@ import {
   buildDemographicsFormChangeHandler,
 } from "@/features/planner/page/plannerFormHandlers";
 import { usePlannerClientEffects } from "@/features/planner/page/usePlannerClientEffects";
+import { usePlannerDebouncedInputs } from "@/features/planner/page/usePlannerDebouncedInputs";
 import {
   formatCurrency,
   getFederalSaverCreditPercent,
@@ -89,7 +90,6 @@ import {
 } from "@/lib/report/exportScheduleCsv";
 import { shouldShowStandaloneWithdrawalLimitedMessage } from "@/lib/planner/messages";
 import { useQualifiedWithdrawalBudget } from "@/lib/inputs/useQualifiedWithdrawalBudget";
-import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 
 type ClientBlocks = Partial<
   Record<
@@ -189,14 +189,26 @@ export default function Home() {
   const [wtaAutoApplied, setWtaAutoApplied] = useState(false);
   const [wtaDismissed, setWtaDismissed] = useState(false);
   const [ssiIncomeWarningDismissed, setSsiIncomeWarningDismissed] = useState(false);
-  const calcStartingBalanceInput = useDebouncedValue(startingBalance, INPUT_DEBOUNCE_MS);
-  const calcMonthlyContributionInput = useDebouncedValue(monthlyContribution, INPUT_DEBOUNCE_MS);
-  const calcMonthlyContributionFutureInput = useDebouncedValue(monthlyContributionFuture, INPUT_DEBOUNCE_MS);
-  const calcMonthlyWithdrawalInput = useDebouncedValue(monthlyWithdrawal, INPUT_DEBOUNCE_MS);
-  const calcContributionIncreasePctInput = useDebouncedValue(contributionIncreasePct, INPUT_DEBOUNCE_MS);
-  const calcWithdrawalIncreasePctInput = useDebouncedValue(withdrawalIncreasePct, INPUT_DEBOUNCE_MS);
-  const calcPlannerAgiInput = useDebouncedValue(plannerAgi, INPUT_DEBOUNCE_MS);
-  const calcAnnualReturnInput = useDebouncedValue(annualReturn, INPUT_DEBOUNCE_MS);
+  const {
+    calcStartingBalanceInput,
+    calcMonthlyContributionInput,
+    calcMonthlyContributionFutureInput,
+    calcMonthlyWithdrawalInput,
+    calcContributionIncreasePctInput,
+    calcWithdrawalIncreasePctInput,
+    calcPlannerAgiInput,
+    calcAnnualReturnInput,
+  } = usePlannerDebouncedInputs({
+    startingBalance,
+    monthlyContribution,
+    monthlyContributionFuture,
+    monthlyWithdrawal,
+    contributionIncreasePct,
+    withdrawalIncreasePct,
+    plannerAgi,
+    annualReturn,
+    delayMs: INPUT_DEBOUNCE_MS,
+  });
   useEffect(() => {
     setWtaAutoApplied(false);
     setWtaDismissed(false);
